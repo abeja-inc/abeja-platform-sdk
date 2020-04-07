@@ -3,7 +3,7 @@
 ABEJA Platform SDK is the ABEJA Platform Software Development Kit (SDK) for Python, which allows Python developers to write software that makes use of services like Datalake, Dataset, Training, Deployment, etc. You can find the latest, most up to date, documentation at our doc site, including a list of services that are supported.
 
 
-[![CircleCI](https://circleci.com/gh/abeja-inc/platform-sdk.svg?style=svg&circle-token=dd87411479d2bfe13b390ed872da2c5816a28571)](https://circleci.com/gh/abeja-inc/platform-sdk)
+[![CircleCI](https://circleci.com/gh/abeja-inc/abeja-platform-sdk.svg?style=svg)](https://circleci.com/gh/abeja-inc/abeja-platform-sdk)
 
 ## How to install
 ### Using pip
