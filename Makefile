@@ -33,4 +33,4 @@ docs:
 	sphinx-build -M html doc/source doc/build
 
 release: dist
-	package_cloud push abeja/platform-public/python ./dist/abeja_sdk-*-py2.py3-none-any.whl
+	twine upload ./dist/abeja_sdk-*-py2.py3-none-any.whl
