@@ -28,9 +28,7 @@ install-release-dependencies: &install-release-dependencies
     name: Install Dependencies
     command: |
       sudo apt-get update
-      sudo apt-get install ruby-full
-      sudo gem install rake
-      sudo gem install package_cloud
+      sudo pip install twine
 
 run-release: &run-release
   run:
