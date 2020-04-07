@@ -1,0 +1,84 @@
+default: &default
+  working_directory: ~/abeja-platform-sdk
+  docker:
+    - image: circleci/python:3.5
+
+# Job Steps
+test_step: &test_step
+  - checkout
+  - run:
+      name: Install Dependencies
+      environment:
+        - PIPENV_VENV_IN_PROJECT: 1
+      command: |
+        sudo pip install pipenv
+        pipenv install --dev
+  - run:
+      name: Test
+      command: |
+        make test
+  # NOTE: need to fix test cases, because these are not stable.
+  # - run:
+  #     name: Integration Test
+  #     command: |
+  #       make integration_test
+
+install-release-dependencies: &install-release-dependencies
+  run:
+    name: Install Dependencies
+    command: |
+      sudo apt-get update
+      sudo apt-get install ruby-full
+      sudo gem install rake
+      sudo gem install package_cloud
+
+run-release: &run-release
+  run:
+    name: Deploy
+    command: |
+      sudo -E make release
+
+release: &release
+  - checkout
+  - *install-release-dependencies
+  - *run-release
+
+release-rc: &release-rc
+  - checkout
+  - *install-release-dependencies
+  - run: sed -i -e "s/'$/\.rc1'/g" abeja/version.py
+  - *run-release
+
+# Jobs
+version: 2
+jobs:
+  codetest:
+    <<: *default
+    steps: *test_step
+  release-package:
+    <<: *default
+    steps: *release
+  release-rc-package:
+    <<: *default
+    steps: *release-rc
+
+# Workflows
+workflows:
+  version: 2
+  test_and_build:
+    jobs:
+      - codetest
+      - release-package:
+          filters:
+            branches:
+              only:
+                - master
+          requires:
+            - codetest
+      - release-rc-package:
+          filters:
+            branches:
+              only:
+                - /^release\/.*/
+          requires:
+            - codetest
