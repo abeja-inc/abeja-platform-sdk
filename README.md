@@ -95,8 +95,3 @@ $ git push origin develop
 $ git push origin master
 $ git push origin X.X.X
 ```
-
-### Contribution
-> Feel free to ask the team directly about the best way to contribute!
-
-[gitflow](https://github.com/nvie/gitflow) branching model is used, if you have a feature you want to contribute create a feature/FEATURE-NAME branch from the "develop" branch, and issue a Pull-Request to have your feature integrated.
