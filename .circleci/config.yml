@@ -11,8 +11,8 @@ test_step: &test_step
       environment:
         - PIPENV_VENV_IN_PROJECT: 1
       command: |
-        sudo pip install pipenv
-        pipenv install --dev
+        sudo pip install poetry
+        poetry install
   - run:
       name: Test
       command: |
