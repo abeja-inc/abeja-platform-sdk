@@ -78,6 +78,7 @@ $ git flow release start X.X.X
 $ vim CHANGELOG.md
 # update to new version
 $ poetry version X.X.X
+$ git add pyproject.toml
 $ git add CHANGELOG.md
 $ git commit -m "bump version"
 $ git flow release publish X.X.X
