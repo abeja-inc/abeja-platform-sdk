@@ -1,36 +1,34 @@
 NAME=abeja-sdk
 
-requirements.txt: Pipfile.lock
-	pipenv lock -r | grep -v '^-i' > requirements.txt
+.PHONY: clean
+clean:
+	rm -rf dist
 
-install: clean requirements.txt
-	pipenv run python setup.py build
-	pipenv run python setup.py install --force
-
-uninstall:
-	pip uninstall $(NAME)
-
-clean: requirements.txt
-	pipenv run python setup.py clean
-
-dist: clean requirements.txt
+.PHONY: dist
+dist: clean
 	pip install wheel==0.31.1
-	pipenv run python setup.py bdist_wheel --universal
+	poetry build -f wheel
 
+.PHONY: lint
 lint:
-	pipenv run flake8 abeja tests --ignore=E501
+	poetry run flake8 abeja tests --ignore=E501
 
-test: requirements.txt lint
-	pipenv run pytest tests/${TEST_TARGET} --doctest-modules --cov=abeja
+.PHONY: test
+test: lint
+	poetry run pytest tests/${TEST_TARGET} --doctest-modules --cov=abeja
 
+.PHONY: integration_test
 integration_test:
-	pipenv run pytest -vs integration_tests
+	poetry run pytest -vs integration_tests
 
+.PHONY: fmt
 fmt:
-	pipenv run autopep8 -i -r abeja tests --max-line-length=120
+	poetry run autopep8 -i -r abeja tests --max-line-length=120
 
+.PHONY: docs
 docs:
-	sphinx-build -M html doc/source doc/build
+	poetry run sphinx-build -M html doc/source doc/build
 
+.PHONY: release
 release: dist
-	twine upload ./dist/abeja_sdk-*-py2.py3-none-any.whl
+	poetry publish -u ${TWINE_USERNAME} -p ${TWINE_PASSWORD}
