@@ -43,7 +43,7 @@ release: &release
 release-rc: &release-rc
   - checkout
   - *install-release-dependencies
-  - run: sed -i -e "s/'$/\.rc1'/g" abeja/version.py
+  - run: poetry version $(PYTHONPATH=./ python tools/add_rc_version.py)
   - *run-release
 
 # Jobs
