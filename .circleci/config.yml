@@ -28,7 +28,6 @@ install-release-dependencies: &install-release-dependencies
     name: Install Dependencies
     command: |
       sudo apt-get update
-      sudo pip install twine
 
 run-release: &run-release
   run:

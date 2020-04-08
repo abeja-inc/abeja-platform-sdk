@@ -8,11 +8,11 @@ ABEJA Platform SDK is the ABEJA Platform Software Development Kit (SDK) for Pyth
 ## How to install
 ### Using pip
 ```
-$ pip install abeja-sdk>=0.0.1
+$ pip install abeja-sdk>=1.0.0
 ```
 If you want to use latest version including **release candidate**, add `--pre` option.
 ```
-$ pip install abeja-sdk>=0.0.1 --pre
+$ pip install abeja-sdk>=1.0.0 --pre
 ```
 If you have bigger version than latest pre-release, bigger not-pre-release version in installed.
 For example, when there are versions of `1.0.1` and `1.0.0rc1`, `1.0.1` is installed even if you specify `--pre` option.
@@ -23,18 +23,18 @@ Release candidate is published when release branch is pushed to Github.
 
 *`requirements.txt`*
 ```
-abeja-sdk>=0.0.1
+abeja-sdk>=1.0.0
 ```
 
 If you want to use pre-release, add `rc0` suffix.
 ```
-abeja-sdk>=0.0.1rc0
+abeja-sdk>=1.0.0rc
 ```
 
 
 ## Development
 ### Running Tests
-You can run tests in all supported Python versions using `nosetests`.
+You can run tests in all supported Python versions using `pytest`.
 
 ```bash
 $ make test
@@ -57,7 +57,7 @@ $ make docs
 ```
 $ brew install sphinx-doc
 $ echo 'export PATH="/usr/local/opt/sphinx-doc/bin:$PATH"' >> ~/.bashrc
-$ pip install guzzle_sphinx_theme
+$ poetry install
 ```
 
 
@@ -77,9 +77,8 @@ Create release branch and prepare for release.
 $ git flow release start X.X.X
 $ vim CHANGELOG.md
 # update to new version
-$ vim abeja/version.py
+$ poetry version X.X.X
 $ git add CHANGELOG.md
-$ git add abeja/version.py
 $ git commit -m "bump version"
 $ git flow release publish X.X.X
 ```

@@ -1,0 +1,39 @@
+[tool]
+[tool.poetry]
+name = "abeja-sdk"
+version = "1.0.2"
+description = "ABEJA Platform Software Development Kit"
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Programming Language :: Python :: 3.5",
+    "Programming Language :: Python :: 3.6",
+    "Intended Audience :: Developers",
+    "Topic :: Internet :: WWW/HTTP",
+    "Operating System :: OS Independent"
+]
+authors = ["ABEJA Inc. <platform-support@abejainc.com>"]
+license = "Apache-2.0"
+packages = [
+    { include = "abeja" }
+]
+
+[tool.poetry.dependencies]
+python = "~=3.5"
+requests = "~=2.18.0"
+retrying = "~=1.3.3"
+tensorboardx = "==1.8"
+tomlkit = "^0.5.11"
+
+[tool.poetry.dev-dependencies]
+autopep8 = "==1.3.2"
+flake8 = "==3.5.0"
+flake8-print = "==3.1.0"
+keras = "~=2.2.0"
+mock = "==2.0.0"
+parameterized = "==0.6.1"
+pytest = "==5.2.1"
+pytest-cov = "==2.6.1"
+requests-mock = "~>=1.5.0"
+tensorflow = "~=1.13.0"
+Sphinx = "==1.6.7"
+guzzle_sphinx_theme = "==0.7.11"
