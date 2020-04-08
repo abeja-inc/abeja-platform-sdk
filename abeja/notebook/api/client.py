@@ -263,8 +263,6 @@ class APIClient(BaseAPIClient):
             - Unauthorized: Authentication failed
             - InternalServerError
         """
-        # TODO: When either of instance_type or image is not specified,
-        # the parameter not specified is overwriten by API default value.
         params = {}
         if instance_type is not None and InstanceType.to_enum(instance_type):
             params['instance_type'] = instance_type
