@@ -77,9 +77,8 @@ Create release branch and prepare for release.
 $ git flow release start X.X.X
 $ vim CHANGELOG.md
 # update to new version
-$ tools/bump_version.sh X.X.X
+$ poetry version X.X.X
 $ git add pyproject.toml
-$ git add abeja/version.py
 $ git add CHANGELOG.md
 $ git commit -m "bump version"
 $ git flow release publish X.X.X
