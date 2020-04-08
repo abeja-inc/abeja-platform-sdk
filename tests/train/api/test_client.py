@@ -1,7 +1,7 @@
 from mock import patch
-
+import os
 import pytest
-
+import tempfile
 from abeja import VERSION
 from abeja.common.connection import Connection
 from abeja.exceptions import BadRequest
@@ -145,9 +145,14 @@ class TestApiClient:
         image = "abeja-inc/minimal:0.1.0"
         environment = {}
         description = ""
-        self.api_client.create_training_job_definition_version(
-            ORGANIZATION_ID, JOB_DEFINITION_NAME, filepaths=filepaths, handler=handler,
-            image=image, environment=environment, description=description)
+        with tempfile.TemporaryDirectory() as dname:
+            filepath = os.path.join(dname, 'requirements.txt')
+            with open(filepath, 'w') as f:
+                f.write("requests==1.0.0")
+            filepaths = [filepath]
+            self.api_client.create_training_job_definition_version(
+                ORGANIZATION_ID, JOB_DEFINITION_NAME, filepaths=filepaths, handler=handler,
+                image=image, environment=environment, description=description)
         url = '{}/organizations/{}/training/definitions/{}/versions'.format(
             ABEJA_API_URL, ORGANIZATION_ID, JOB_DEFINITION_NAME)
         m.assert_called_once_with('POST', url, params=None,
