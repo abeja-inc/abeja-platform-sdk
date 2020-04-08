@@ -35,3 +35,16 @@ class ImageType(Enum):
                 return elm
         error_message = "'{}' is not supported as image".format(status)
         raise BadRequest(error=error_message, error_description=error_message, status_code=400)
+
+
+class NotebookType(Enum):
+    NOTEBOOK = 'notebook'
+    LAB = 'lab'
+
+    @classmethod
+    def to_enum(cls, status: str):
+        for elm in NotebookType:
+            if elm.value == status:
+                return elm
+        error_message = "'{}' is not supported as NotebookTyle".format(status)
+        raise BadRequest(error=error_message, error_description=error_message, status_code=400)

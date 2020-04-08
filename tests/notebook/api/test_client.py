@@ -58,11 +58,12 @@ class TestAPIClient(unittest.TestCase):
 
         ret = client.create_notebook(
             ORGANIZATION_ID, JOB_DEFINITION_NAME,
-            instance_type="gpu-1", image="abeja-inc/all-gpu:18.10"
+            instance_type="gpu-1", image="abeja-inc/all-gpu:18.10", notebook_type="lab"
         )
         expected_payload = {
             "instance_type": "gpu-1",
-            "image": 'abeja-inc/all-gpu:18.10'
+            "image": 'abeja-inc/all-gpu:18.10',
+            "notebook_type": "lab"
         }
         self.assertDictEqual(m.request_history[0].json(), expected_payload)
         self.assertDictEqual(ret, NOTEBOOK_RES)
@@ -106,11 +107,12 @@ class TestAPIClient(unittest.TestCase):
         client = APIClient()
         ret = client.update_notebook(
             ORGANIZATION_ID, JOB_DEFINITION_NAME, NOTEBOOK_ID,
-            instance_type="gpu-1", image="abeja-inc/all-gpu:18.10"
+            instance_type="gpu-1", image="abeja-inc/all-gpu:18.10", notebook_type="lab"
         )
         expected_payload = {
             "instance_type": "gpu-1",
-            "image": 'abeja-inc/all-gpu:18.10'
+            "image": 'abeja-inc/all-gpu:18.10',
+            "notebook_type": 'lab'
         }
         self.assertDictEqual(m.request_history[0].json(), expected_payload)
         self.assertDictEqual(ret, NOTEBOOK_RES)
