@@ -43,7 +43,7 @@ release: &release
 release-rc: &release-rc
   - checkout
   - *install-release-dependencies
-  - run: poetry version $(PYTHONPATH=./ python tools/add_rc_version.py)
+  - run: ./tools/bump_version.sh $(PYTHONPATH=./ python tools/add_rc_version.py)
   - *run-release
 
 # Jobs
