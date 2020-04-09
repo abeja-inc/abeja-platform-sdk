@@ -26,7 +26,6 @@ def get_latest_build_num_for_stage(stage):
 
 def get_latest_build_num():
     sdk_branch_name = os.environ.get('CIRCLE_BRANCH')
-    sdk_branch_name = 'release/0.1.0'
     if re.match(r'^release\/.+$', sdk_branch_name):
         stage = 'staging'
     elif sdk_branch_name == 'master':
