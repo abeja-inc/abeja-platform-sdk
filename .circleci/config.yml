@@ -36,16 +36,24 @@ run-release: &run-release
     command: |
       sudo -E make release
 
+trigger-system-test: &trigger-system-test
+  run:
+    name: TriggerSystemTest
+    command: |
+      poetry run python tools/trigger_build_system_test.py
+
 release: &release
   - checkout
   - *install-release-dependencies
   - *run-release
+  - *trigger-system-test
 
 release-rc: &release-rc
   - checkout
   - *install-release-dependencies
   - run: poetry version $(PYTHONPATH=./ poetry run python tools/add_rc_version.py)
   - *run-release
+  - *trigger-system-test
 
 # Jobs
 version: 2
