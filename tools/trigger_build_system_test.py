@@ -21,7 +21,7 @@ def get_latest_build_num_for_stage(stage):
     """https://circleci.com/docs/api/#recent-builds-for-a-single-project
     """
     limit = 1000
-    branch_name = f'deployment/{stage}'
+    branch_name = 'deployment/{}'.format(stage)
     session = get_request_session()
     for i in range(100):
         offset = limit * i
@@ -59,7 +59,7 @@ def get_latest_build_num():
 def trigger_build(build_num):
     """https://circleci.com/docs/api/#retry-a-build
     """
-    url = f"{base_url}/{build_num}/retry"
+    url = "{}/{build_num}/retry".format(base_url, build_num)
     params = {
         'circle-token': token,
     }
