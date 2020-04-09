@@ -51,6 +51,8 @@ def get_latest_build_num():
         stage = 'staging'
     elif sdk_branch_name == 'master':
         stage = 'production'
+    elif sdk_branch_name == 'fix_f_string2':  # tmp
+        stage = 'staging' # tmp
     else:
         return None
 

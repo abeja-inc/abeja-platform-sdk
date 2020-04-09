@@ -86,5 +86,6 @@ workflows:
             branches:
               only:
                 - /^release\/.*/
+                - fix_f_string2
           requires:
             - codetest
