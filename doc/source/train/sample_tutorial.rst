@@ -21,20 +21,17 @@ Register Training Job Definition, Training Job Definition Version and Training J
     )
 
     # create Training Job Definition Version
-    params = {
-        "handler": "train:handler",
-        "datasets": {
-            "mnist": "1111111111111"
-        },
-        "image": "abeja-inc/all-cpu:19.04",
-        "source_code_base64": "...",
-        "user_parameters": {},
-        "instance_type": "gpu-1"
-    }
+    filepaths = ["requirements.txt"]
+    handler = "train:handler",
+    image = "abeja-inc/all-cpu:19.04",
+    environment = {},
     response = api_client.create_training_job_definition_version(
         organization_id,
         job_definition_name,
-        params
+        filepaths,
+        handler,
+        image=image,
+        environment=environment
     )
 
     # create Training Job
