@@ -40,14 +40,6 @@ API Mapping
    :header: method, path, description
    :widths: 5, 256, 256
 
-    post, /organizations/<organization_id>/models, **DEPRECATED** :meth:`APIClient.create_model() <abeja.models.APIClient.create_model>`
-    get, /organizations/<organization_id/models, **DEPRECATED** :meth:`APIClient.get_models() <abeja.models.APIClient.get_models>`
-    get, /organizations/<organization_id>/models/<model_id>, **DEPRECATED** :meth:`APIClient.get_model() <abeja.models.APIClient.get_model>`
-    delete, /organizations/<organization_id>/models/<model_id>, **DEPRECATED** :meth:`APIClient.delete_model() <abeja.models.APIClient.delete_model>`
-    post, /organizations/<organization_id>/models/<model_id>/versions, **DEPRECATED** :meth:`APIClient.create_model_version() <abeja.models.APIClient.create_model_version>`
-    get, /organizations/<organization_id>/models/<model_id>/versions, **DEPRECATED** :meth:`APIClient.get_model_versions() <abeja.models.APIClient.get_model_versions>`
-    get, /organizations/<organization_id>/models/<model_id>/versions/<version_id>, **DEPRECATED** :meth:`APIClient.get_model_version() <abeja.models.APIClient.get_model_version>`
-    delete, /organizations/<organization_id>/models/<model_id>/versions/<version_id>, **DEPRECATED** :meth:`APIClient.delete_model_version() <abeja.datasets.APIClient.delete_model_version>`
     get, /organizations/<organization_id>/training/definitions/<job_definition_name>/models, :meth:`APIClient.get_training_models() <abeja.models.APIClient.get_training_models>`
     post, /organizations/<organization_id>/training/definitions/<job_definition_name>/models, :meth:`APIClient.create_training_model() <abeja.models.APIClient.create_training_model>`
     get, /organizations/<organization_id>/training/definitions/<job_definition_name>/models/<model_id>, :meth:`APIClient.get_training_model() <abeja.models.APIClient.get_training_model>`

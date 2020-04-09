@@ -1,7 +1,7 @@
 from typing import Dict, Optional
 
 from abeja.common.api_client import BaseAPIClient
-from abeja.common.utils import print_feature_deprecation, print_feature_new
+from abeja.common.utils import print_feature_deprecation
 from abeja.exceptions import BadRequest
 
 
@@ -16,12 +16,12 @@ class APIClient(BaseAPIClient):
     """
 
     def create_deployment(
-            self, organization_id: str, model_id: Optional[str] = None, name: str = None,
+            self, organization_id: str, name: str = None,
             description: Optional[str] = '',
             default_environment: Optional[Dict[str, str]]=None) -> dict:
         """create a deployment
 
-        API reference: POST /organizations/<organization_id>/models/<models_id>/deployments
+        API reference: POST /organizations/<organization_id>/deployments
 
         Request Syntax:
             .. code-block:: python
@@ -29,18 +29,16 @@ class APIClient(BaseAPIClient):
                 organization_id = "1111111111111"
                 deployment_name = "deployment_name"
                 description = "description"
-                model_id = "1111111111111"
                 default_environment = {
                     'SAMPLE_ENV': 'SAMPLE_VALUE'
                 }
 
-                response = api_client.create_deployment(organization_id, model_id, deployment_name, default_environment)
+                response = api_client.create_deployment(organization_id, deployment_name, default_environment)
 
         Params:
             - **organization_id** (str): organization identifier
             - **name** (str): deploymnet name
             - **description** (str): description
-            - **model_id** (str): model identifier
             - **default_environment** (dict): default environment variables on the running environment
 
         Return type:
@@ -62,7 +60,6 @@ class APIClient(BaseAPIClient):
                             "created_at": "2017-05-29T07:48:55Z",
                             "updated_at": "2017-11-29T10:21:24Z"
                         },
-                        "model_id": "1111111111111",
                         "default_environment": {},
                         "runs": [],
                         "daemons": [],
@@ -93,13 +90,6 @@ class APIClient(BaseAPIClient):
             payload.update({
                 'default_environment': default_environment
             })
-        if model_id:
-            print_feature_deprecation(
-                target='model_id',
-                additional_message='new spec does not require "model_id" on "create_deployment()", '
-                                   'Please not to specify "model_id" here.')
-            path = '/organizations/{}/models/{}/deployments'.format(organization_id, model_id)
-            return self._connection.api_request(method='POST', path=path, json=payload)
         path = '/organizations/{}/deployments'.format(organization_id)
         return self._connection.api_request(method='POST', path=path, json=payload)
 
@@ -111,7 +101,7 @@ class APIClient(BaseAPIClient):
         Request Syntax:
             .. code-block:: python
 
-                response = api_client.get_deployment(organization_id='1111111111111', model_id='1111111111111')
+                response = api_client.get_deployment(organization_id='1111111111111', deployment_id='1111111111111')
 
         Params:
             - **organization_id** (str): organization_id
@@ -127,7 +117,6 @@ class APIClient(BaseAPIClient):
                     {
                         "deployment_id": "1111111111111",
                         "name": "deployment_name",
-                        "model_id": "1111111111111",
                         "creator": {
                             "display_name": null,
                             "email": "platform-support@abeja.asia",
@@ -180,7 +169,6 @@ class APIClient(BaseAPIClient):
                             {
                                 "deployment_id": "1111111111111",
                                 "name": "deployment_name",
-                                "model_id": "1111111111111",
                                 "creator": {
                                     "display_name": null,
                                     "email": "paltform-support@abeja.asia",
@@ -261,7 +249,7 @@ class APIClient(BaseAPIClient):
 
         Params:
             - **organization_id** (str): organization identifier
-            - **model_id** (str): model identifier
+            - **deployment_id** (str): deployment identifier
             - **name** (str): deploymnet name
             - **default_environment** (dict): default environment variables on the running environment
 
@@ -274,7 +262,6 @@ class APIClient(BaseAPIClient):
                     {
                         "deployment_id": "1111111111111",
                         "name": "deployment_name",
-                        "model_id": "1111111111111",
                         "default_environment": {},
                         "runs": [],
                         "daemons": [],
@@ -416,10 +403,6 @@ class APIClient(BaseAPIClient):
           - Unauthorized: Authentication failed
           - InternalServerError
         """
-        print_feature_new(
-            target='create_deployment_version',
-            additional_message='New spec requires you to store a deployment code under deployment. '
-                               'Please not to use "create_model_version()" anymore.')
         payload = {
             'version': version,
             'handler': handler,
@@ -495,7 +478,6 @@ class APIClient(BaseAPIClient):
           - Unauthorized: Authentication failed
           - InternalServerError
         """
-        print_feature_new(target='create_deployment_from_template')
         payload = {
             'template_id': template_id,
             'version': version,
@@ -557,10 +539,6 @@ class APIClient(BaseAPIClient):
           - Unauthorized: Authentication failed
           - InternalServerError
         """
-        print_feature_new(
-            target='get_deployment_version',
-            additional_message='Please use "get_deployment_version()" since '
-                               '"get_model_version()" will be a deprecation.')
         path = '/organizations/{}/deployments/{}/versions/{}'.format(
             organization_id, deployment_id, version_id)
         return self._connection.api_request(method='GET', path=path)
@@ -602,10 +580,6 @@ class APIClient(BaseAPIClient):
           - Unauthorized: Authentication failed
           - InternalServerError
         """
-        print_feature_new(
-            target='delete_deployment_version',
-            additional_message='Please use "delete_deployment_version()" since '
-                               '"delete_model_version()" will be a deprecation.')
         path = '/organizations/{}/deployments/{}/versions/{}'.format(organization_id, deployment_id, version_id)
         return self._connection.api_request(method='DELETE', path=path)
 
@@ -646,7 +620,6 @@ class APIClient(BaseAPIClient):
           - Unauthorized: Authentication failed
           - InternalServerError
         """
-        print_feature_new(target='download_deployment_version')
         path = '/organizations/{}/deployments/{}/versions/{}/download'.format(
             organization_id, deployment_id, version_id)
         return self._connection.api_request(method='GET', path=path)
