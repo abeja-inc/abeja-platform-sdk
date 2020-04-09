@@ -1,7 +1,7 @@
 from typing import Optional
 
 from abeja.common.api_client import BaseAPIClient
-from abeja.notebook.types import InstanceType, ImageType
+from abeja.notebook.types import InstanceType, ImageType, NotebookType
 
 
 class APIClient(BaseAPIClient):
@@ -14,7 +14,7 @@ class APIClient(BaseAPIClient):
        api_client = APIClient()
     """
 
-    def create_notebook(self, organization_id: str, job_definition_name: str, instance_type: Optional[str] = None, image: Optional[str] = None) -> dict:
+    def create_notebook(self, organization_id: str, job_definition_name: str, instance_type: Optional[str] = None, image: Optional[str] = None, notebook_type: Optional[str] = None) -> dict:
         """create a notebook.
 
         API reference: POST /organizations/{organization_id}/training/definitions/{job_definition_name}/notebooks
@@ -26,15 +26,17 @@ class APIClient(BaseAPIClient):
                 job_definition_name = "test_job_definition"
                 instance_type = 'cpu-1'
                 image = 'abeja-inc/all-cpu:19.10'
+                notebook_type = 'lab'
                 response = api_client.create_notebook(
                     organization_id, job_definition_name,
-                    instance_type, image
+                    instance_type, image, notebook_type
                 )
         Params:
             - **organization_id** (str): organization id
             - **job_definition_name** (str): training job definition name
             - **instance_type** (str): **[optional]** instance type (ex. cpu-1)
             - **image** (str): **[optional]** runtime environment (ex. abeja-inc/all-cpu:19.10)
+            - **notebook_type** (str): **[optional]** notebook type (notebook or lab)
 
         Return type:
             dict
@@ -75,6 +77,8 @@ class APIClient(BaseAPIClient):
             params['instance_type'] = instance_type
         if image is not None and ImageType.to_enum(image):
             params['image'] = image
+        if notebook_type is not None and NotebookType.to_enum(notebook_type):
+            params['notebook_type'] = notebook_type
         path = '/organizations/{}/training/definitions/{}/notebooks'.format(organization_id, job_definition_name)
         return self._connection.api_request(method='POST', path=path, json=params)
 
@@ -139,7 +143,7 @@ class APIClient(BaseAPIClient):
         path = '/organizations/{}/training/definitions/{}/notebooks'.format(organization_id, job_definition_name)
         return self._connection.api_request(method='GET', path=path)
 
-    def get_notebook(self, organization_id: str, job_definition_name: str, notebook_id: str) -> dict:
+    def get_notebook(self, organization_id: str, job_definition_name: str, notebook_id: str=None) -> dict:
         """get a notebook.
 
         API reference: GET /organizations/{organization_id}/training/definitions/{job_definition_name}/notebooks/{notebook_id}
@@ -198,7 +202,7 @@ class APIClient(BaseAPIClient):
 
     def update_notebook(
         self, organization_id: str, job_definition_name: str, notebook_id: str,
-        instance_type: Optional[str] = None, image: Optional[str] = None
+        instance_type: Optional[str] = None, image: Optional[str] = None, notebook_type: Optional[str] = None
     ) -> dict:
         """update a notebook.
 
@@ -222,6 +226,7 @@ class APIClient(BaseAPIClient):
             - **notebook_id** (str): notebook id
             - **instance_type** (str): **[optional]** instance type (ex. cpu-1)
             - **image** (str): **[optional]** runtime environment (ex. abeja-inc/all-cpu:19.10)
+            - **notebook_type** (str): **[optional]** notebook type (notebook or lab)
 
         Return type:
             dict
@@ -258,13 +263,13 @@ class APIClient(BaseAPIClient):
             - Unauthorized: Authentication failed
             - InternalServerError
         """
-        # TODO: When either of instance_type or image is not specified,
-        # the parameter not specified is overwriten by API default value.
         params = {}
         if instance_type is not None and InstanceType.to_enum(instance_type):
             params['instance_type'] = instance_type
         if image is not None and ImageType.to_enum(image):
             params['image'] = image
+        if notebook_type is not None and NotebookType.to_enum(notebook_type):
+            params['notebook_type'] = notebook_type
         path = '/organizations/{}/training/definitions/{}/notebooks/{}'.format(
             organization_id, job_definition_name, notebook_id)
         return self._connection.api_request(method='PUT', path=path, json=params)
@@ -309,7 +314,7 @@ class APIClient(BaseAPIClient):
             organization_id, job_definition_name, notebook_id)
         return self._connection.api_request(method='DELETE', path=path)
 
-    def start_notebook(self, organization_id: str, job_definition_name: str, notebook_id: str) -> dict:
+    def start_notebook(self, organization_id: str, job_definition_name: str, notebook_id: str, notebook_type: Optional[str] = None) -> dict:
         """start a notebook.
 
         API reference: POST /organizations/{organization_id}/training/definitions/{job_definition_name}/notebooks/{notebook_id}/start
@@ -327,6 +332,7 @@ class APIClient(BaseAPIClient):
             - **organization_id** (str): organization id
             - **job_definition_name** (str): training job definition name
             - **notebook_id** (str): notebook id
+            - **notebook_type** (str): **[optional]** notebook type (notebook or lab)
 
         Return type:
             dict
@@ -362,9 +368,12 @@ class APIClient(BaseAPIClient):
             - Unauthorized: Authentication failed
             - InternalServerError
         """
+        params = {}
+        if notebook_type is not None and NotebookType.to_enum(notebook_type):
+            params['notebook_type'] = notebook_type
         path = '/organizations/{}/training/definitions/{}/notebooks/{}/start'.format(
             organization_id, job_definition_name, notebook_id)
-        return self._connection.api_request(method='POST', path=path, json={})
+        return self._connection.api_request(method='POST', path=path, json=params)
 
     def stop_notebook(self, organization_id: str, job_definition_name: str, notebook_id: str) -> dict:
         """stop a notebook.

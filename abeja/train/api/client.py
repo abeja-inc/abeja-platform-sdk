@@ -3,10 +3,9 @@ import tempfile
 import zipfile
 from io import BytesIO
 from pathlib import Path
-from typing import Optional
+from typing import Optional, List
 
 from abeja.common.api_client import BaseAPIClient
-from abeja.common.utils import print_feature_deprecation
 from abeja.train.instance_type import InstanceType
 from abeja.common.utils import get_filter_archived_applied_params
 
@@ -223,8 +222,8 @@ class APIClient(BaseAPIClient):
         return self._connection.api_request(method='DELETE', path=path)
 
     def create_training_job_definition_version(
-            self, organization_id: str, job_definition_name: str, params: Optional[dict] = None,
-            filepaths: Optional[list] = None, handler: Optional[str] = None,
+            self, organization_id: str, job_definition_name: str,
+            filepaths: List[str], handler: str,
             image: Optional[str] = None, environment: Optional[dict] = None,
             description: Optional[str] = None) -> dict:
         """create a training job definition version.
@@ -241,16 +240,9 @@ class APIClient(BaseAPIClient):
                 image = "abeja-inc/all-gpu:19.04"
                 environment = {"key": "value"}
                 description = "description"
-                params = {
-                    "handler": "train:handler",
-                    "datasets": {
-                        "mnist": "1111111111111"
-                    },
-                    "image": "abeja-inc/all-gpu:19.04",
-                    "source_code_base64": "....",
-                    "user_parameters": {}
-                }
-                response = api_client.create_training_job_definition_version(organization_id, job_definition_name, params)
+                response = api_client.create_training_job_definition_version(
+                    organization_id, job_definition_name, filepaths, handler,
+                    image=image, environment=environment, description=description)
 
         Params:
             - **organization_id** (str): ORGANIZATION_ID
@@ -260,12 +252,6 @@ class APIClient(BaseAPIClient):
             - **image** (Optional[str]): runtime enviornment
             - **environment** (Optional[dict]): user defined parameters set as environment variables
             - **description** (Optional[str]): description
-            - (DEPRECATED) **params** (dict): parameters for training job definition version
-                - **handler** (str): path to handler (ex. train:handler )
-                - (DEPRECATED) **datasets** (Optional[str]): (**deprecated!!**) datasets, combination of alias and dataset_id
-                - **image** (Optional[str]): runtime enviornment
-                - **source_code_base64** (str): base64 encoded source code
-                - **user_parameters** (Optional[dict]): user defined parameters set as environment variables.
 
         Return type:
             dict
@@ -296,41 +282,30 @@ class APIClient(BaseAPIClient):
             - InternalServerError
         """
         path = '/organizations/{}/training/definitions/{}/versions'.format(organization_id, job_definition_name)
-        if params:
-            print_feature_deprecation(
-                target='params',
-                additional_message='please set "filepaths", "handler", "image", '
-                                   '"environment" and "description" instead.')
-            if 'datasets' in params:
-                print_feature_deprecation(
-                    target='datasets',
-                    additional_message='please set datasets when you create training job.')
-            return self._connection.api_request(method='POST', path=path, json=params)
-        else:
-            try:
-                source_code = tempfile.NamedTemporaryFile(suffix='.zip')
-                with zipfile.ZipFile(source_code.name, 'w', compression=zipfile.ZIP_DEFLATED) as new_zip:
-                    for filepath in filepaths:
-                        path_obj = Path(filepath)
-                        new_zip.write(filepath, path_obj.name)
-                source_code.seek(0)
+        try:
+            source_code = tempfile.NamedTemporaryFile(suffix='.zip')
+            with zipfile.ZipFile(source_code.name, 'w', compression=zipfile.ZIP_DEFLATED) as new_zip:
+                for filepath in filepaths:
+                    path_obj = Path(filepath)
+                    new_zip.write(filepath, path_obj.name)
+            source_code.seek(0)
 
-                parameters = {'handler': handler}
-                if image:
-                    parameters['image'] = image
-                if environment:
-                    parameters['environment'] = environment
-                if description:
-                    parameters['description'] = description
-                parameters = BytesIO(json.dumps(parameters).encode())
-                files = {
-                    'source_code': ('source_code.zip', source_code, 'application/zip'),
-                    'parameters': ('params.json', parameters, 'application/json'),
-                }
-                return self._connection.api_request(method='POST', path=path, files=files)
-            finally:
-                if source_code:
-                    source_code.close()
+            parameters = {'handler': handler}
+            if image:
+                parameters['image'] = image
+            if environment:
+                parameters['environment'] = environment
+            if description:
+                parameters['description'] = description
+            parameters = BytesIO(json.dumps(parameters).encode())
+            files = {
+                'source_code': ('source_code.zip', source_code, 'application/zip'),
+                'parameters': ('params.json', parameters, 'application/json'),
+            }
+            return self._connection.api_request(method='POST', path=path, files=files)
+        finally:
+            if source_code:
+                source_code.close()
 
     def get_training_job_definition_versions(
             self, organization_id: str, job_definition_name: str,

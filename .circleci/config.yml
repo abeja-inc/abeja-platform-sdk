@@ -11,8 +11,8 @@ test_step: &test_step
       environment:
         - PIPENV_VENV_IN_PROJECT: 1
       command: |
-        sudo pip install pipenv
-        pipenv install --dev
+        sudo pip install poetry
+        poetry install
   - run:
       name: Test
       command: |
@@ -28,7 +28,7 @@ install-release-dependencies: &install-release-dependencies
     name: Install Dependencies
     command: |
       sudo apt-get update
-      sudo pip install twine
+      poetry install
 
 run-release: &run-release
   run:
@@ -44,7 +44,7 @@ release: &release
 release-rc: &release-rc
   - checkout
   - *install-release-dependencies
-  - run: sed -i -e "s/'$/\.rc1'/g" abeja/version.py
+  - run: poetry version $(PYTHONPATH=./ poetry run python tools/add_rc_version.py)
   - *run-release
 
 # Jobs
