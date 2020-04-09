@@ -240,7 +240,9 @@ class APIClient(BaseAPIClient):
                 image = "abeja-inc/all-gpu:19.04"
                 environment = {"key": "value"}
                 description = "description"
-                response = api_client.create_training_job_definition_version(organization_id, job_definition_name, params)
+                response = api_client.create_training_job_definition_version(
+                    organization_id, job_definition_name, filepaths, handler,
+                    image=image, environment=environment, description=description)
 
         Params:
             - **organization_id** (str): ORGANIZATION_ID
