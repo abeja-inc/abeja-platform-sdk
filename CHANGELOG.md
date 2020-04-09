@@ -1,3 +1,7 @@
+# 1.0.6
+- trigger system test when sdk is released (#12) (#13)
+- Remove deprecated field (#11)
+
 # 1.0.4
 - Add notebook type to notebok API (#6)
 - use poetry (#7)
