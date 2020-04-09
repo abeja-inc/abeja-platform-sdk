@@ -18,6 +18,8 @@ def get_request_session():
     return s
 
 def get_latest_build_num_for_stage(stage):
+    """https://circleci.com/docs/api/#recent-builds-for-a-single-project
+    """
     limit = 1000
     branch_name = f'deployment/{stage}'
     session = get_request_session()
@@ -32,6 +34,11 @@ def get_latest_build_num_for_stage(stage):
         }
         r = session.get(base_url, params=params)
         r.raise_for_status()
+
+        # When no more builds are available
+        if len(r.json()) == 0:
+            return None
+
         builds = [_ for _ in r.json() if _['branch'] == branch_name]
         if len(builds) > 0:
             build_num = builds[0]['build_num']
@@ -50,6 +57,8 @@ def get_latest_build_num():
     return get_latest_build_num_for_stage(stage)
 
 def trigger_build(build_num):
+    """https://circleci.com/docs/api/#retry-a-build
+    """
     url = f"{base_url}/{build_num}/retry"
     params = {
         'circle-token': token,
