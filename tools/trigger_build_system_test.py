@@ -59,7 +59,7 @@ def get_latest_build_num():
 def trigger_build(build_num):
     """https://circleci.com/docs/api/#retry-a-build
     """
-    url = "{}/{build_num}/retry".format(base_url, build_num)
+    url = "{}/{}/retry".format(base_url, build_num)
     params = {
         'circle-token': token,
     }
