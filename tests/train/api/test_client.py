@@ -114,33 +114,8 @@ class TestApiClient:
                                       'User-Agent': 'abeja-platform-sdk/{}'.format(VERSION)},
                                   timeout=30, data=None, json=None)
 
-    @patch('abeja.train.api.client.print_feature_deprecation')
-    @patch('requests.Session.request')
-    def test_create_training_job_definition_version_deprecated(self, m, mock_print):
-        params = {
-            "handler": "train:handler",
-            "datasets": {
-                "mnist": "1111111111111",
-                "image": "abeja-inc/minimal:0.1.0",
-                "source_code_base64": "",
-                "user_parameters": {}
-            }
-        }
-        self.api_client.create_training_job_definition_version(
-            ORGANIZATION_ID, JOB_DEFINITION_NAME, params)
-        url = '{}/organizations/{}/training/definitions/{}/versions'.format(
-            ABEJA_API_URL, ORGANIZATION_ID, JOB_DEFINITION_NAME)
-        m.assert_called_once_with('POST', url, params=None,
-                                  headers={
-                                      'User-Agent': 'abeja-platform-sdk/{}'.format(VERSION)},
-                                  timeout=30, data=None, json=params)
-
-        # make sure deprecation message
-        mock_print.assert_called()
-
     @patch('requests.Session.request')
     def test_create_training_job_definition_version(self, m):
-        filepaths = ['requirements.txt']
         handler = "train:handler"
         image = "abeja-inc/minimal:0.1.0"
         environment = {}
