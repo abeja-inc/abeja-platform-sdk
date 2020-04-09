@@ -56,7 +56,6 @@ DEPLOYMENT_RES = {
     },
     'default_environment': {},
     'runs': [],
-    'daemons': [],
     'services': [],
     'triggers': [],
     'created_at': '2018-06-05T08:52:02.428441Z',
