@@ -11,8 +11,6 @@ test_step: &test_step
       - v1-dependencies-{{ checksum "poetry.lock" }}
   - run:
       name: Install Dependencies
-      environment:
-        - PIPENV_VENV_IN_PROJECT: 1
       command: |
         sudo pip install poetry
         poetry config --local virtualenvs.in-project true
