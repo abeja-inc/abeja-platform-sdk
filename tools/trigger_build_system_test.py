@@ -5,7 +5,6 @@ import os
 import re
 import urllib.parse
 token = os.environ.get('CIRCLE_CI_TOKEN')
-base_url = "https://circleci.com/api/v1.1/project/gh/abeja-inc/platform-system-test"
 
 
 def get_request_session():
@@ -30,17 +29,17 @@ def get_stage():
 
 
 def trigger_build_by_branch(stage):
-    """https://circleci.com/docs/api/#trigger-a-new-job-with-a-branch
+    """https://circleci.com/docs/api/v2/#trigger-a-new-pipeline
     """
+    url = 'https://circleci.com/api/v2/project/gh/abeja-inc/platform-system-test/pipeline'
+    url = '{}?circle-token={}'.format(url, token)
     branch_name = 'deployment/{}'.format(stage)
 
-    branch = urllib.parse.quote(branch_name, safe='')
-    url = "{}/tree/{}".format(base_url, branch)
     params = {
-        'circle-token': token,
+        'branch': branch_name
     }
     session = get_request_session()
-    r = session.post(url, params=params)
+    r = session.post(url, json=params)
     r.raise_for_status()
 
 
