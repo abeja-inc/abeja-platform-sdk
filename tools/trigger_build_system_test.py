@@ -3,7 +3,6 @@ from requests.packages.urllib3.util.retry import Retry
 from requests.adapters import HTTPAdapter
 import os
 import re
-import urllib.parse
 token = os.environ.get('CIRCLE_CI_TOKEN')
 
 
