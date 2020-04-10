@@ -8,38 +8,10 @@ from abeja.exceptions import BadRequest
 
 ORGANIZATION_ID = '1111111111111'
 DEPLOYMENT_ID = '2222222222222'
-MODEL_ID = '3333333333333'
 DEPLOYMENT_NAME = 'deployment_name'
 DEPLOYMENT_DEFAULT_ENV = {
     'ENV_A': 'abc'
 }
-
-MODEL_DEPLOYMENT_RES = {
-    'deployment_id': DEPLOYMENT_ID,
-    'name': DEPLOYMENT_NAME,
-    'description': 'description',
-    'model_id': MODEL_ID,
-    'creator': {
-        'display_name': None,
-        'email': 'platform-support@abeja.asia',
-        'id': '1111111111111',
-        'is_registered': True,
-        'role': 'admin',
-        'created_at': '2017-05-29T07:48:55Z',
-        'updated_at': '2017-11-29T10:21:24Z'
-    },
-    'default_environment': {},
-    'runs': [],
-    'daemons': [],
-    'services': [],
-    'triggers': [],
-    'created_at': '2018-06-05T08:52:02.428441Z',
-    'modified_at': '2018-06-05T08:52:02.428587Z'
-}
-
-MODEL_DEPLOYMENT_LIST_RES = [
-    MODEL_DEPLOYMENT_RES
-]
 
 DEPLOYMENT_RES = {
     'deployment_id': DEPLOYMENT_ID,
@@ -61,6 +33,9 @@ DEPLOYMENT_RES = {
     'created_at': '2018-06-05T08:52:02.428441Z',
     'modified_at': '2018-06-05T08:52:02.428587Z'
 }
+DEPLOYMENT_LIST_RES = [
+    DEPLOYMENT_RES
+]
 
 TEMPLATE_ID = 1
 DEPLOYMENT_VERSION_ID = 'ver-c37e4e41b25243c9'
@@ -72,7 +47,6 @@ DEPLOYMENT_VERSION_RES = {
     'version_id': DEPLOYMENT_VERSION_ID,
     'image': IMAGE,
     'handler': HANDLER,
-    'model_id': MODEL_ID,
     'created_at': '2017-10-27T08:00:38.334312Z',
     'modified_at': '2017-10-27T08:00:38.334436Z',
     'training_job_id': None,
@@ -87,25 +61,6 @@ DEPLOYMENT_VERSION_LIST_RES = {
 
 
 class TestAPIClient(unittest.TestCase):
-
-    @requests_mock.Mocker()
-    def test_create_model_deployment(self, m):
-        path = '/organizations/{}/models/{}/deployments'.format(ORGANIZATION_ID, MODEL_ID)
-        m.post(path, json=MODEL_DEPLOYMENT_RES)
-
-        client = APIClient()
-        ret = client.create_deployment(ORGANIZATION_ID,
-                                       name=DEPLOYMENT_NAME,
-                                       model_id=MODEL_ID,
-                                       description='description',
-                                       default_environment=DEPLOYMENT_DEFAULT_ENV)
-        expected_payload = {
-            'name': DEPLOYMENT_NAME,
-            'description': 'description',
-            'default_environment': DEPLOYMENT_DEFAULT_ENV
-        }
-        self.assertDictEqual(m.request_history[0].json(), expected_payload)
-        self.assertDictEqual(ret, MODEL_DEPLOYMENT_RES)
 
     @requests_mock.Mocker()
     def test_create_deployment(self, m):
@@ -128,20 +83,20 @@ class TestAPIClient(unittest.TestCase):
     @requests_mock.Mocker()
     def test_get_deployment(self, m):
         path = '/organizations/{}/deployments/{}'.format(ORGANIZATION_ID, DEPLOYMENT_ID)
-        m.get(path, json=MODEL_DEPLOYMENT_RES)
+        m.get(path, json=DEPLOYMENT_RES)
 
         client = APIClient()
         ret = client.get_deployment(ORGANIZATION_ID, DEPLOYMENT_ID)
-        self.assertDictEqual(ret, MODEL_DEPLOYMENT_RES)
+        self.assertDictEqual(ret, DEPLOYMENT_RES)
 
     @requests_mock.Mocker()
     def test_get_deployments(self, m):
         path = '/organizations/{}/deployments'.format(ORGANIZATION_ID)
-        m.get(path, json=MODEL_DEPLOYMENT_LIST_RES)
+        m.get(path, json=DEPLOYMENT_LIST_RES)
 
         client = APIClient()
         ret = client.get_deployments(ORGANIZATION_ID)
-        self.assertListEqual(ret, MODEL_DEPLOYMENT_LIST_RES)
+        self.assertListEqual(ret, DEPLOYMENT_LIST_RES)
 
     @requests_mock.Mocker()
     def test_delete_deployment(self, m):
@@ -158,7 +113,7 @@ class TestAPIClient(unittest.TestCase):
     @requests_mock.Mocker()
     def test_patch_deployment(self, m):
         path = '/organizations/{}/deployments/{}'.format(ORGANIZATION_ID, DEPLOYMENT_ID)
-        m.patch(path, json=MODEL_DEPLOYMENT_RES)
+        m.patch(path, json=DEPLOYMENT_RES)
 
         client = APIClient()
         ret = client.patch_deployment(ORGANIZATION_ID, DEPLOYMENT_ID, DEPLOYMENT_NAME,
@@ -168,7 +123,7 @@ class TestAPIClient(unittest.TestCase):
             'default_environment': DEPLOYMENT_DEFAULT_ENV
         }
         self.assertDictEqual(m.request_history[0].json(), expected_payload)
-        self.assertDictEqual(ret, MODEL_DEPLOYMENT_RES)
+        self.assertDictEqual(ret, DEPLOYMENT_RES)
 
     @requests_mock.Mocker()
     def test_get_deployment_versions(self, m):

@@ -39,7 +39,6 @@ API Mapping
    :header: method, path, description
    :widths: 5, 256, 256
 
-    post, /organizations/<organization_id>/models/<model_id>/deployments, **DEPRECATED** :meth:`APIClient.create_deployment() <abeja.deployments.APIClient.create_deployment>`
     post, /organizations/<organization_id>/deployments, :meth:`APIClient.create_deployment() <abeja.deployments.APIClient.create_deployment>`
     get, /organizations/<organization_id>/deployments, :meth:`APIClient.get_deployments() <abeja.deployments.APIClient.get_deployments>`
     get, /organizations/<organization_id>/deployments/<deployment_id>, :meth:`APIClient.get_deployment() <abeja.deployments.APIClient.get_deployment>`
