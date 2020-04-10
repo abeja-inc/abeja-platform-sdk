@@ -4,7 +4,6 @@ from requests.adapters import HTTPAdapter
 import os
 import re
 token = os.environ.get('CIRCLE_CI_TOKEN')
-base_url = "https://circleci.com/api/v1.1/project/gh/abeja-inc/platform-system-test"
 
 
 def get_request_session():
@@ -17,35 +16,8 @@ def get_request_session():
     s.mount('http://', HTTPAdapter(max_retries=retries))
     return s
 
-def get_latest_build_num_for_stage(stage):
-    """https://circleci.com/docs/api/#recent-builds-for-a-single-project
-    """
-    limit = 1000
-    branch_name = 'deployment/{}'.format(stage)
-    session = get_request_session()
-    for i in range(100):
-        offset = limit * i
-        params = {
-            'circle-token': token,
-            'limit': limit,
-            'offset': offset,
-            'filter': 'completed',
-            'sharrow': True
-        }
-        r = session.get(base_url, params=params)
-        r.raise_for_status()
 
-        # When no more builds are available
-        if len(r.json()) == 0:
-            return None
-
-        builds = [_ for _ in r.json() if _['branch'] == branch_name]
-        if len(builds) > 0:
-            build_num = builds[0]['build_num']
-            return build_num
-    return None
-
-def get_latest_build_num():
+def get_stage():
     sdk_branch_name = os.environ.get('CIRCLE_BRANCH')
     if re.match(r'^release\/.+$', sdk_branch_name):
         stage = 'staging'
@@ -53,25 +25,28 @@ def get_latest_build_num():
         stage = 'production'
     else:
         return None
+    return stage
 
-    return get_latest_build_num_for_stage(stage)
 
-def trigger_build(build_num):
-    """https://circleci.com/docs/api/#retry-a-build
+def trigger_build_by_branch(stage):
+    """https://circleci.com/docs/api/v2/#trigger-a-new-pipeline
     """
-    url = "{}/{build_num}/retry".format(base_url, build_num)
+    url = 'https://circleci.com/api/v2/project/gh/abeja-inc/platform-system-test/pipeline'
+    url = '{}?circle-token={}'.format(url, token)
+    branch_name = 'deployment/{}'.format(stage)
     params = {
-        'circle-token': token,
+        'branch': branch_name
     }
     session = get_request_session()
-    r = session.post(url, params=params)
+    r = session.post(url, json=params)
     r.raise_for_status()
 
+
 def main():
-    build_num = get_latest_build_num()
-    if build_num is None:
+    stage = get_stage()
+    if stage is None:
         exit(1)
-    trigger_build(build_num)
+    trigger_build_by_branch(stage)
 
 if __name__ == '__main__':
     main()
