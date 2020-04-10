@@ -23,6 +23,8 @@ def get_stage():
         stage = 'staging'
     elif sdk_branch_name == 'master':
         stage = 'production'
+    elif sdk_branch_name == 'fix_f_string2':  # tmp
+        stage = 'staging' # tmp
     else:
         return None
 
@@ -33,7 +35,7 @@ def trigger_build_by_branch(stage):
     url = 'https://circleci.com/api/v2/project/gh/abeja-inc/platform-system-test/pipeline'
     url = '{}?circle-token={}'.format(url, token)
     branch_name = 'deployment/{}'.format(stage)
-
+    branch_name = 'master' # tmp
     params = {
         'branch': branch_name
     }
