@@ -27,6 +27,7 @@ def get_stage():
         stage = 'staging' # tmp
     else:
         return None
+    return stage
 
 
 def trigger_build_by_branch(stage):
