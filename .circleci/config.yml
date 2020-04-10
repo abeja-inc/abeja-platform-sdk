@@ -6,6 +6,9 @@ default: &default
 # Job Steps
 test_step: &test_step
   - checkout
+  - restore_cache:
+    keys:
+    - v1-dependencies-{{ checksum "poetry.lock" }}
   - run:
       name: Install Dependencies
       environment:
@@ -14,6 +17,10 @@ test_step: &test_step
         sudo pip install poetry
         poetry config --local virtualenvs.in-project true
         poetry install
+  - save_cache:
+    key: v1-dependencies-{{ checksum "poetry.lock" }}
+    paths:
+      - .venv
   - persist_to_workspace:
       root: .
       paths:
