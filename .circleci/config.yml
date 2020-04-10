@@ -12,7 +12,12 @@ test_step: &test_step
         - PIPENV_VENV_IN_PROJECT: 1
       command: |
         sudo pip install poetry
+        poetry config --local virtualenvs.in-project true
         poetry install
+  - persist_to_workspace:
+      root: .
+      paths:
+        - .venv
   - run:
       name: Test
       command: |
@@ -28,6 +33,7 @@ install-release-dependencies: &install-release-dependencies
     name: Install Dependencies
     command: |
       sudo apt-get update
+      poetry config --local virtualenvs.in-project true
       poetry install
 
 run-release: &run-release
@@ -44,12 +50,16 @@ trigger-system-test: &trigger-system-test
 
 release: &release
   - checkout
+  - attach_workspace:
+      at: .
   - *install-release-dependencies
   - *run-release
   - *trigger-system-test
 
 release-rc: &release-rc
   - checkout
+  - attach_workspace:
+      at: .
   - *install-release-dependencies
   - run: poetry version $(PYTHONPATH=./ poetry run python tools/add_rc_version.py)
   - *run-release
