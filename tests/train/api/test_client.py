@@ -383,7 +383,7 @@ class TestApiClient:
         path = '/organizations/{}/training/definitions/{}/jobs/{}/stop'.format(
             ORGANIZATION_ID, JOB_DEFINITION_NAME, TRAINING_JOB_ID)
         requests_mock.post(path, json={
-            'message': f'{JOB_DEFINITION_NAME}:{TRAINING_JOB_ID} stopped'
+            'message': '{}:{} stopped'.format(JOB_DEFINITION_NAME, TRAINING_JOB_ID)
         })
         self.api_client.stop_training_job(
             ORGANIZATION_ID, JOB_DEFINITION_NAME, TRAINING_JOB_ID)
