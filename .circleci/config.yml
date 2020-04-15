@@ -6,13 +6,23 @@ default: &default
 # Job Steps
 test_step: &test_step
   - checkout
+  - restore_cache:
+      keys:
+      - v1-dependencies-{{ checksum "poetry.lock" }}
   - run:
       name: Install Dependencies
-      environment:
-        - PIPENV_VENV_IN_PROJECT: 1
       command: |
         sudo pip install poetry
+        poetry config --local virtualenvs.in-project true
         poetry install
+  - save_cache:
+      key: v1-dependencies-{{ checksum "poetry.lock" }}
+      paths:
+        - .venv
+  - persist_to_workspace:
+      root: .
+      paths:
+        - .venv
   - run:
       name: Test
       command: |
@@ -28,6 +38,7 @@ install-release-dependencies: &install-release-dependencies
     name: Install Dependencies
     command: |
       sudo apt-get update
+      poetry config --local virtualenvs.in-project true
       poetry install
 
 run-release: &run-release
@@ -36,16 +47,28 @@ run-release: &run-release
     command: |
       sudo -E make release
 
+trigger-system-test: &trigger-system-test
+  run:
+    name: TriggerSystemTest
+    command: |
+      poetry run python tools/trigger_build_system_test.py
+
 release: &release
   - checkout
+  - attach_workspace:
+      at: .
   - *install-release-dependencies
   - *run-release
+  - *trigger-system-test
 
 release-rc: &release-rc
   - checkout
+  - attach_workspace:
+      at: .
   - *install-release-dependencies
   - run: poetry version $(PYTHONPATH=./ poetry run python tools/add_rc_version.py)
   - *run-release
+  - *trigger-system-test
 
 # Jobs
 version: 2
