@@ -683,11 +683,11 @@ class APIClient(BaseAPIClient):
             organization_id, job_definition_name, training_job_id)
         return self._connection.api_request(method='GET', path=path)
 
-    def delete_training_job(
+    def stop_training_job(
             self, organization_id: str, job_definition_name: str, training_job_id: str) -> dict:
-        """delete a training job
+        """stop a training job
 
-        API reference: DELETE /organizations/<organization_id>/training/definitions/<job_definition_name>/jobs/<training_job_id>
+        API reference: POST /organizations/<organization_id>/training/definitions/<job_definition_name>/jobs/<training_job_id>/stop
 
         Request Syntax:
             .. code-block:: python
@@ -695,9 +695,7 @@ class APIClient(BaseAPIClient):
                 organization_id = "1102940376065"
                 job_definition_name = "test_job_definition"
                 training_job_id = "1443722127663"
-                response = api_client.delete_training_job_definition_version(organization_id,
-                                                                             job_definition_name,
-                                                                             training_job_id)
+                response = api_client.stop_training_job(organization_id, job_definition_name, training_job_id)
 
         Params:
             - **organization_id** (str): ORGANIZATION_ID
@@ -713,17 +711,17 @@ class APIClient(BaseAPIClient):
             .. code-block:: json
 
                 {
-                    "message": "test_job_definition:1443722127663 deleted"
+                    "message": "test_job_definition:1443722127663 stopped"
                 }
 
         Raises:
-            - BadRequest
             - Unauthorized: Authentication failed
+            - Forbidden:
             - InternalServerError
         """
-        path = '/organizations/{}/training/definitions/{}/jobs/{}'.format(
+        path = '/organizations/{}/training/definitions/{}/jobs/{}/stop'.format(
             organization_id, job_definition_name, training_job_id)
-        return self._connection.api_request(method='DELETE', path=path)
+        return self._connection.api_request(method='POST', path=path)
 
     def get_training_result(
             self, organization_id: str, job_definition_name: str, training_job_id: str) -> dict:
