@@ -3,7 +3,7 @@ import tempfile
 import zipfile
 from io import BytesIO
 from pathlib import Path
-from typing import Optional, List
+from typing import AnyStr, IO, Optional, List, Union
 
 from abeja.common.api_client import BaseAPIClient
 from abeja.train.instance_type import InstanceType
@@ -223,7 +223,7 @@ class APIClient(BaseAPIClient):
 
     def create_training_job_definition_version(
             self, organization_id: str, job_definition_name: str,
-            filepaths: List[str], handler: str,
+            filepaths_or_buffer: Union[List[str], IO[AnyStr]], handler: str,
             image: Optional[str] = None, environment: Optional[dict] = None,
             description: Optional[str] = None) -> dict:
         """create a training job definition version.
@@ -235,19 +235,19 @@ class APIClient(BaseAPIClient):
 
                 organization_id = "1102940376065"
                 job_definition_name = "test_job_definition"
-                filepaths = ["./requirements.txt", "./train.py"]
+                filepaths_or_buffer = ["./requirements.txt", "./train.py"]
                 handler = "train:handler"
                 image = "abeja-inc/all-gpu:19.04"
                 environment = {"key": "value"}
                 description = "description"
                 response = api_client.create_training_job_definition_version(
-                    organization_id, job_definition_name, filepaths, handler,
+                    organization_id, job_definition_name, filepaths_or_buffer, handler,
                     image=image, environment=environment, description=description)
 
         Params:
             - **organization_id** (str): ORGANIZATION_ID
             - **job_definition_name** (str): training job definition name
-            - **filepaths** (list): file list to run training job
+            - **filepaths_or_buffer** (Union[list, IO]): file list or archived file-like object by zip or tar.gz to run training job
             - **handler** (str): path to handler (ex. train:handler )
             - **image** (Optional[str]): runtime enviornment
             - **environment** (Optional[dict]): user defined parameters set as environment variables
@@ -283,12 +283,15 @@ class APIClient(BaseAPIClient):
         """
         path = '/organizations/{}/training/definitions/{}/versions'.format(organization_id, job_definition_name)
         try:
-            source_code = tempfile.NamedTemporaryFile(suffix='.zip')
-            with zipfile.ZipFile(source_code.name, 'w', compression=zipfile.ZIP_DEFLATED) as new_zip:
-                for filepath in filepaths:
-                    path_obj = Path(filepath)
-                    new_zip.write(filepath, path_obj.name)
-            source_code.seek(0)
+            if hasattr(filepaths_or_buffer, 'read'):
+                source_code = filepaths_or_buffer
+            else:
+                source_code = tempfile.NamedTemporaryFile(suffix='.zip')
+                with zipfile.ZipFile(source_code.name, 'w', compression=zipfile.ZIP_DEFLATED) as new_zip:
+                    for filepath in filepaths_or_buffer:
+                        path_obj = Path(filepath)
+                        new_zip.write(filepath, path_obj.name)
+                source_code.seek(0)
 
             parameters = {'handler': handler}
             if image:

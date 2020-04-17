@@ -2,6 +2,7 @@ from mock import patch
 import os
 import pytest
 import tempfile
+import zipfile
 from abeja import VERSION
 from abeja.common.connection import Connection
 from abeja.exceptions import BadRequest
@@ -115,7 +116,7 @@ class TestApiClient:
                                   timeout=30, data=None, json=None)
 
     @patch('requests.Session.request')
-    def test_create_training_job_definition_version(self, m):
+    def test_create_training_job_definition_version_with_filepaths(self, m):
         handler = "train:handler"
         image = "abeja-inc/minimal:0.1.0"
         environment = {}
@@ -124,9 +125,9 @@ class TestApiClient:
             filepath = os.path.join(dname, 'requirements.txt')
             with open(filepath, 'w') as f:
                 f.write("requests==1.0.0")
-            filepaths = [filepath]
+            filepaths_or_buffer = [filepath]
             self.api_client.create_training_job_definition_version(
-                ORGANIZATION_ID, JOB_DEFINITION_NAME, filepaths=filepaths, handler=handler,
+                ORGANIZATION_ID, JOB_DEFINITION_NAME, filepaths_or_buffer=filepaths_or_buffer, handler=handler,
                 image=image, environment=environment, description=description)
         url = '{}/organizations/{}/training/definitions/{}/versions'.format(
             ABEJA_API_URL, ORGANIZATION_ID, JOB_DEFINITION_NAME)
@@ -137,15 +138,37 @@ class TestApiClient:
                                   json=None, files=m.call_args[1]['files'])
 
     @patch('requests.Session.request')
+    def test_create_training_job_definition_version_with_buffer(self, m):
+        handler = "train:handler"
+        image = "abeja-inc/minimal:0.1.0"
+        environment = {}
+        description = ""
+        with tempfile.NamedTemporaryFile(suffix='.zip') as source_code:
+            with zipfile.ZipFile(source_code.name, 'w', compression=zipfile.ZIP_DEFLATED) as new_zip:
+                new_zip.writestr('requirements.txt', 'requests==1.0.0')
+                source_code.seek(0)
+                filepaths_or_buffer = source_code
+                self.api_client.create_training_job_definition_version(
+                    ORGANIZATION_ID, JOB_DEFINITION_NAME, filepaths_or_buffer=filepaths_or_buffer, handler=handler,
+                    image=image, environment=environment, description=description)
+        url = '{}/organizations/{}/training/definitions/{}/versions'.format(
+            ABEJA_API_URL, ORGANIZATION_ID, JOB_DEFINITION_NAME)
+        m.assert_called_once_with('POST', url, params=None,
+                                  headers={
+                                      'User-Agent': 'abeja-platform-sdk/{}'.format(VERSION)},
+                                  timeout=30, data=None,
+                                  json=None, files=m.call_args[1]['files'])
+
+    @patch('requests.Session.request')
     def test_create_training_job_definition_version_file_not_found(self, m):
-        filepaths = ['hoge.txt']
+        filepaths_or_buffer = ['hoge.txt']
         handler = "train:handler"
         image = "abeja-inc/minimal:0.1.0"
         environment = {}
         description = ""
         with pytest.raises(FileNotFoundError):
             self.api_client.create_training_job_definition_version(
-                ORGANIZATION_ID, JOB_DEFINITION_NAME, filepaths=filepaths, handler=handler,
+                ORGANIZATION_ID, JOB_DEFINITION_NAME, filepaths_or_buffer=filepaths_or_buffer, handler=handler,
                 image=image, environment=environment, description=description)
 
     @patch('requests.Session.request')
