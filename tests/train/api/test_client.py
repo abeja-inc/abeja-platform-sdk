@@ -379,13 +379,19 @@ class TestApiClient:
                                       'User-Agent': 'abeja-platform-sdk/{}'.format(VERSION)},
                                   timeout=30, data=None, json=None)
 
-    @patch('requests.Session.request')
-    def test_delete_training_job(self, m):
-        self.api_client.delete_training_job(
+    def test_stop_training_job(self, requests_mock):
+        path = '/organizations/{}/training/definitions/{}/jobs/{}/stop'.format(
             ORGANIZATION_ID, JOB_DEFINITION_NAME, TRAINING_JOB_ID)
-        url = '{}/organizations/{}/training/definitions/{}/jobs/{}'.format(
-            ABEJA_API_URL, ORGANIZATION_ID, JOB_DEFINITION_NAME, TRAINING_JOB_ID)
-        m.assert_called_once_with('DELETE', url, params=None,
-                                  headers={
-                                      'User-Agent': 'abeja-platform-sdk/{}'.format(VERSION)},
-                                  timeout=30, data=None, json=None)
+        requests_mock.post(path, json={
+            'message': '{}:{} stopped'.format(JOB_DEFINITION_NAME, TRAINING_JOB_ID)
+        })
+        self.api_client.stop_training_job(
+            ORGANIZATION_ID, JOB_DEFINITION_NAME, TRAINING_JOB_ID)
+
+        request = requests_mock.request_history[0]
+        assert request.method == 'POST'
+        assert 'User-Agent' in request.headers
+        assert request.headers['User-Agent'] == 'abeja-platform-sdk/{}'.format(VERSION)
+        assert request.timeout == 30
+        assert request.query == ''
+        assert request.text is None
