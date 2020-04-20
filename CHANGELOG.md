@@ -1,3 +1,6 @@
+# 1.0.9
+- Feature/stop training job (#15)
+
 # 1.0.8
 - system-testのpipelineをtriggerするようにした。 (#14)
 - Deprecate `/models` endpoint (#10) 
