@@ -2,6 +2,7 @@ from mock import patch
 import os
 import pytest
 import tempfile
+import zipfile
 from abeja import VERSION
 from abeja.common.connection import Connection
 from abeja.exceptions import BadRequest
@@ -113,6 +114,27 @@ class TestApiClient:
                                   headers={
                                       'User-Agent': 'abeja-platform-sdk/{}'.format(VERSION)},
                                   timeout=30, data=None, json=None)
+
+    @patch('requests.Session.request')
+    def test_create_training_job_definition_version_native_api(self, m):
+        handler = "train:handler"
+        image = "abeja-inc/minimal:0.1.0"
+        environment = {}
+        description = ""
+        with tempfile.NamedTemporaryFile(suffix='.zip') as source_code:
+            with zipfile.ZipFile(source_code.name, 'w', compression=zipfile.ZIP_DEFLATED) as new_zip:
+                new_zip.writestr('requirements.txt', 'requests==1.0.0')
+                source_code.seek(0)
+                self.api_client.create_training_job_definition_version_native_api(
+                    ORGANIZATION_ID, JOB_DEFINITION_NAME, source_code=source_code,
+                    parameters={'handler': handler, 'imag': image, 'environment': environment, 'description': description})
+        url = '{}/organizations/{}/training/definitions/{}/versions'.format(
+            ABEJA_API_URL, ORGANIZATION_ID, JOB_DEFINITION_NAME)
+        m.assert_called_once_with('POST', url, params=None,
+                                  headers={
+                                      'User-Agent': 'abeja-platform-sdk/{}'.format(VERSION)},
+                                  timeout=30, data=None,
+                                  json=None, files=m.call_args[1]['files'])
 
     @patch('requests.Session.request')
     def test_create_training_job_definition_version(self, m):
