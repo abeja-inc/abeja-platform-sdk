@@ -233,7 +233,7 @@ class APIClient(BaseAPIClient):
 
                 organization_id = "1102940376065"
                 job_definition_name = "test_job_definition"
-                source_code = open("./train.py")
+                source_code = open("./train.zip", "rb")
                 handler = "train:handler"
                 image = "abeja-inc/all-gpu:19.04"
                 environment = {"key": "value"}
