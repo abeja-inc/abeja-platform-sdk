@@ -33,7 +33,14 @@ abeja-sdk>=1.0.0rc
 
 
 ## Development
+
+```bash
+$ poetry install
+$ poetry run pre-commit install
+```
+
 ### Running Tests
+
 You can run tests in all supported Python versions using `pytest`.
 
 ```bash
@@ -43,7 +50,7 @@ $ make test
 You can also run individual tests with your default Python version:
 
 ```bash
-$ pipenv run pytest tests/
+$ poetry run pytest tests/
 ```
 
 ### Generating Documentation

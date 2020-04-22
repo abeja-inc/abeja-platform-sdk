@@ -102,6 +102,7 @@ def _download_item_content(item: DatasetItem) -> DatasetItem:
 
 class DatasetItemIterator(Iterator):
     """an iterator class for DatasetItem"""
+
     def __init__(
             self, api: APIClient, organization_id: str, dataset_id: str,
             next_page_token: Optional[str]=None, limit: Optional[int]=None,
@@ -183,6 +184,7 @@ class DatasetItems:
             dataset_items = dataset.dataset_items
 
     """
+
     def __init__(self, api: APIClient, organization_id: str, dataset_id: str) -> None:
         self._api = api
         self.organization_id = organization_id

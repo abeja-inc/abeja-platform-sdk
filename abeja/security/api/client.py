@@ -12,6 +12,7 @@ class APIClient(BaseAPIClient):
 
        api_client = APIClient()
     """
+
     def create_ip_address(self, organization_id: str,
                           payload: Optional[dict] = None) -> dict:
         """create a ip address
