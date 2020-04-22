@@ -3,6 +3,7 @@ from abc import ABCMeta, abstractmethod
 
 class Iterator(metaclass=ABCMeta):
     """abstract class for page iterator"""
+
     def __iter__(self):
         return self._items_iter()
 

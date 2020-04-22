@@ -12,6 +12,7 @@ class APIClient(BaseAPIClient):
 
        api_client = APIClient()
     """
+
     def create_trigger(
             self, organization_id: str, deployment_id: str, version_id: str,
             input_service_name: str, input_service_id: str,
