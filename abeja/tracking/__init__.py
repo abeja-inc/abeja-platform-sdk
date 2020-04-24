@@ -126,14 +126,20 @@ class Tracking:
         self._summary_writer.flush()
         if self._is_valid_job and self._total_steps is not None and self._step is not None:
             statistics = ABEJAStatistics(num_epochs=self._total_steps, epoch=self._step)
+            kwargs = {**self._params, **self._metrics}
+            kwargs.pop('main_acc', None)
+            kwargs.pop('main_loss', None)
+            kwargs.pop('test_acc', None)
+            kwargs.pop('test_loss', None)
+
             train_acc = self._metrics.get('main_acc')
             train_loss = self._metrics.get('main_loss')
             if train_acc is not None or train_loss is not None:
-                statistics.add_stage(ABEJAStatistics.STAGE_TRAIN, train_acc, train_loss)
+                statistics.add_stage(ABEJAStatistics.STAGE_TRAIN, train_acc, train_loss, **kwargs)
             val_acc = self._metrics.get('test_acc')
             val_loss = self._metrics.get('test_loss')
             if val_acc is not None or val_loss is not None:
-                statistics.add_stage(ABEJAStatistics.STAGE_VALIDATION, val_acc, val_loss)
+                statistics.add_stage(ABEJAStatistics.STAGE_VALIDATION, val_acc, val_loss, **kwargs)
             if statistics.get_statistics():
                 try:
                     res = TrainingClient().update_statistics(
