@@ -241,7 +241,15 @@ class TestTracking(unittest.TestCase):
                 tk.log_metric(key='main/loss', value=0.5)
                 tk.log_metric(key='test/acc', value=0.5)
                 tk.log_metric(key='test/loss', value=0.5)
+                tk.log_param(key='dummy', value='dummy')
         self.assertEqual(2, m_update_statistics.call_count)
+        expect = {
+            'dummy': 'dummy',
+            'accuracy': 0.5,
+            'loss': 0.5
+        }
+        self.assertDictEqual(expect, m_update_statistics.call_args[1]['statistics']['stages']['train'])
+        self.assertDictEqual(expect, m_update_statistics.call_args[1]['statistics']['stages']['validation'])
 
     @mock.patch('abeja.train.api.client.APIClient.update_statistics')
     def test_tracking_statistics_not_work(self, m_update_statistics):
