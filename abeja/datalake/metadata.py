@@ -12,7 +12,8 @@ class DatalakeMetadata(Mapping):
         if metadata is None:
             self.__dict = {}
         else:
-            self.__dict = {k.replace('x-abeja-meta-', ''): v for k, v in metadata.items() if k.startswith('x-abeja-meta-')}
+            self.__dict = {k.replace('x-abeja-meta-', ''): v for k, v in metadata.items()
+                           if k.startswith('x-abeja-meta-')}
 
     def __len__(self):
         return len(self.__dict)

@@ -188,7 +188,8 @@ class TestAPIClient(unittest.TestCase):
 
     @requests_mock.Mocker()
     def test_get_deployment_version(self, m):
-        path = '/organizations/{}/deployments/{}/versions/{}'.format(ORGANIZATION_ID, DEPLOYMENT_ID, DEPLOYMENT_VERSION_ID)
+        path = '/organizations/{}/deployments/{}/versions/{}'.format(
+            ORGANIZATION_ID, DEPLOYMENT_ID, DEPLOYMENT_VERSION_ID)
         m.get(path, json=DEPLOYMENT_VERSION_RES)
 
         client = APIClient()
@@ -200,7 +201,8 @@ class TestAPIClient(unittest.TestCase):
         res = {
             'message': 'ver-123456789012 deleted'
         }
-        path = '/organizations/{}/deployments/{}/versions/{}'.format(ORGANIZATION_ID, DEPLOYMENT_ID, DEPLOYMENT_VERSION_ID)
+        path = '/organizations/{}/deployments/{}/versions/{}'.format(
+            ORGANIZATION_ID, DEPLOYMENT_ID, DEPLOYMENT_VERSION_ID)
         m.delete(path, json=res)
 
         client = APIClient()

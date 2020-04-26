@@ -1,3 +1,8 @@
+# 1.0.10
+- change create_training_job_definition_version interface (#16)
+- fix precommit and apply fmt (#17)
+- Send all params/metrics to statistics from tracker (#18)
+
 # 1.0.9
 - Feature/stop training job (#15)
 

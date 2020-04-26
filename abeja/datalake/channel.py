@@ -291,6 +291,7 @@ class Channel:
 
 class Channels:
     """a class for handling channels"""
+
     def __init__(self, api: APIClient, organization_id: str) -> None:
         self._api = api
         self.organization_id = organization_id

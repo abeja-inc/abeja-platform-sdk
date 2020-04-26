@@ -3,7 +3,7 @@ import tempfile
 import zipfile
 from io import BytesIO
 from pathlib import Path
-from typing import Optional, List
+from typing import AnyStr, IO, Optional, List
 
 from abeja.common.api_client import BaseAPIClient
 from abeja.train.instance_type import InstanceType
@@ -221,6 +221,69 @@ class APIClient(BaseAPIClient):
         path = '/organizations/{}/training/definitions/{}'.format(organization_id, job_definition_name)
         return self._connection.api_request(method='DELETE', path=path)
 
+    def create_training_job_definition_version_native_api(
+            self, organization_id: str, job_definition_name: str,
+            source_code: IO[AnyStr], parameters: dict) -> dict:
+        """create a training job definition version.
+
+        API reference: POST /organizations/<organization_id>/training/definitions/<job_definition_name>/versions
+
+        Request Syntax:
+            .. code-block:: python
+
+                organization_id = "1102940376065"
+                job_definition_name = "test_job_definition"
+                source_code = open("./train.zip", "rb")
+                handler = "train:handler"
+                image = "abeja-inc/all-gpu:19.04"
+                environment = {"key": "value"}
+                description = "description"
+                response = api_client.create_training_job_definition_version_native_api(
+                    organization_id, job_definition_name, source_code,
+                    parameters={"handler": handler, "image": image, "environment": environment, "description": description})
+
+        Params:
+            - **organization_id** (str): ORGANIZATION_ID
+            - **job_definition_name** (str): training job definition name
+            - **source_code** (IO): zip or tar.gz archived file-like object to run training job
+            - **parameters** (dict): parameters excluding source code to run training job
+
+        Return type:
+            dict
+
+        Returns:
+            Response Syntax:
+
+            .. code-block:: json
+
+                {
+                    "job_definition_version": 1,
+                    "user_parameters": {},
+                    "environment": {},
+                    "description": "description",
+                    "datasets": {
+                        "mnist": "1111111111111"
+                    },
+                    "modified_at": "2018-05-17T12:34:46.344076Z",
+                    "job_definition_id": "1443714239154",
+                    "handler": "train:handler",
+                    "created_at": "2018-05-17T12:34:46.296488Z",
+                    "image": "abeja-inc/all-gpu:19.04"
+                }
+
+        Raises:
+            - BadRequest
+            - Unauthorized: Authentication failed
+            - InternalServerError
+        """
+        path = '/organizations/{}/training/definitions/{}/versions'.format(organization_id, job_definition_name)
+        parameters = BytesIO(json.dumps(parameters).encode())
+        files = {
+            'source_code': ('source_code.zip', source_code, 'application/zip'),
+            'parameters': ('params.json', parameters, 'application/json'),
+        }
+        return self._connection.api_request(method='POST', path=path, files=files)
+
     def create_training_job_definition_version(
             self, organization_id: str, job_definition_name: str,
             filepaths: List[str], handler: str,
@@ -281,7 +344,6 @@ class APIClient(BaseAPIClient):
             - Unauthorized: Authentication failed
             - InternalServerError
         """
-        path = '/organizations/{}/training/definitions/{}/versions'.format(organization_id, job_definition_name)
         try:
             source_code = tempfile.NamedTemporaryFile(suffix='.zip')
             with zipfile.ZipFile(source_code.name, 'w', compression=zipfile.ZIP_DEFLATED) as new_zip:
@@ -297,12 +359,8 @@ class APIClient(BaseAPIClient):
                 parameters['environment'] = environment
             if description:
                 parameters['description'] = description
-            parameters = BytesIO(json.dumps(parameters).encode())
-            files = {
-                'source_code': ('source_code.zip', source_code, 'application/zip'),
-                'parameters': ('params.json', parameters, 'application/json'),
-            }
-            return self._connection.api_request(method='POST', path=path, files=files)
+            return self.create_training_job_definition_version_native_api(
+                organization_id, job_definition_name, source_code, parameters)
         finally:
             if source_code:
                 source_code.close()
