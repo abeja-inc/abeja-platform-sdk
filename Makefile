@@ -13,8 +13,12 @@ dist: clean
 lint:
 	poetry run flake8 abeja tests
 
+.PHONY: mypy
+mypy:
+	poetry run mypy abeja/train/client.py
+
 .PHONY: test
-test: lint
+test: lint mypy
 	poetry run pytest tests/${TEST_TARGET} --doctest-modules --cov=abeja
 
 .PHONY: integration_test
