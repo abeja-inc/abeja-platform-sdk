@@ -4,8 +4,8 @@ from typing import Dict, Optional
 
 from abeja.exceptions import InvalidPathException
 from abeja.models.api.client import APIClient as ModelClient
-from abeja.train.api.client import APIClient as TrainingClient
-from abeja.train.statistics import Statistics as ABEJAStatistics
+from abeja.training.api.client import APIClient as TrainingClient
+from abeja.training.statistics import Statistics as ABEJAStatistics
 from tensorboardX import SummaryWriter
 
 

@@ -15,7 +15,8 @@ lint:
 
 .PHONY: mypy
 mypy:
-	poetry run mypy --config-file .mypy.ini --package abeja.train
+	poetry run mypy --config-file .mypy.ini --package abeja.train \
+	                                        --package abeja.training
 
 .PHONY: test
 test: lint mypy
