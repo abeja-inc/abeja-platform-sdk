@@ -71,9 +71,6 @@ class Client(BaseClient):
         training_job_id = training_job_id or self.training_job_id or 'None'
         job_definition_name = self.job_definition_name or 'None'
 
-        if training_job_id is None or self.job_definition_name is None:
-            raise RuntimeError('job_definition_name and training_job_id must be set')
-
         response = self.api.get_training_result(organization_id=self.organization_id,
                                                 job_definition_name=job_definition_name,
                                                 training_job_id=training_job_id)
