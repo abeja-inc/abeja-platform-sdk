@@ -136,11 +136,10 @@ class APIClient(BaseAPIClient):
             raise BadRequest(error=error_message, error_description=error_message, status_code=400)
         if parameters is None:
             parameters = {}
-        parameters = BytesIO(json.dumps(parameters).encode())
         model_data = convert_to_zipfile_object(model_data)
         files = {
             'model_data': ('model_data.zip', model_data, 'application/zip'),
-            'parameters': ('params.json', parameters, 'application/json')
+            'parameters': ('params.json', BytesIO(json.dumps(parameters).encode()), 'application/json')
         }
         path = '/organizations/{}/training/definitions/{}/models'.format(organization_id, job_definition_name)
         return self._connection.api_request(method='POST', path=path, files=files)

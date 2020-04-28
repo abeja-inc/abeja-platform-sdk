@@ -11,10 +11,14 @@ dist: clean
 
 .PHONY: lint
 lint:
-	poetry run flake8 abeja tests --ignore=E501
+	poetry run flake8 abeja tests
+
+.PHONY: mypy
+mypy:
+	poetry run mypy --config-file .mypy.ini --package abeja.train
 
 .PHONY: test
-test: lint
+test: lint mypy
 	poetry run pytest tests/${TEST_TARGET} --doctest-modules --cov=abeja
 
 .PHONY: integration_test
@@ -23,7 +27,7 @@ integration_test:
 
 .PHONY: fmt
 fmt:
-	poetry run autopep8 -i -r abeja tests --max-line-length=120
+	poetry run autopep8 -i -r abeja tests
 
 .PHONY: docs
 docs:

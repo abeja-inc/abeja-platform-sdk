@@ -3,7 +3,7 @@ import tempfile
 import zipfile
 from io import BytesIO
 from pathlib import Path
-from typing import AnyStr, IO, Optional, List
+from typing import AnyStr, IO, Optional, List, Dict, Any
 
 from abeja.common.api_client import BaseAPIClient
 from abeja.train.instance_type import InstanceType
@@ -180,10 +180,7 @@ class APIClient(BaseAPIClient):
         else:
             params['include_jobs'] = 'false'
 
-        if len(params) == 0:
-            params = None
-
-        return self._connection.api_request(method='GET', path=path, params=params)
+        return self._connection.api_request(method='GET', path=path, params=(None if len(params) == 0 else params))
 
     def delete_training_job_definition(self, organization_id: str, job_definition_name: str) -> dict:
         """delete a training job definition.
@@ -277,17 +274,16 @@ class APIClient(BaseAPIClient):
             - InternalServerError
         """
         path = '/organizations/{}/training/definitions/{}/versions'.format(organization_id, job_definition_name)
-        parameters = BytesIO(json.dumps(parameters).encode())
         files = {
             'source_code': ('source_code.zip', source_code, 'application/zip'),
-            'parameters': ('params.json', parameters, 'application/json'),
+            'parameters': ('params.json', BytesIO(json.dumps(parameters).encode()), 'application/json'),
         }
         return self._connection.api_request(method='POST', path=path, files=files)
 
     def create_training_job_definition_version(
             self, organization_id: str, job_definition_name: str,
             filepaths: List[str], handler: str,
-            image: Optional[str] = None, environment: Optional[dict] = None,
+            image: Optional[str] = None, environment: Optional[Dict[str, Any]] = None,
             description: Optional[str] = None) -> dict:
         """create a training job definition version.
 
@@ -352,7 +348,7 @@ class APIClient(BaseAPIClient):
                     new_zip.write(filepath, path_obj.name)
             source_code.seek(0)
 
-            parameters = {'handler': handler}
+            parameters = {'handler': handler}  # type: Dict[str, Any]
             if image:
                 parameters['image'] = image
             if environment:
@@ -590,7 +586,7 @@ class APIClient(BaseAPIClient):
             - Unauthorized: Authentication failed
             - InternalServerError
         """
-        data = {}
+        data = {}  # type: Dict[str, Any]
         if environment is not None:
             data['environment'] = environment
         elif user_parameters is not None:

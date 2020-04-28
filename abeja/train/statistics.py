@@ -1,3 +1,9 @@
+from typing import Dict, Any
+
+STATISTICS = Dict[str, Any]
+STAGES = Dict[str, STATISTICS]
+
+
 class Statistics:
 
     STAGE_TRAIN = 'train'
@@ -13,7 +19,7 @@ class Statistics:
         self.epoch = epoch
         self.progress_percentage = progress_percentage
         self.other_information = kwargs
-        self.stages = {}
+        self.stages = {}  # type: STAGES
 
     def add_stage(self, name: str, accuracy: float=None, loss: float=None, **kwargs) -> None:
         """ add stage information
@@ -32,7 +38,7 @@ class Statistics:
         if accuracy is None and loss is None and kwargs is None:
             raise ValueError("something statistics information need")
 
-        stat = {}
+        stat = {}  # type: STATISTICS
         if kwargs:
             stat.update(**kwargs)
         if accuracy:
@@ -58,7 +64,7 @@ class Statistics:
                     'progress_percentage': 90,
                 }
         """
-        ret = {}
+        ret = {}  # type: STATISTICS
         if self.other_information:
             ret.update(**self.other_information)
         if self.num_epochs:

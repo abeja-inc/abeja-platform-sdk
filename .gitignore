@@ -265,3 +265,4 @@ tags
 
 # logs
 logs
+.mypy_cache
