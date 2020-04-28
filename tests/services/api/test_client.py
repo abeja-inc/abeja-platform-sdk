@@ -64,8 +64,10 @@ class TestAPIClient(unittest.TestCase):
 
         client = APIClient()
         ret = client.create_service(ORGANIZATION_ID, DEPLOYMENT_ID, VERSION_ID,
-                                    instance_number=SERVICE_INSTANCE_NUMBER, min_instance_number=1, max_instance_number=SERVICE_INSTANCE_NUMBER * 2, enable_autoscale=True,
-                                    instance_type=SERVICE_INSTANCE_TYPE, environment=ENV_VARS, model_id=TRAINING_MODEL_ID)
+                                    instance_number=SERVICE_INSTANCE_NUMBER, min_instance_number=1,
+                                    max_instance_number=SERVICE_INSTANCE_NUMBER * 2, enable_autoscale=True,
+                                    instance_type=SERVICE_INSTANCE_TYPE, environment=ENV_VARS,
+                                    model_id=TRAINING_MODEL_ID)
         expected_payload = {
             'version_id': VERSION_ID,
             'instance_type': SERVICE_INSTANCE_TYPE,

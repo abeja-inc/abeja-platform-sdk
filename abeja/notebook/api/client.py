@@ -14,7 +14,8 @@ class APIClient(BaseAPIClient):
        api_client = APIClient()
     """
 
-    def create_notebook(self, organization_id: str, job_definition_name: str, instance_type: Optional[str] = None, image: Optional[str] = None, notebook_type: Optional[str] = None) -> dict:
+    def create_notebook(self, organization_id: str, job_definition_name: str,
+                        instance_type: Optional[str] = None, image: Optional[str] = None, notebook_type: Optional[str] = None) -> dict:
         """create a notebook.
 
         API reference: POST /organizations/{organization_id}/training/definitions/{job_definition_name}/notebooks

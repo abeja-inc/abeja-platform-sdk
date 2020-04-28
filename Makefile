@@ -11,7 +11,7 @@ dist: clean
 
 .PHONY: lint
 lint:
-	poetry run flake8 abeja tests --ignore=E501
+	poetry run flake8 abeja tests
 
 .PHONY: test
 test: lint
@@ -23,7 +23,7 @@ integration_test:
 
 .PHONY: fmt
 fmt:
-	poetry run autopep8 -i -r abeja tests --max-line-length=120
+	poetry run autopep8 -i -r abeja tests
 
 .PHONY: docs
 docs:
