@@ -1,4 +1,4 @@
-from typing import Dict, Optional
+from typing import Any, Dict, Optional
 from .api.client import APIClient
 
 
@@ -33,6 +33,28 @@ class JobDefinition():
         self.__archived = archived
         self.__created_at = created_at
         self.__modified_at = modified_at
+
+    @staticmethod
+    def from_response(api: APIClient, organization_id: str, response: Dict[str, Any]) -> 'JobDefinition':
+        """Construct an object from API response.
+
+        NOTE: For convenient, this method DOES NOT validate the input response and
+        always returns an object filled with default values.
+        """
+        return JobDefinition(
+            api=api,
+            organization_id=organization_id,
+            job_definition_id=response.get('job_definition_id', ''),
+            name=response.get('name', ''),
+            version_count=response.get('version_count', 0),
+            model_count=response.get('model_count', 0),
+            notebook_count=response.get('notebook_count', 0),
+            tensorboard_count=response.get('tensorboard_count', 0),
+            versions=response.get('versions'),
+            jobs=response.get('jobs'),
+            archived=response.get('archived', False),
+            created_at=response.get('created_at', ''),
+            modified_at=response.get('modified_at', ''))
 
     @property
     def organization_id(self) -> str:
@@ -122,6 +144,26 @@ class JobDefinitionVersion():
         self.__created_at = created_at
         self.__modified_at = modified_at
 
+    @staticmethod
+    def from_response(api: APIClient, organization_id: str, response: Dict[str, Any]) -> 'JobDefinitionVersion':
+        """Construct an object from API response.
+
+        NOTE: For convenient, this method DOES NOT validate the input response and
+        always returns an object filled with default values.
+        """
+        return JobDefinitionVersion(
+            api=api,
+            organization_id=organization_id,
+            job_definition_id=response.get('job_definition_id', ''),
+            job_definition_version=response.get('job_definition_version', 0),
+            handler=response.get('handler', ''),
+            image=response.get('image', ''),
+            environment=response.get('environment', {}),
+            description=response.get('description', ''),
+            archived=response.get('archived', False),
+            created_at=response.get('created_at', ''),
+            modified_at=response.get('modified_at', ''))
+
     @property
     def organization_id(self) -> str:
         """Get the organization ID of this job definition."""
@@ -176,7 +218,7 @@ class JobDefinitionVersion():
 
 
 class JobDefinitions():
-    """The training job definition iterator class.
+    """The training job definition proxy/iterator class.
     """
 
     def __init__(self, api: APIClient, organization_id: str):
@@ -209,17 +251,52 @@ class JobDefinitions():
             job_definition_name=job_definition_name,
             include_jobs=include_jobs)
 
-        return JobDefinition(
+        return JobDefinition.from_response(
             api=self.__api,
             organization_id=self.organization_id,
-            job_definition_id=res.get('job_definition_id', ''),
-            name=res.get('name', ''),
-            version_count=res.get('version_count', 0),
-            model_count=res.get('model_count', 0),
-            notebook_count=res.get('notebook_count', 0),
-            tensorboard_count=res.get('tensorboard_count', 0),
-            versions=res.get('versions'),
-            jobs=res.get('jobs'),
-            archived=res.get('archived', False),
-            created_at=res.get('created_at', ''),
-            modified_at=res.get('modified_at', ''))
+            response=res)
+
+
+class JobDefinitionVersions():
+    """The training job definition version proxy/iterator class.
+    """
+
+    def __init__(self, api: APIClient, organization_id: str, job_definition_id: str):
+        self.__api = api
+        self.__organization_id = organization_id
+        self.__job_definition_id = job_definition_id
+
+    @property
+    def organization_id(self) -> str:
+        """Get the organization ID."""
+        return self.__organization_id
+
+    @property
+    def job_definition_id(self) -> str:
+        """Get the job definition ID."""
+        return self.__job_definition_id
+
+    def get(self, version: int) -> JobDefinitionVersion:
+        """get a training job definition version.
+
+        Request Syntax:
+            .. code-block:: python
+
+                version = versions.get(version=5)
+
+            Params:
+            - **version** (int): the version number
+
+        Return type:
+            :class:`JobDefinitionVersion` object
+
+        """
+        res = self.__api.get_training_job_definition_version(
+            organization_id=self.organization_id,
+            job_definition_name=self.job_definition_id,  # it's ok
+            version_id=version)
+
+        return JobDefinitionVersion.from_response(
+            api=self.__api,
+            organization_id=self.organization_id,
+            response=res)
