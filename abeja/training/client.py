@@ -3,7 +3,7 @@ from typing import Dict, Optional
 
 from abeja.base_client import BaseClient
 from .api.client import APIClient
-from .job_definition import JobDefinitions, JobDefinition
+from .job_definition import JobDefinitions
 
 
 class Client(BaseClient):
@@ -31,19 +31,16 @@ class Client(BaseClient):
         self.api = APIClient(credential=credential, timeout=timeout, max_retry_count=max_retry_count)
         self.logger = getLogger('train-api')
 
-    def get_job_definition(self, job_definition_name: str) -> JobDefinition:
-        """Get a training job definition for specific ``job_definition_name``.
+    def job_definitions(self) -> JobDefinitions:
+        """Get a proxy object for handling training job definitions in the organization.
 
         Request syntax:
             .. code-block:: python
 
-                definition = client.get_job_definition(job_definition_name)
-
-        Params:
-            - **job_definition_name** (str): Training Job Definition name
+                proxy = client.job_definitions()
+                definition = proxy.get(job_definition_name)
 
         Return type:
-            :class:`JobDefinition <abeja.training.JobDefinition>` object
+            :class:`JobDefinitions <abeja.training.JobDefinitions>` object
         """
-        definitions = JobDefinitions(api=self.api, organization_id=self.organization_id)
-        return definitions.get(job_definition_name)
+        return JobDefinitions(api=self.api, organization_id=self.organization_id)
