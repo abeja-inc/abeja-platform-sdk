@@ -1,6 +1,8 @@
-from typing import Optional
+from typing import Dict, Optional
 from .api.client import APIClient
 
+
+# Entity objects
 
 class JobDefinition():
     """Training job definition object.
@@ -91,6 +93,86 @@ class JobDefinition():
     def modified_at(self) -> str:
         """Get the modified date string (ISO 8601) of this job definition."""
         return self.__modified_at
+
+
+class JobDefinitionVersion():
+    """Training job definition version object.
+    """
+
+    def __init__(self, api: APIClient,
+                 organization_id: str,
+                 job_definition_id: str,
+                 job_definition_version: int,
+                 handler: str,
+                 image: str,
+                 environment: Dict[str, str],
+                 description: str,
+                 archived: bool,
+                 created_at: str,
+                 modified_at: str):
+        self.__api = api
+        self.__organization_id = organization_id
+        self.__job_definition_id = job_definition_id
+        self.__job_definition_version = job_definition_version
+        self.__handler = handler
+        self.__image = image
+        self.__environment = environment
+        self.__description = description
+        self.__archived = archived
+        self.__created_at = created_at
+        self.__modified_at = modified_at
+
+    @property
+    def organization_id(self) -> str:
+        """Get the organization ID of this job definition."""
+        return self.__organization_id
+
+    @property
+    def job_definition_id(self) -> str:
+        """Get the job_definition ID of this job definition."""
+        return self.__job_definition_id
+
+    @property
+    def job_definition_version(self) -> int:
+        """Get the version of this job definition version."""
+        return self.__job_definition_version
+
+    @property
+    def handler(self) -> str:
+        """Get the handler of this job definition version."""
+        return self.__handler
+
+    @property
+    def image(self) -> str:
+        """Get the image of this job definition version."""
+        return self.__image
+
+    @property
+    def environment(self) -> Dict[str, str]:
+        """Get the environment variables of this job definition version."""
+        return self.__environment
+
+    @property
+    def description(self) -> str:
+        """Get the description of this job definition version."""
+        return self.__description
+
+    @property
+    def archived(self) -> bool:
+        """Get whether this job definition is archived or not."""
+        return self.__archived
+
+    @property
+    def created_at(self) -> str:
+        """Get the created date string (ISO 8601) of this job definition version."""
+        return self.__created_at
+
+    @property
+    def modified_at(self) -> str:
+        """Get the modified date string (ISO 8601) of this job definition version."""
+        return self.__modified_at
+
+# Proxy objects
 
 
 class JobDefinitions():
