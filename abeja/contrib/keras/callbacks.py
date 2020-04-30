@@ -1,6 +1,6 @@
 from logging import getLogger
 
-from abeja.training.client import Client
+from abeja.train.client import Client
 from abeja.training.statistics import Statistics as ABEJAStatistics
 from keras.callbacks import Callback
 
