@@ -7,6 +7,20 @@ Client represents a higher level interface to training API.
    :members:
    :undoc-members:
 
+JobDefinitions
+--------------
+
+.. autoclass:: abeja.training.JobDefinitions
+   :members:
+   :undoc-members:
+
+JobDefinition
+-------------
+
+.. autoclass:: abeja.training.JobDefinition
+   :members:
+   :undoc-members:
+
 Statistics
 -----------
 

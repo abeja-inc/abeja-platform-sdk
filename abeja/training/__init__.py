@@ -1,3 +1,4 @@
 # flake8: noqa
-from abeja.training.client import Client
-from abeja.training.api.client import APIClient
+from .client import Client
+from .job_definition import JobDefinitions, JobDefinition
+from .api.client import APIClient

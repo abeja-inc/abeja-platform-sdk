@@ -9,6 +9,7 @@ import requests_mock as requests_mock_module
 from collections import namedtuple
 from pathlib import Path
 import shutil
+from abeja.common.connection import Connection
 
 
 @pytest.fixture
@@ -173,9 +174,9 @@ def make_zip_content(tmpdir_factory):
 
 
 @pytest.fixture
-def abeja_api_url(monkeypatch):
+def api_base_url(monkeypatch):
     url = 'https://{}.api.example.com'.format(fake_platform_id())
-    monkeypatch.setenv('ABEJA_API_URL', url)
+    monkeypatch.setattr(Connection, 'BASE_URL', url)
     return url
 
 
@@ -231,6 +232,45 @@ def file_response():
             "channel_id": channel_id
         }
     return response
+
+
+@pytest.fixture
+def training_job_definition_response():
+    def _training_job_definition_response(organization_id, training_job_definition_id, **extra):
+        return {
+            "organization_id": organization_id,
+            "job_definition_id": training_job_definition_id,
+            "name": "test",
+            "archived": False,
+            "versions": [],
+            "version_count": 0,
+            "created_at": fake_iso8601(),
+            "modified_at": fake_iso8601(),
+            **extra
+        }
+
+    return _training_job_definition_response
+
+
+@pytest.fixture
+def training_job_definition_version_response():
+    def _training_job_definition_version_response(_organization_id, training_job_definition_id, training_job_definition_version, **extra):
+        return {
+            "job_definition_version": training_job_definition_version,
+            "user_parameters": {},
+            "datasets": {
+                "mnist": "1111111111111"
+            },
+            "modified_at": fake_iso8601(),
+            "job_definition_id": training_job_definition_id,
+            "handler": "train:handler",
+            "created_at": fake_iso8601(),
+            "image": "abeja-inc/all-gpu:19.04",
+            "archived": False,
+            **extra
+        }
+
+    return _training_job_definition_version_response
 
 
 @pytest.fixture

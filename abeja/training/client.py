@@ -2,7 +2,8 @@ from logging import getLogger
 from typing import Dict, Optional
 
 from abeja.base_client import BaseClient
-from abeja.training.api.client import APIClient
+from .api.client import APIClient
+from .job_definition import JobDefinitions, JobDefinition
 
 
 class Client(BaseClient):
@@ -29,3 +30,20 @@ class Client(BaseClient):
         super().__init__(organization_id, credential)
         self.api = APIClient(credential=credential, timeout=timeout, max_retry_count=max_retry_count)
         self.logger = getLogger('train-api')
+
+    def get_job_definition(self, job_definition_name: str) -> JobDefinition:
+        """Get a training job definition for specific ``job_definition_name``.
+
+        Request syntax:
+            .. code-block:: python
+
+                definition = client.get_job_definition(job_definition_name)
+
+        Params:
+            - **job_definition_name** (str): Training Job Definition name
+
+        Return type:
+            :class:`JobDefinition <abeja.training.JobDefinition>` object
+        """
+        definitions = JobDefinitions(api=self.api, organization_id=self.organization_id)
+        return definitions.get(job_definition_name)
