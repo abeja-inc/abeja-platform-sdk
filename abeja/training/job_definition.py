@@ -1,4 +1,4 @@
-from typing import Any, Dict, Optional
+from typing import Any, Dict, List, Optional
 from .api.client import APIClient
 
 
@@ -15,7 +15,7 @@ class JobDefinition():
                  model_count: int,
                  notebook_count: int,
                  tensorboard_count: int,
-                 versions: Optional[list],
+                 versions: Optional[List['JobDefinitionVersion']],
                  jobs: Optional[list],
                  archived: bool,
                  created_at: str,
@@ -41,6 +41,13 @@ class JobDefinition():
         NOTE: For convenient, this method DOES NOT validate the input response and
         always returns an object filled with default values.
         """
+        versions = None
+        vs = response.get('versions')
+        if vs:
+            versions = [
+                JobDefinitionVersion.from_response(api=api, organization_id=organization_id, response=v)
+                for v in vs]
+
         return JobDefinition(
             api=api,
             organization_id=organization_id,
@@ -50,7 +57,7 @@ class JobDefinition():
             model_count=response.get('model_count', 0),
             notebook_count=response.get('notebook_count', 0),
             tensorboard_count=response.get('tensorboard_count', 0),
-            versions=response.get('versions'),
+            versions=versions,
             jobs=response.get('jobs'),
             archived=response.get('archived', False),
             created_at=response.get('created_at', ''),
