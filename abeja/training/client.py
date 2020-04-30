@@ -17,6 +17,7 @@ class Client(BaseClient):
     Params:
         - **organization_id** (str): The organization ID. Takes from ``os.environ['ABEJA_ORGANIZATION_ID']`` if omitted.
         - **credential** (dict):  **[optional]** This parameter will be passed to its undering :mod:`APIClient <abeja.training.APIClient>`.
+          See the section :ref:`authentication_client_parameter` for more details about how to specify this parameter.
         - **timeout** (int):  **[optional]** This parameter will be passed to its undering :mod:`APIClient <abeja.training.APIClient>`.
         - **max_retry_count** (int):  **[optional]** This parameter will be passed to its undering :mod:`APIClient <abeja.training.APIClient>`.
     """
