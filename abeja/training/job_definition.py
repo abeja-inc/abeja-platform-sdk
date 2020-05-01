@@ -279,16 +279,30 @@ class JobDefinitions():
             organization_id=self.organization_id,
             response=res)
 
-    def list(self) -> SizedIterable[JobDefinition]:
+    def list(self,
+             filter_archived: Optional[bool] = None,
+             offset: Optional[int] = None,
+             limit: Optional[int] = None) -> SizedIterable[JobDefinition]:
         """Returns an iterator object that iterates training job definitions
         under the this object's context.
 
         This method returns an instance of :class:`SizedIterable`, so you can
         get the total number of training jobs.
+
+        Params:
+            - **filter_archived** (bool): **[optional]** whether include archived ones or not. (default is not-filtered)
+            - **offset** (int): **[optional]** paging offset.
+            - **limit** (int): **[optional]** paging limit.
+
+        Return type:
+            SizedIterable[JobDefinition]
         """
         return JobDefinitionIterator(
             api=self.__api,
-            organization_id=self.organization_id)
+            organization_id=self.organization_id,
+            filter_archived=filter_archived,
+            offset=offset,
+            limit=limit)
 
     def create(self, name: str) -> JobDefinition:
         """Create a new training job definition.
@@ -412,10 +426,23 @@ class JobDefinitionVersions():
 
 class JobDefinitionIterator(SizedIterable[JobDefinition]):
 
-    def __init__(self, api: APIClient, organization_id: str) -> None:
+    def __init__(self, api: APIClient, organization_id: str,
+                 filter_archived: Optional[bool],
+                 offset: Optional[int],
+                 limit: Optional[int]) -> None:
         self.__api = api
         self.__organization_id = organization_id
+        self.__filter_archived = filter_archived
+        self.__offset = offset
+        self.__limit = limit
         self.__total = None  # type: Optional[int]
+
+    def invoke_api(self) -> Dict[str, Any]:
+        return self.__api.get_training_job_definitions(
+            organization_id=self.organization_id,
+            filter_archived=self.__filter_archived,
+            offset=self.__offset,
+            limit=self.__limit)
 
     @property
     def organization_id(self) -> str:
@@ -424,13 +451,13 @@ class JobDefinitionIterator(SizedIterable[JobDefinition]):
 
     def __len__(self) -> int:
         if self.__total is None:
-            response = self.__api.get_training_job_definitions(organization_id=self.organization_id)
+            response = self.invoke_api()
             self.__total = int(response['total'])
             return self.__total
         else:
             return self.__total
 
     def __iter__(self) -> Iterator[JobDefinition]:
-        response = self.__api.get_training_job_definitions(organization_id=self.organization_id)
+        response = self.invoke_api()
         for entry in response["entries"]:
             yield JobDefinition.from_response(self.__api, self.organization_id, entry)

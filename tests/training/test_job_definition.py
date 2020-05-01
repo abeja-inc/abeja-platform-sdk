@@ -186,7 +186,7 @@ def test_get_job_definition_version(requests_mock, api_base_url,
 
 def test_list_job_definitions(requests_mock, api_base_url, api_client,
                               organization_id, job_definition_id, job_definition_name,
-                              training_job_definition_response, training_job_definition_version_response) -> None:
+                              training_job_definition_response) -> None:
     adapter = JobDefinitions(api=api_client, organization_id=organization_id)
 
     definition1 = training_job_definition_response(organization_id, job_definition_id)
@@ -208,3 +208,27 @@ def test_list_job_definitions(requests_mock, api_base_url, api_client,
     assert len(definitions) == 2
     assert definitions[0].job_definition_id == definition1['job_definition_id']
     assert definitions[1].job_definition_id == definition2['job_definition_id']
+
+
+def test_list_job_definitions_filter_archived(requests_mock, api_base_url, api_client,
+                                              organization_id, job_definition_id, job_definition_name,
+                                              training_job_definition_response) -> None:
+    adapter = JobDefinitions(api=api_client, organization_id=organization_id)
+
+    definition1 = training_job_definition_response(organization_id, job_definition_id)
+    requests_mock.get(
+        '{}/organizations/{}/training/definitions/?filter_archived=exclude_archived'.format(
+            api_base_url, organization_id),
+        json={
+            'entries': [definition1],
+            'limit': 50,
+            'offset': 0,
+            'total': 1
+        })
+
+    iterator = adapter.list(filter_archived=True)
+    assert len(iterator) == 1
+
+    definitions = list(iterator)
+    assert len(definitions) == 1
+    assert definitions[0].job_definition_id == definition1['job_definition_id']
