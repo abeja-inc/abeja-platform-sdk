@@ -114,7 +114,10 @@ class APIClient(BaseAPIClient):
         path = '/organizations/{}/training/definitions/{}/unarchive'.format(organization_id, job_definition_name)
         return self._connection.api_request(method='POST', path=path, json={})
 
-    def get_training_job_definitions(self, organization_id: str, filter_archived: Optional[bool] = None) -> dict:
+    def get_training_job_definitions(self, organization_id: str,
+                                     filter_archived: Optional[bool] = None,
+                                     offset: Optional[int] = None,
+                                     limit: Optional[int] = None) -> dict:
         """get training job definitions
 
         API reference: GET /organizations/<organization_id>/training/definitions
@@ -128,6 +131,8 @@ class APIClient(BaseAPIClient):
         Params:
             - **organization_id** (str): ORGANIZATION_ID
             - **filter_archived** (bool): **[optional]** whether include archived ones or not. (default is not-filtered)
+            - **offset** (int): **[optional]** paging offset.
+            - **limit** (int): **[optional]** paging limit.
 
         Return type:
             dict
@@ -170,9 +175,16 @@ class APIClient(BaseAPIClient):
             - Unauthorized: Authentication failed
             - InternalServerError
         """
-        params = None if filter_archived is None else get_filter_archived_applied_params({}, filter_archived)
+        params = {}  # type: Dict[str, Any]
+        if filter_archived is not None:
+            params = get_filter_archived_applied_params(params, filter_archived)
+        if offset is not None:
+            params['offset'] = offset
+        if limit is not None:
+            params['limit'] = limit
+
         path = '/organizations/{}/training/definitions/'.format(organization_id)
-        return self._connection.api_request(method='GET', path=path, params=params)
+        return self._connection.api_request(method='GET', path=path, params=params if params else None)
 
     def get_training_job_definition(self, organization_id: str, job_definition_name: str, include_jobs: Optional[bool] = None) -> dict:
         """get a training job definition.
