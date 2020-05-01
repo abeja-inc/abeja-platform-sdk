@@ -302,22 +302,32 @@ class JobDefinitions():
             response=res)
 
     def archive(self, name: str):
-        """Get a training job definition.
+        """Archive a training job definition.
 
         Request Syntax:
             .. code-block:: python
 
-                definition = definitions.get(name=job_definition_name)
+                definition = definitions.archive(name=job_definition_name)
 
             Params:
             - **name** (str): The identifier of a training job definition. It can be either **name or job_definition_id**.
-            - **include_jobs** (bool): If ``True``, also returns training jobs in response. (Default: ``False``)
-
-        Return type:
-            :class:`JobDefinition` object
-
         """
         self.__api.archive_training_job_definition(
+            organization_id=self.organization_id,
+            job_definition_name=name)
+
+    def unarchive(self, name: str):
+        """Unarchive a training job definition.
+
+        Request Syntax:
+            .. code-block:: python
+
+                definition = definitions.unarchive(name=job_definition_name)
+
+            Params:
+            - **name** (str): The identifier of a training job definition. It can be either **name or job_definition_id**.
+        """
+        self.__api.unarchive_training_job_definition(
             organization_id=self.organization_id,
             job_definition_name=name)
 
