@@ -123,6 +123,21 @@ class JobDefinition():
         """Get the modified date string (ISO 8601) of this job definition."""
         return self.__modified_at
 
+    def job_definition_versions(self) -> 'JobDefinitionVersions':
+        """Get a adapter object for handling training job definition versions under
+        this job definition.
+
+        Request syntax:
+            .. code-block:: python
+
+                adapter = definition.job_definition_versions()
+                version = adapter.get(version=1)
+
+        Return type:
+            :class:`JobDefinitions <abeja.training.JobDefinitions>` object
+        """
+        return JobDefinitionVersions(api=self.__api, job_definition=self)
+
 
 class JobDefinitionVersion():
     """Training job definition version object.
@@ -221,11 +236,11 @@ class JobDefinitionVersion():
         """Get the modified date string (ISO 8601) of this job definition version."""
         return self.__modified_at
 
-# Proxy objects
+# adapter objects
 
 
 class JobDefinitions():
-    """The training job definition proxy/iterator class.
+    """The training job definition adapter/iterator class.
     """
 
     def __init__(self, api: APIClient, organization_id: str):
@@ -265,31 +280,35 @@ class JobDefinitions():
 
 
 class JobDefinitionVersions():
-    """The training job definition version proxy/iterator class.
+    """The training job definition version adapter/iterator class.
     """
 
-    def __init__(self, api: APIClient, organization_id: str, job_definition_id: str):
+    def __init__(self, api: APIClient, job_definition: JobDefinition):
         self.__api = api
-        self.__organization_id = organization_id
-        self.__job_definition_id = job_definition_id
+        self.__job_definition = job_definition
 
     @property
     def organization_id(self) -> str:
         """Get the organization ID."""
-        return self.__organization_id
+        return self.__job_definition.organization_id
 
     @property
     def job_definition_id(self) -> str:
         """Get the job definition ID."""
-        return self.__job_definition_id
+        return self.__job_definition.job_definition_id
 
-    def get(self, version: int) -> JobDefinitionVersion:
-        """get a training job definition version.
+    @property
+    def job_definition_name(self) -> str:
+        """Get the job definition name."""
+        return self.__job_definition.name
+
+    def get(self, version_id: int) -> JobDefinitionVersion:
+        """Get a training job definition version.
 
         Request Syntax:
             .. code-block:: python
 
-                version = versions.get(version=5)
+                version = versions.get(version_id=5)
 
             Params:
             - **version** (int): the version number
@@ -300,8 +319,8 @@ class JobDefinitionVersions():
         """
         res = self.__api.get_training_job_definition_version(
             organization_id=self.organization_id,
-            job_definition_name=self.job_definition_id,  # it's ok
-            version_id=version)
+            job_definition_name=self.job_definition_name,
+            version_id=version_id)
 
         return JobDefinitionVersion.from_response(
             api=self.__api,

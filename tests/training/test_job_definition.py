@@ -1,10 +1,33 @@
 import pytest
-from abeja.training import APIClient, JobDefinitions
+from abeja.training import APIClient, JobDefinition, JobDefinitions
+from tests.utils import fake_iso8601
 
 
 @pytest.fixture
-def api_client():
+def api_client() -> APIClient:
     return APIClient()
+
+
+@pytest.fixture
+def job_definition_factory(api_client, organization_id, job_definition_id, job_definition_name):
+    def factory(organization_id=organization_id, job_definition_id=job_definition_id, job_definition_name=job_definition_name, **kwargs):
+        return JobDefinition(
+            api=api_client,
+            organization_id=organization_id,
+            job_definition_id=job_definition_id,
+            name=job_definition_name,
+            version_count=0,
+            model_count=0,
+            notebook_count=0,
+            tensorboard_count=0,
+            versions=None,
+            jobs=None,
+            archived=False,
+            created_at=fake_iso8601(),
+            modified_at=fake_iso8601(),
+            **kwargs
+        )
+    return factory
 
 
 def test_get_job_definition(requests_mock, api_base_url, api_client,
@@ -28,8 +51,8 @@ def test_get_job_definition(requests_mock, api_base_url, api_client,
                     1
                 )
             ]))
-    proxy = JobDefinitions(api=api_client, organization_id=organization_id)
-    definition = proxy.get(job_definition_name)
+    adapter = JobDefinitions(api=api_client, organization_id=organization_id)
+    definition = adapter.get(job_definition_name)
     assert definition
     assert definition.job_definition_id == job_definition_id
     assert definition.name == job_definition_name
@@ -45,3 +68,10 @@ def test_get_job_definition(requests_mock, api_base_url, api_client,
 
     version = definition.versions[0]
     assert version.job_definition_id == job_definition_id
+
+
+def test_job_definition_versions(job_definition_factory):
+    definition = job_definition_factory()
+    adapter = definition.job_definition_versions()
+    adapter.organization_id == definition.organization_id
+    adapter.job_definition_id == definition.job_definition_id

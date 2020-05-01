@@ -32,13 +32,13 @@ class Client(BaseClient):
         self.logger = getLogger('train-api')
 
     def job_definitions(self) -> JobDefinitions:
-        """Get a proxy object for handling training job definitions in the organization.
+        """Get a adapter object for handling training job definitions in the organization.
 
         Request syntax:
             .. code-block:: python
 
-                proxy = client.job_definitions()
-                definition = proxy.get(job_definition_name)
+                adapter = client.job_definitions()
+                definition = adapter.get(job_definition_name)
 
         Return type:
             :class:`JobDefinitions <abeja.training.JobDefinitions>` object
