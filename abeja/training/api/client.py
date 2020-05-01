@@ -64,6 +64,31 @@ class APIClient(BaseAPIClient):
         path = '/organizations/{}/training/definitions/'.format(organization_id)
         return self._connection.api_request(method='POST', path=path, json=data)
 
+    def archive_training_job_definition(self, organization_id: str, job_definition_name: str):
+        """archive a training job definition
+
+        API reference: POST /organizations/<organization_id>/training/definitions/{name}/archive
+
+        Request Syntax:
+            .. code-block:: python
+
+                organization_id = "1102940376065"
+                job_definition_name = "test"
+                response = api_client.archive_training_job_definition(organization_id,
+                                                                     job_definition_name)
+
+        Params:
+            - **organization_id** (str): ORGANIZATION_ID
+            - **job_definition_name** (str): training job definition name
+
+        Raises:
+            - BadRequest
+            - Unauthorized: Authentication failed
+            - InternalServerError
+        """
+        path = '/organizations/{}/training/definitions/{}/archive'.format(organization_id, job_definition_name)
+        return self._connection.api_request(method='POST', path=path, json={})
+
     def get_training_job_definitions(self, organization_id: str, filter_archived: Optional[bool] = None) -> dict:
         """get training job definitions
 

@@ -111,6 +111,18 @@ def test_create_job_definition(requests_mock, api_base_url, api_client,
     assert definition.created_at == res['created_at']
     assert definition.modified_at == res['modified_at']
 
+
+def test_archive_job_definition(requests_mock, api_base_url, api_client,
+                                organization_id, job_definition_id, job_definition_name,
+                                training_job_definition_response, training_job_definition_version_response):
+    adapter = JobDefinitions(api=api_client, organization_id=organization_id)
+
+    requests_mock.post(
+        '{}/organizations/{}/training/definitions/{}/archive'.format(api_base_url, organization_id, job_definition_id),
+        json={'message': "test-1 archived"})
+
+    adapter.archive(name=job_definition_id)
+
 # JobDefinitionVersions
 
 

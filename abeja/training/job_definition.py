@@ -261,7 +261,7 @@ class JobDefinitions():
                 definition = definitions.get(name=job_definition_name)
 
             Params:
-            - **name** (str): training job definition name
+            - **name** (str): The identifier of a training job definition. It can be either **name or job_definition_id**.
             - **include_jobs** (bool): If ``True``, also returns training jobs in response. (Default: ``False``)
 
         Return type:
@@ -300,6 +300,26 @@ class JobDefinitions():
             api=self.__api,
             organization_id=self.organization_id,
             response=res)
+
+    def archive(self, name: str):
+        """Get a training job definition.
+
+        Request Syntax:
+            .. code-block:: python
+
+                definition = definitions.get(name=job_definition_name)
+
+            Params:
+            - **name** (str): The identifier of a training job definition. It can be either **name or job_definition_id**.
+            - **include_jobs** (bool): If ``True``, also returns training jobs in response. (Default: ``False``)
+
+        Return type:
+            :class:`JobDefinition` object
+
+        """
+        self.__api.archive_training_job_definition(
+            organization_id=self.organization_id,
+            job_definition_name=name)
 
 
 class JobDefinitionVersions():
