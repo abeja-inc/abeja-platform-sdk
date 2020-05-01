@@ -433,9 +433,10 @@ class JobDefinitionIterator(SizedIterable[JobDefinition]):
         self.__api = api
         self.__organization_id = organization_id
         self.__filter_archived = filter_archived
-        self.__offset = offset
-        self.__limit = limit
+        self.__offset = offset if offset is not None else 0
+        self.__limit = limit if limit is not None else 50
         self.__total = None  # type: Optional[int]
+        self.__page = None  # type: Optional[Dict[str, Any]]
 
     def invoke_api(self) -> Dict[str, Any]:
         return self.__api.get_training_job_definitions(
@@ -450,14 +451,19 @@ class JobDefinitionIterator(SizedIterable[JobDefinition]):
         return self.__organization_id
 
     def __len__(self) -> int:
-        if self.__total is None:
-            response = self.invoke_api()
-            self.__total = int(response['total'])
-            return self.__total
-        else:
-            return self.__total
+        if self.__page is None:
+            self.__page = self.invoke_api()
+        return self.__page['total']
 
     def __iter__(self) -> Iterator[JobDefinition]:
-        response = self.invoke_api()
-        for entry in response["entries"]:
-            yield JobDefinition.from_response(self.__api, self.organization_id, entry)
+        if self.__page is None:
+            self.__page = self.invoke_api()
+
+        while self.__page['entries']:
+            for entry in self.__page["entries"]:
+                yield JobDefinition.from_response(self.__api, self.organization_id, entry)
+                self.__offset += 1
+            if self.__offset < self.__page['total']:
+                self.__page = self.invoke_api()
+            else:
+                break
