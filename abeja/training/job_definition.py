@@ -43,7 +43,7 @@ class JobDefinition():
         """
         versions = None
         vs = response.get('versions')
-        if vs:
+        if vs is not None:
             versions = [
                 JobDefinitionVersion.from_response(api=api, organization_id=organization_id, response=v)
                 for v in vs]
@@ -59,7 +59,7 @@ class JobDefinition():
             tensorboard_count=response.get('tensorboard_count', 0),
             versions=versions,
             jobs=response.get('jobs'),
-            archived=response.get('archived', False),
+            archived=bool(response.get('archived')),
             created_at=response.get('created_at', ''),
             modified_at=response.get('modified_at', ''))
 
@@ -182,7 +182,7 @@ class JobDefinitionVersion():
             image=response.get('image', ''),
             environment=(response.get('environment') or {}),
             description=response.get('description', ''),
-            archived=response.get('archived', False),
+            archived=bool(response.get('archived')),
             created_at=response.get('created_at', ''),
             modified_at=response.get('modified_at', ''))
 
@@ -252,16 +252,16 @@ class JobDefinitions():
         """Get the organization ID."""
         return self.__organization_id
 
-    def get(self, job_definition_name: str, include_jobs: Optional[bool] = False) -> JobDefinition:
-        """get a training job definition.
+    def get(self, name: str, include_jobs: Optional[bool] = False) -> JobDefinition:
+        """Get a training job definition.
 
         Request Syntax:
             .. code-block:: python
 
-                definition = definitions.get(job_definition_id=job_definition_id)
+                definition = definitions.get(name=job_definition_name)
 
             Params:
-            - **job_definition_name** (str): training job definition name
+            - **name** (str): training job definition name
             - **include_jobs** (bool): If ``True``, also returns training jobs in response. (Default: ``False``)
 
         Return type:
@@ -270,8 +270,31 @@ class JobDefinitions():
         """
         res = self.__api.get_training_job_definition(
             organization_id=self.organization_id,
-            job_definition_name=job_definition_name,
+            job_definition_name=name,
             include_jobs=include_jobs)
+
+        return JobDefinition.from_response(
+            api=self.__api,
+            organization_id=self.organization_id,
+            response=res)
+
+    def create(self, name: str) -> JobDefinition:
+        """Create a new training job definition.
+
+        Request Syntax:
+            .. code-block:: python
+
+                definition = definitions.create(name)
+
+            Params:
+            - **name** (str): training job definition name
+
+        Return type:
+            :class:`JobDefinition` object
+        """
+        res = self.__api.create_training_job_definition(
+            organization_id=self.organization_id,
+            job_definition_name=name)
 
         return JobDefinition.from_response(
             api=self.__api,
@@ -302,16 +325,16 @@ class JobDefinitionVersions():
         """Get the job definition name."""
         return self.__job_definition.name
 
-    def get(self, version_id: int) -> JobDefinitionVersion:
+    def get(self, job_definition_version: int) -> JobDefinitionVersion:
         """Get a training job definition version.
 
         Request Syntax:
             .. code-block:: python
 
-                version = versions.get(version_id=5)
+                version = versions.get(job_definition_version=5)
 
             Params:
-            - **version** (int): the version number
+            - **job_definition_version** (int): the version number
 
         Return type:
             :class:`JobDefinitionVersion` object
@@ -320,7 +343,7 @@ class JobDefinitionVersions():
         res = self.__api.get_training_job_definition_version(
             organization_id=self.organization_id,
             job_definition_name=self.job_definition_name,
-            version_id=version_id)
+            version_id=job_definition_version)
 
         return JobDefinitionVersion.from_response(
             api=self.__api,

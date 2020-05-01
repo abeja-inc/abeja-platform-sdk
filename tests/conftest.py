@@ -212,7 +212,11 @@ def training_job_definition_response():
             "name": "test",
             "archived": False,
             "versions": [],
+            "jobs": None,
             "version_count": 0,
+            "model_count": 0,
+            "notebook_count": 0,
+            "tensorboard_count": 0,
             "created_at": fake_iso8601(),
             "modified_at": fake_iso8601(),
             **extra
