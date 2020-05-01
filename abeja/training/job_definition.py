@@ -307,7 +307,7 @@ class JobDefinitions():
         Request Syntax:
             .. code-block:: python
 
-                definition = definitions.archive(name=job_definition_name)
+                definitions.archive(name=job_definition_name)
 
             Params:
             - **name** (str): The identifier of a training job definition. It can be either **name or job_definition_id**.
@@ -322,12 +322,27 @@ class JobDefinitions():
         Request Syntax:
             .. code-block:: python
 
-                definition = definitions.unarchive(name=job_definition_name)
+                definitions.unarchive(name=job_definition_name)
 
             Params:
             - **name** (str): The identifier of a training job definition. It can be either **name or job_definition_id**.
         """
         self.__api.unarchive_training_job_definition(
+            organization_id=self.organization_id,
+            job_definition_name=name)
+
+    def delete(self, name: str):
+        """Delete a training job definition.
+
+        Request Syntax:
+            .. code-block:: python
+
+                definitions.delete(name=job_definition_name)
+
+            Params:
+            - **name** (str): The identifier of a training job definition. It can be either **name or job_definition_id**.
+        """
+        self.__api.delete_training_job_definition(
             organization_id=self.organization_id,
             job_definition_name=name)
 

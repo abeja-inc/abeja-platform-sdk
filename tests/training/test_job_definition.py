@@ -113,8 +113,7 @@ def test_create_job_definition(requests_mock, api_base_url, api_client,
 
 
 def test_archive_job_definition(requests_mock, api_base_url, api_client,
-                                organization_id, job_definition_id, job_definition_name,
-                                training_job_definition_response, training_job_definition_version_response):
+                                organization_id, job_definition_id, job_definition_name):
     adapter = JobDefinitions(api=api_client, organization_id=organization_id)
 
     requests_mock.post(
@@ -125,8 +124,7 @@ def test_archive_job_definition(requests_mock, api_base_url, api_client,
 
 
 def test_unarchive_job_definition(requests_mock, api_base_url, api_client,
-                                  organization_id, job_definition_id, job_definition_name,
-                                  training_job_definition_response, training_job_definition_version_response):
+                                  organization_id, job_definition_id, job_definition_name):
     adapter = JobDefinitions(api=api_client, organization_id=organization_id)
 
     requests_mock.post(
@@ -134,6 +132,17 @@ def test_unarchive_job_definition(requests_mock, api_base_url, api_client,
         json={'message': "test-1 unarchived"})
 
     adapter.unarchive(name=job_definition_id)
+
+
+def test_delete_job_definition(requests_mock, api_base_url, api_client,
+                               organization_id, job_definition_id, job_definition_name):
+    adapter = JobDefinitions(api=api_client, organization_id=organization_id)
+
+    requests_mock.delete(
+        '{}/organizations/{}/training/definitions/{}'.format(api_base_url, organization_id, job_definition_id),
+        json={'message': "test-1 deleted"})
+
+    adapter.delete(name=job_definition_id)
 
 # JobDefinitionVersions
 
