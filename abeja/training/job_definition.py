@@ -100,14 +100,15 @@ class JobDefinition():
         return self.__tensorboard_count
 
     @property
-    def versions(self) -> Optional[list]:
+    def versions(self) -> Optional[List['JobDefinitionVersion']]:
         """Get the versions of this job definition."""
         return self.__versions
 
-    @property
-    def jobs(self) -> Optional[list]:
-        """Get the jobs of this job definition."""
-        return self.__jobs
+    # TODO: Uncomment if we finish to implememt Job class
+    # @property
+    # def jobs(self) -> Optional[List['Job']]:
+    #     """Get the jobs of this job definition."""
+    #     return self.__jobs
 
     @property
     def archived(self) -> bool:
