@@ -180,7 +180,7 @@ class JobDefinitionVersion():
             job_definition_version=response.get('job_definition_version', 0),
             handler=response.get('handler', ''),
             image=response.get('image', ''),
-            environment=response.get('environment', {}),
+            environment=(response.get('environment') or {}),
             description=response.get('description', ''),
             archived=response.get('archived', False),
             created_at=response.get('created_at', ''),
