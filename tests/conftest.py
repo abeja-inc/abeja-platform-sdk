@@ -209,7 +209,7 @@ def training_job_definition_response():
         return {
             "organization_id": organization_id,
             "job_definition_id": training_job_definition_id,
-            "name": "test",
+            "name": "test-{}".format(random.randint(1, 1000)),
             "archived": False,
             "versions": [],
             "jobs": None,

@@ -1,4 +1,5 @@
 # flake8: noqa
 from .client import Client
-from .job_definition import JobDefinitions, JobDefinition
+from .common import SizedIterable
+from .job_definition import JobDefinitions, JobDefinition, JobDefinitionVersions, JobDefinitionVersion
 from .api.client import APIClient

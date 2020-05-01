@@ -1,8 +1,9 @@
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Iterator, Optional
 from .api.client import APIClient
+from .common import SizedIterable
 
 
-# Entity objects
+# Entity classes
 
 class JobDefinition():
     """Training job definition object.
@@ -19,7 +20,7 @@ class JobDefinition():
                  jobs: Optional[list],
                  archived: bool,
                  created_at: str,
-                 modified_at: str):
+                 modified_at: str) -> None:
         self.__api = api
         self.__organization_id = organization_id
         self.__job_definition_id = job_definition_id
@@ -153,7 +154,7 @@ class JobDefinitionVersion():
                  description: str,
                  archived: bool,
                  created_at: str,
-                 modified_at: str):
+                 modified_at: str) -> None:
         self.__api = api
         self.__organization_id = organization_id
         self.__job_definition_id = job_definition_id
@@ -236,14 +237,14 @@ class JobDefinitionVersion():
         """Get the modified date string (ISO 8601) of this job definition version."""
         return self.__modified_at
 
-# adapter objects
+# Adapter classes
 
 
 class JobDefinitions():
-    """The training job definition adapter/iterator class.
+    """The training job definition adapter class.
     """
 
-    def __init__(self, api: APIClient, organization_id: str):
+    def __init__(self, api: APIClient, organization_id: str) -> None:
         self.__api = api
         self.__organization_id = organization_id
 
@@ -277,6 +278,17 @@ class JobDefinitions():
             api=self.__api,
             organization_id=self.organization_id,
             response=res)
+
+    def list(self) -> SizedIterable[JobDefinition]:
+        """Returns an iterator object that iterates training job definitions
+        under the this object's context.
+
+        This method returns an instance of :class:`SizedIterable`, so you can
+        get the total number of training jobs.
+        """
+        return JobDefinitionIterator(
+            api=self.__api,
+            organization_id=self.organization_id)
 
     def create(self, name: str) -> JobDefinition:
         """Create a new training job definition.
@@ -348,10 +360,10 @@ class JobDefinitions():
 
 
 class JobDefinitionVersions():
-    """The training job definition version adapter/iterator class.
+    """The training job definition version adapter class.
     """
 
-    def __init__(self, api: APIClient, job_definition: JobDefinition):
+    def __init__(self, api: APIClient, job_definition: JobDefinition) -> None:
         self.__api = api
         self.__job_definition = job_definition
 
@@ -394,3 +406,31 @@ class JobDefinitionVersions():
             api=self.__api,
             organization_id=self.organization_id,
             response=res)
+
+# Iterator classes
+
+
+class JobDefinitionIterator(SizedIterable[JobDefinition]):
+
+    def __init__(self, api: APIClient, organization_id: str) -> None:
+        self.__api = api
+        self.__organization_id = organization_id
+        self.__total = None  # type: Optional[int]
+
+    @property
+    def organization_id(self) -> str:
+        """Get the organization ID."""
+        return self.__organization_id
+
+    def __len__(self) -> int:
+        if self.__total is None:
+            response = self.__api.get_training_job_definitions(organization_id=self.organization_id)
+            self.__total = int(response['total'])
+            return self.__total
+        else:
+            return self.__total
+
+    def __iter__(self) -> Iterator[JobDefinition]:
+        response = self.__api.get_training_job_definitions(organization_id=self.organization_id)
+        for entry in response["entries"]:
+            yield JobDefinition.from_response(self.__api, self.organization_id, entry)

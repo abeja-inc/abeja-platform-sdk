@@ -8,7 +8,7 @@ def test_init(organization_id):
 
 def test_adapters(requests_mock, api_base_url,
                   organization_id, job_definition_id, job_definition_name,
-                  training_job_definition_response):
+                  training_job_definition_response) -> None:
 
     client = Client(organization_id=organization_id)
     adapter = client.job_definitions()
