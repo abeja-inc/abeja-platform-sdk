@@ -621,6 +621,46 @@ class APIClient(BaseAPIClient):
             organization_id, job_definition_name, version_id)
         return self._connection.api_request(method='POST', path=path)
 
+    def unarchive_training_job_definition_version(
+            self, organization_id: str, job_definition_name: str, version_id: int) -> dict:
+        """unarchive a training job definition version
+
+        API reference: POST /organizations/<organization_id>/training/definitions/<job_definition_name>/versions/<version_id>/unarchive
+
+        Request Syntax:
+            .. code-block:: python
+
+                organization_id = "1102940376065"
+                job_definition_name = "test_job_definition"
+                version_id = 1
+                response = api_client.unarchive_training_job_definition_version(organization_id, job_definition_name, version_id)
+
+        Params:
+            - **organization_id** (str): ORGANIZATION_ID
+            - **job_definition_name** (str): training job definition name
+            - **version_id** (int): training job version
+
+        Return type:
+            dict
+
+        Returns:
+            Response Syntax:
+
+            .. code-block:: json
+
+                {
+                    "message": "unarchived"
+                }
+
+        Raises:
+            - BadRequest
+            - Unauthorized: Authentication failed
+            - InternalServerError
+        """
+        path = '/organizations/{}/training/definitions/{}/versions/{}/unarchive'.format(
+            organization_id, job_definition_name, version_id)
+        return self._connection.api_request(method='POST', path=path)
+
     def delete_training_job_definition_version(
             self, organization_id: str, job_definition_name: str, version_id: int) -> dict:
         """delete a training job definition version

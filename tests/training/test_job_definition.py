@@ -482,3 +482,17 @@ def test_archive_job_definition_version(requests_mock, api_base_url, api_client,
 
     adapter.archive(job_definition_version=1)
     assert requests_mock.called
+
+
+def test_unarchive_job_definition_version(requests_mock, api_base_url, api_client,
+                                          job_definition_factory) -> None:
+    definition = job_definition_factory()  # type: JobDefinition
+    adapter = definition.job_definition_versions()
+
+    requests_mock.post(
+        '{}/organizations/{}/training/definitions/{}/versions/1/unarchive'.format(
+            api_base_url, adapter.organization_id, adapter.job_definition_name),
+        json={'message': "test-1 unarchived"})
+
+    adapter.unarchive(job_definition_version=1)
+    assert requests_mock.called
