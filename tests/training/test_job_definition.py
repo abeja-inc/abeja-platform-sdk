@@ -2,6 +2,7 @@ import pytest
 from io import BytesIO
 import json
 import cgi
+from pathlib import Path
 from abeja.training import APIClient, JobDefinition, JobDefinitionVersion, JobDefinitions
 
 
@@ -322,16 +323,63 @@ def test_create_job_definition_version_zip(
     item = fs['parameters']
     parameters = json.loads(item.value.decode('utf-8'))
 
-    assert item.filename == 'params.json'
     assert item.headers['Content-Type'] == 'application/json'
     assert parameters['handler'] == 'train:main'
     assert parameters['image'] == 'abeja-inc/all-gpu:19.04'
     assert parameters['environment'] == {'key': 'value'}
 
     item = fs['source_code']
-    assert item.filename == 'source_code.zip'
     assert item.headers['Content-Type'] == 'application/zip'
     assert item.value == zip_content
+
+
+def test_create_job_definition_version_files(
+        requests_mock, api_base_url,
+        tmpdir, make_zip_content,
+        job_definition_factory, training_job_definition_version_response) -> None:
+    definition = job_definition_factory()  # type: JobDefinition
+    adapter = definition.job_definition_versions()
+
+    # Make some files
+    files = []
+    with tmpdir.as_cwd():
+        d = Path('work')
+        d.mkdir(parents=True, exist_ok=True)
+
+        path = d / 'test.txt'
+        path.write_bytes(b'test')
+        files.append(str(path))
+        path = d / 'train.py'
+        path.write_bytes(b'def handler(): pass')
+        files.append(str(path))
+
+        res = training_job_definition_version_response(adapter.organization_id, adapter.job_definition_id)
+        requests_mock.post(
+            '{}/organizations/{}/training/definitions/{}/versions'.format(
+                api_base_url, adapter.organization_id, adapter.job_definition_name),
+            json=res)
+
+        version = adapter.create(files, 'train:handler', 'abeja-inc/all-cpu:19.10', {'KEY': 'VALUE'}, description='new version')
+        assert version
+        assert version.job_definition_version == res['job_definition_version']
+        assert version.job_definition
+        assert version.job_definition_id == adapter.job_definition_id
+
+    history = requests_mock.request_history
+    assert len(history) == 1
+
+    fs = cgi.FieldStorage(fp=BytesIO(history[0].body), headers=history[0].headers, environ={'REQUEST_METHOD': 'POST'})
+
+    item = fs['parameters']
+    parameters = json.loads(item.value.decode('utf-8'))
+
+    assert item.headers['Content-Type'] == 'application/json'
+    assert parameters['handler'] == 'train:handler'
+    assert parameters['image'] == 'abeja-inc/all-cpu:19.10'
+    assert parameters['environment'] == {'KEY': 'VALUE'}
+    item = fs['source_code']
+    assert item.headers['Content-Type'] == 'application/zip'
+    assert item.value
 
 
 def test_update_job_definition_version(requests_mock, api_base_url,

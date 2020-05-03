@@ -1,4 +1,5 @@
 from typing import cast, Any, Dict, List, Iterator, Optional, Union, IO, AnyStr
+import io
 from .api.client import APIClient
 from .common import SizedIterable
 
@@ -466,25 +467,40 @@ class JobDefinitionVersions():
             :class:`JobDefinitionVersion` object
 
         """
-        parameters = {'handler': handler}  # type: Dict[str, Any]
-        if image is not None:
-            parameters['image'] = image
-        if environment is not None:
-            parameters['environment'] = environment
-        if description is not None:
-            parameters['description'] = description
+        if isinstance(source, io.IOBase):
+            parameters = {'handler': handler}  # type: Dict[str, Any]
+            if image is not None:
+                parameters['image'] = image
+            if environment is not None:
+                parameters['environment'] = environment
+            if description is not None:
+                parameters['description'] = description
 
-        res = self.__api.create_training_job_definition_version_native_api(
-            organization_id=self.organization_id,
-            job_definition_name=self.job_definition_name,
-            source_code=cast(IO[AnyStr], source),
-            parameters=parameters)
+            res = self.__api.create_training_job_definition_version_native_api(
+                organization_id=self.organization_id,
+                job_definition_name=self.job_definition_name,
+                source_code=cast(IO[AnyStr], source),
+                parameters=parameters)
 
-        return JobDefinitionVersion.from_response(
-            api=self.__api,
-            organization_id=self.organization_id,
-            response=res,
-            job_definition=self.__job_definition)
+            return JobDefinitionVersion.from_response(
+                api=self.__api,
+                organization_id=self.organization_id,
+                response=res,
+                job_definition=self.__job_definition)
+        else:
+            res = self.__api.create_training_job_definition_version(
+                organization_id=self.organization_id,
+                job_definition_name=self.job_definition_name,
+                filepaths=cast(List[str], source),
+                handler=handler,
+                image=image,
+                environment=environment,
+                description=description)
+            return JobDefinitionVersion.from_response(
+                api=self.__api,
+                organization_id=self.organization_id,
+                response=res,
+                job_definition=self.__job_definition)
 
     def update(self, job_definition_version: int, description: str) -> JobDefinitionVersion:
         """Update a training job definition version.
