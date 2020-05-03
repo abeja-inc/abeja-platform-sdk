@@ -528,6 +528,59 @@ class APIClient(BaseAPIClient):
             organization_id, job_definition_name, version_id)
         return self._connection.api_request(method='GET', path=path)
 
+    def patch_training_job_definition_version(
+            self, organization_id: str, job_definition_name: str, version_id: int,
+            description: str) -> dict:
+        """Update a training job definition version
+
+        API reference: PATCH /organizations/<organization_id>/training/definitions/<job_definition_name>/versions/<version_id>
+
+        Request Syntax:
+            .. code-block:: python
+
+                organization_id = "1102940376065"
+                job_definition_name = "test_job_definition"
+                version_id = 1
+                response = api_client.patch_training_job_definition_version(organization_id, job_definition_name, version_id, description='new version')
+
+        Params:
+            - **organization_id** (str): ORGANIZATION_ID
+            - **job_definition_name** (str): training job definition name
+            - **version_id** (int): training job version
+            - **description** (str): description
+
+        Return type:
+            dict
+
+        Returns:
+            Response Syntax:
+
+            .. code-block:: json
+
+                {
+                    "job_definition_version": 1,
+                    "user_parameters": {},
+                    "datasets": {
+                        "mnist": "1111111111111"
+                    },
+                    "modified_at": "2018-05-17T12:34:46.344076Z",
+                    "job_definition_id": "1443714239154",
+                    "handler": "train:handler",
+                    "created_at": "2018-05-17T12:34:46.296488Z",
+                    "image": "abeja-inc/all-gpu:19.04",
+                    "archived": false
+                }
+
+        Raises:
+            - BadRequest
+            - Unauthorized: Authentication failed
+            - InternalServerError
+        """
+        path = '/organizations/{}/training/definitions/{}/versions/{}'.format(
+            organization_id, job_definition_name, version_id)
+        params = {'description': description}
+        return self._connection.api_request(method='PATCH', path=path, json=params)
+
     def delete_training_job_definition_version(
             self, organization_id: str, job_definition_name: str, version_id: int) -> dict:
         """delete a training job definition version

@@ -435,6 +435,33 @@ class JobDefinitionVersions():
             response=res,
             job_definition=self.__job_definition)
 
+    def update(self, job_definition_version: int, description: str) -> JobDefinitionVersion:
+        """Update a training job definition version.
+
+        Request Syntax:
+            .. code-block:: python
+
+                version = versions.update(job_definition_version=5, description='new version')
+
+            Params:
+            - **job_definition_version** (int): the version number
+
+        Return type:
+            :class:`JobDefinitionVersion` object
+
+        """
+        res = self.__api.patch_training_job_definition_version(
+            organization_id=self.organization_id,
+            job_definition_name=self.job_definition_name,
+            version_id=job_definition_version,
+            description=description)
+
+        return JobDefinitionVersion.from_response(
+            api=self.__api,
+            organization_id=self.organization_id,
+            response=res,
+            job_definition=self.__job_definition)
+
 # Iterator classes
 
 

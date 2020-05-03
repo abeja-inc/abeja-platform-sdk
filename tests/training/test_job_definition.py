@@ -289,3 +289,28 @@ def test_get_job_definition_version(requests_mock, api_base_url,
 
     assert version.job_definition
     assert version.job_definition_id == adapter.job_definition_id
+
+
+def test_update_job_definition_version(requests_mock, api_base_url,
+                                       job_definition_factory, training_job_definition_version_response) -> None:
+    definition = job_definition_factory()
+    adapter = definition.job_definition_versions()
+
+    res = training_job_definition_version_response(adapter.organization_id, adapter.job_definition_id)
+    version_id = res['job_definition_version']
+    requests_mock.patch(
+        '{}/organizations/{}/training/definitions/{}/versions/{}'.format(
+            api_base_url, adapter.organization_id, adapter.job_definition_name, version_id),
+        json=res)
+
+    description = 'new version'
+    version = adapter.update(job_definition_version=version_id, description=description)
+    assert version
+    assert version.job_definition_version == version_id
+
+    assert version.job_definition
+    assert version.job_definition_id == adapter.job_definition_id
+
+    history = requests_mock.request_history
+    assert len(history) == 1
+    assert history[0].json() == {'description': description}
