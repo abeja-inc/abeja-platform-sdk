@@ -320,8 +320,7 @@ def test_create_job_definition_version_zip(
     c_type, c_data = cgi.parse_header(history[0].headers['Content-Type'])
     assert c_type == 'multipart/form-data'
 
-    c_data['boundary'] = c_data['boundary'].encode()
-    form_data = cgi.parse_multipart(BytesIO(history[0].body), c_data)
+    form_data = cgi.parse_multipart(BytesIO(history[0].body), {'boundary': c_data['boundary'].encode()})
     parameters = json.loads(form_data['parameters'][0].decode('utf-8'))
 
     assert form_data['source_code'][0] == zip_content
