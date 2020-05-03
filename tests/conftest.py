@@ -227,10 +227,13 @@ def training_job_definition_response():
 
 @pytest.fixture
 def training_job_definition_version_response():
-    def _training_job_definition_version_response(_organization_id, training_job_definition_id, training_job_definition_version, **extra):
+    def _training_job_definition_version_response(_organization_id, job_definition_id, job_definition_version=None, **extra):
+        if job_definition_version is None:
+            job_definition_version = random.randint(0, 100)
+
         return {
-            "job_definition_id": training_job_definition_id,
-            "job_definition_version": training_job_definition_version,
+            "job_definition_id": job_definition_id,
+            "job_definition_version": job_definition_version,
             "environment": {},
             "user_parameters": {},
             "datasets": {

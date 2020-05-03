@@ -1,6 +1,5 @@
 import pytest
-from abeja.training import APIClient, JobDefinition, JobDefinitions
-from tests.utils import fake_iso8601
+from abeja.training import APIClient, JobDefinition, JobDefinitionVersion, JobDefinitions
 
 
 @pytest.fixture
@@ -9,23 +8,24 @@ def api_client() -> APIClient:
 
 
 @pytest.fixture
-def job_definition_factory(api_client, organization_id, job_definition_id, job_definition_name):
-    def factory(organization_id=organization_id, job_definition_id=job_definition_id, job_definition_name=job_definition_name, **kwargs):
-        return JobDefinition(
+def job_definition_factory(api_client, organization_id, job_definition_id, training_job_definition_response):
+    def factory(organization_id=organization_id, job_definition_id=job_definition_id, **kwargs):
+        response = training_job_definition_response(organization_id, job_definition_id, **kwargs)
+        return JobDefinition.from_response(
             api=api_client,
             organization_id=organization_id,
-            job_definition_id=job_definition_id,
-            name=job_definition_name,
-            version_count=0,
-            model_count=0,
-            notebook_count=0,
-            tensorboard_count=0,
-            versions=None,
-            jobs=None,
-            archived=False,
-            created_at=fake_iso8601(),
-            modified_at=fake_iso8601(),
-            **kwargs
+            response=response)
+    return factory
+
+
+@pytest.fixture
+def job_definition_version_factory(api_client, organization_id, job_definition_id, training_job_definition_version_response):
+    def factory(organization_id=organization_id, job_definition_id=job_definition_id, **kwargs):
+        response = training_job_definition_version_response(organization_id, job_definition_id, **kwargs)
+        return JobDefinitionVersion.from_response(
+            api=api_client,
+            organization_id=organization_id,
+            response=response
         )
     return factory
 
@@ -237,25 +237,39 @@ def test_list_job_definitions_paging(requests_mock, api_base_url, api_client,
 # JobDefinitionVersions
 
 
+def test_job_definition_version(requests_mock, api_base_url, job_definition_version_factory, training_job_definition_response) -> None:
+    version = job_definition_version_factory()
+
+    res = training_job_definition_response(version.organization_id, version.job_definition_id)
+    requests_mock.get(
+        '{}/organizations/{}/training/definitions/{}?include_jobs=false'.format(
+            api_base_url, version.organization_id, version.job_definition_id),
+        json=res)
+
+    definition = version.job_definition
+    assert definition
+    assert definition.organization_id == version.organization_id
+    assert definition.job_definition_id == version.job_definition_id
+
+
 def test_job_definition_versions(job_definition_factory) -> None:
     definition = job_definition_factory()
     adapter = definition.job_definition_versions()
-    adapter.organization_id == definition.organization_id
-    adapter.job_definition_id == definition.job_definition_id
+    assert adapter.organization_id == definition.organization_id
+    assert adapter.job_definition_id == definition.job_definition_id
 
 
 def test_get_job_definition_version(requests_mock, api_base_url,
                                     job_definition_factory, training_job_definition_version_response) -> None:
-    version_id = 1
     definition = job_definition_factory()
     adapter = definition.job_definition_versions()
 
     res = training_job_definition_version_response(
         adapter.organization_id,
         adapter.job_definition_id,
-        version_id,
         environment=None
     )
+    version_id = res['job_definition_version']
     requests_mock.get(
         '{}/organizations/{}/training/definitions/{}/versions/{}'.format(
             api_base_url, adapter.organization_id, adapter.job_definition_name, version_id),
@@ -272,3 +286,6 @@ def test_get_job_definition_version(requests_mock, api_base_url,
     assert version.environment == {}
     assert version.created_at == res['created_at']
     assert version.modified_at == res['modified_at']
+
+    assert version.job_definition
+    assert version.job_definition_id == adapter.job_definition_id

@@ -155,7 +155,8 @@ class JobDefinitionVersion():
                  description: str,
                  archived: bool,
                  created_at: str,
-                 modified_at: str) -> None:
+                 modified_at: str,
+                 job_definition: Optional[JobDefinition] = None) -> None:
         self.__api = api
         self.__organization_id = organization_id
         self.__job_definition_id = job_definition_id
@@ -167,9 +168,13 @@ class JobDefinitionVersion():
         self.__archived = archived
         self.__created_at = created_at
         self.__modified_at = modified_at
+        self.__job_definition = job_definition
 
     @staticmethod
-    def from_response(api: APIClient, organization_id: str, response: Dict[str, Any]) -> 'JobDefinitionVersion':
+    def from_response(api: APIClient,
+                      organization_id: str,
+                      response: Dict[str, Any],
+                      job_definition: Optional[JobDefinition] = None) -> 'JobDefinitionVersion':
         """Construct an object from API response.
 
         NOTE: For convenient, this method DOES NOT validate the input response and
@@ -186,7 +191,14 @@ class JobDefinitionVersion():
             description=response.get('description', ''),
             archived=bool(response.get('archived')),
             created_at=response.get('created_at', ''),
-            modified_at=response.get('modified_at', ''))
+            modified_at=response.get('modified_at', ''),
+            job_definition=job_definition)
+
+    @property
+    def job_definition(self) -> JobDefinition:
+        if self.__job_definition is None:
+            self.__job_definition = JobDefinitions(api=self.__api, organization_id=self.organization_id).get(name=self.job_definition_id)
+        return self.__job_definition
 
     @property
     def organization_id(self) -> str:
@@ -420,7 +432,8 @@ class JobDefinitionVersions():
         return JobDefinitionVersion.from_response(
             api=self.__api,
             organization_id=self.organization_id,
-            response=res)
+            response=res,
+            job_definition=self.__job_definition)
 
 # Iterator classes
 
