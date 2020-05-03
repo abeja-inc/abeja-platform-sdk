@@ -229,15 +229,16 @@ def training_job_definition_response():
 def training_job_definition_version_response():
     def _training_job_definition_version_response(_organization_id, training_job_definition_id, training_job_definition_version, **extra):
         return {
+            "job_definition_id": training_job_definition_id,
             "job_definition_version": training_job_definition_version,
+            "environment": {},
             "user_parameters": {},
             "datasets": {
                 "mnist": "1111111111111"
             },
-            "modified_at": fake_iso8601(),
-            "job_definition_id": training_job_definition_id,
             "handler": "train:handler",
             "created_at": fake_iso8601(),
+            "modified_at": fake_iso8601(),
             "image": "abeja-inc/all-gpu:19.04",
             "archived": False,
             **extra

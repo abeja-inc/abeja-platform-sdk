@@ -146,45 +146,6 @@ def test_delete_job_definition(requests_mock, api_base_url, api_client,
 
     adapter.delete(name=job_definition_id)
 
-# JobDefinitionVersions
-
-
-def test_job_definition_versions(job_definition_factory) -> None:
-    definition = job_definition_factory()
-    adapter = definition.job_definition_versions()
-    adapter.organization_id == definition.organization_id
-    adapter.job_definition_id == definition.job_definition_id
-
-
-def test_get_job_definition_version(requests_mock, api_base_url,
-                                    job_definition_factory, training_job_definition_version_response) -> None:
-    version_id = 1
-    definition = job_definition_factory()
-    adapter = definition.job_definition_versions()
-
-    res = training_job_definition_version_response(
-        adapter.organization_id,
-        adapter.job_definition_id,
-        version_id,
-        environment=None
-    )
-    requests_mock.get(
-        '{}/organizations/{}/training/definitions/{}/versions/{}'.format(
-            api_base_url, adapter.organization_id, adapter.job_definition_name, version_id),
-        json=res)
-
-    version = adapter.get(job_definition_version=version_id)
-    assert version
-    assert version.organization_id == adapter.organization_id
-    assert version.job_definition_id == adapter.job_definition_id
-    assert version.job_definition_version == version_id
-    assert version.handler == res['handler']
-    assert version.image == res['image']
-    assert version.image == res['image']
-    assert version.environment == {}
-    assert version.created_at == res['created_at']
-    assert version.modified_at == res['modified_at']
-
 
 def test_list_job_definitions(requests_mock, api_base_url, api_client,
                               organization_id, job_definition_id, job_definition_name,
@@ -272,3 +233,42 @@ def test_list_job_definitions_paging(requests_mock, api_base_url, api_client,
     assert definitions[0].job_definition_id == definition1['job_definition_id']
     assert definitions[1].job_definition_id == definition2['job_definition_id']
     assert definitions[2].job_definition_id == definition3['job_definition_id']
+
+# JobDefinitionVersions
+
+
+def test_job_definition_versions(job_definition_factory) -> None:
+    definition = job_definition_factory()
+    adapter = definition.job_definition_versions()
+    adapter.organization_id == definition.organization_id
+    adapter.job_definition_id == definition.job_definition_id
+
+
+def test_get_job_definition_version(requests_mock, api_base_url,
+                                    job_definition_factory, training_job_definition_version_response) -> None:
+    version_id = 1
+    definition = job_definition_factory()
+    adapter = definition.job_definition_versions()
+
+    res = training_job_definition_version_response(
+        adapter.organization_id,
+        adapter.job_definition_id,
+        version_id,
+        environment=None
+    )
+    requests_mock.get(
+        '{}/organizations/{}/training/definitions/{}/versions/{}'.format(
+            api_base_url, adapter.organization_id, adapter.job_definition_name, version_id),
+        json=res)
+
+    version = adapter.get(job_definition_version=version_id)
+    assert version
+    assert version.organization_id == adapter.organization_id
+    assert version.job_definition_id == adapter.job_definition_id
+    assert version.job_definition_version == version_id
+    assert version.handler == res['handler']
+    assert version.image == res['image']
+    assert version.image == res['image']
+    assert version.environment == {}
+    assert version.created_at == res['created_at']
+    assert version.modified_at == res['modified_at']
