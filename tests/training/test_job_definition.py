@@ -1,4 +1,7 @@
 import pytest
+from io import BytesIO
+import json
+import cgi
 from abeja.training import APIClient, JobDefinition, JobDefinitionVersion, JobDefinitions
 
 
@@ -238,7 +241,7 @@ def test_list_job_definitions_paging(requests_mock, api_base_url, api_client,
 
 
 def test_job_definition_version(requests_mock, api_base_url, job_definition_version_factory, training_job_definition_response) -> None:
-    version = job_definition_version_factory()
+    version = job_definition_version_factory()  # type: JobDefinitionVersion
 
     res = training_job_definition_response(version.organization_id, version.job_definition_id)
     requests_mock.get(
@@ -253,7 +256,7 @@ def test_job_definition_version(requests_mock, api_base_url, job_definition_vers
 
 
 def test_job_definition_versions(job_definition_factory) -> None:
-    definition = job_definition_factory()
+    definition = job_definition_factory()  # type: JobDefinition
     adapter = definition.job_definition_versions()
     assert adapter.organization_id == definition.organization_id
     assert adapter.job_definition_id == definition.job_definition_id
@@ -261,7 +264,7 @@ def test_job_definition_versions(job_definition_factory) -> None:
 
 def test_get_job_definition_version(requests_mock, api_base_url,
                                     job_definition_factory, training_job_definition_version_response) -> None:
-    definition = job_definition_factory()
+    definition = job_definition_factory()  # type: JobDefinition
     adapter = definition.job_definition_versions()
 
     res = training_job_definition_version_response(
@@ -291,9 +294,45 @@ def test_get_job_definition_version(requests_mock, api_base_url,
     assert version.job_definition_id == adapter.job_definition_id
 
 
+def test_create_job_definition_version_zip(
+        requests_mock, api_base_url,
+        make_zip_content,
+        job_definition_factory, training_job_definition_version_response) -> None:
+    definition = job_definition_factory()  # type: JobDefinition
+    adapter = definition.job_definition_versions()
+
+    res = training_job_definition_version_response(adapter.organization_id, adapter.job_definition_id)
+    requests_mock.post(
+        '{}/organizations/{}/training/definitions/{}/versions'.format(
+            api_base_url, adapter.organization_id, adapter.job_definition_name),
+        json=res)
+
+    zip_content = make_zip_content({'train.py': b'print(1)'})
+    version = adapter.create(BytesIO(zip_content), 'train:main', 'abeja-inc/all-gpu:19.04', {'key': 'value'}, description='new version')
+    assert version
+    assert version.job_definition_version == res['job_definition_version']
+    assert version.job_definition
+    assert version.job_definition_id == adapter.job_definition_id
+
+    history = requests_mock.request_history
+    assert len(history) == 1
+
+    c_type, c_data = cgi.parse_header(history[0].headers['Content-Type'])
+    assert c_type == 'multipart/form-data'
+
+    c_data['boundary'] = c_data['boundary'].encode()
+    form_data = cgi.parse_multipart(BytesIO(history[0].body), c_data)
+    parameters = json.loads(form_data['parameters'][0].decode('utf-8'))
+
+    assert form_data['source_code'][0] == zip_content
+    assert parameters['handler'] == 'train:main'
+    assert parameters['image'] == 'abeja-inc/all-gpu:19.04'
+    assert parameters['environment'] == {'key': 'value'}
+
+
 def test_update_job_definition_version(requests_mock, api_base_url,
                                        job_definition_factory, training_job_definition_version_response) -> None:
-    definition = job_definition_factory()
+    definition = job_definition_factory()  # type: JobDefinition
     adapter = definition.job_definition_versions()
 
     res = training_job_definition_version_response(adapter.organization_id, adapter.job_definition_id)
@@ -304,7 +343,7 @@ def test_update_job_definition_version(requests_mock, api_base_url,
         json=res)
 
     description = 'new version'
-    version = adapter.update(job_definition_version=version_id, description=description)
+    version = adapter.update(version_id, description)
     assert version
     assert version.job_definition_version == version_id
 

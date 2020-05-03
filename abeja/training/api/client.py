@@ -370,7 +370,7 @@ class APIClient(BaseAPIClient):
             - **job_definition_name** (str): training job definition name
             - **filepaths** (list): file list to run training job
             - **handler** (str): path to handler (ex. train:handler )
-            - **image** (Optional[str]): runtime enviornment
+            - **image** (Optional[str]): runtime environment
             - **environment** (Optional[dict]): user defined parameters set as environment variables
             - **description** (Optional[str]): description
 

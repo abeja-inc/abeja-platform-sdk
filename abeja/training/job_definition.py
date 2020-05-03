@@ -1,9 +1,9 @@
-from typing import Any, Dict, List, Iterator, Optional
+from typing import cast, Any, Dict, List, Iterator, Optional, Union, IO, AnyStr
 from .api.client import APIClient
 from .common import SizedIterable
 
-
 # Entity classes
+
 
 class JobDefinition():
     """Training job definition object.
@@ -428,6 +428,57 @@ class JobDefinitionVersions():
             organization_id=self.organization_id,
             job_definition_name=self.job_definition_name,
             version_id=job_definition_version)
+
+        return JobDefinitionVersion.from_response(
+            api=self.__api,
+            organization_id=self.organization_id,
+            response=res,
+            job_definition=self.__job_definition)
+
+    def create(self,
+               source: Union[List[str], IO[AnyStr]],
+               handler: str,
+               image: Optional[str] = None,
+               environment: Optional[Dict[str, Any]] = None,
+               description: Optional[str] = None):
+        """Create a new training job definition version.
+
+        Request Syntax:
+            .. code-block:: python
+
+                version = versions.create(
+                    source=['train.py'],
+                    handler='train:handler',
+                    image='abeja-inc/all-gpu:19.04',
+                    environment={'key': 'value'},
+                    description='new version')
+
+            Params:
+            - **job_definition_version** (int): the version number
+            - **source** (List[str] | IO): an input source for training code. It's one of:
+              - zip or tar.gz archived file-like object.
+              - a list of file paths.
+            - **image** (Optional[str]): runtime environment
+            - **environment** (Optional[dict]): user defined parameters set as environment variables
+            - **description** (Optional[str]): description
+
+        Return type:
+            :class:`JobDefinitionVersion` object
+
+        """
+        parameters = {'handler': handler}  # type: Dict[str, Any]
+        if image is not None:
+            parameters['image'] = image
+        if environment is not None:
+            parameters['environment'] = environment
+        if description is not None:
+            parameters['description'] = description
+
+        res = self.__api.create_training_job_definition_version_native_api(
+            organization_id=self.organization_id,
+            job_definition_name=self.job_definition_name,
+            source_code=cast(IO[AnyStr], source),
+            parameters=parameters)
 
         return JobDefinitionVersion.from_response(
             api=self.__api,
