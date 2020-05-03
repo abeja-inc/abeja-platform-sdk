@@ -298,10 +298,10 @@ class JobDefinitions():
              offset: Optional[int] = None,
              limit: Optional[int] = None) -> SizedIterable[JobDefinition]:
         """Returns an iterator object that iterates training job definitions
-        under the this object's context.
+        under the this object.
 
         This method returns an instance of :class:`SizedIterable`, so you can
-        get the total number of training jobs.
+        get the total number of training job definitions.
 
         Params:
             - **filter_archived** (bool): **[optional]** whether include archived ones or not. (default is not-filtered)
@@ -435,6 +435,35 @@ class JobDefinitionVersions():
             organization_id=self.organization_id,
             response=res,
             job_definition=self.__job_definition)
+
+    def list(self, filter_archived: Optional[bool] = None) -> SizedIterable[JobDefinitionVersion]:
+        """Returns an iterator object that iterates training job definition versions
+        under the this object.
+
+        This method returns an instance of :class:`SizedIterable`, so you can
+        get the total number of training job definition versions.
+
+        Params:
+            - **filter_archived** (bool): **[optional]** whether include archived ones or not. (default is not-filtered)
+
+        Return type:
+            SizedIterable[JobDefinitionVersion]
+        """
+        res = self.__api.get_training_job_definition_versions(
+            organization_id=self.organization_id,
+            job_definition_name=self.job_definition_name,
+            filter_archived=filter_archived)
+
+        versions = [
+            JobDefinitionVersion.from_response(
+                api=self.__api,
+                organization_id=self.organization_id,
+                response=entry,
+                job_definition=self.__job_definition)
+            for entry in res['entries']]
+        # Because the SizedIterator<T> is not a true "Intersection Type" but is
+        # a new class, a list object will not be considered as adapted.
+        return cast(SizedIterable[JobDefinitionVersion], versions)
 
     def create(self,
                source: Union[List[str], IO[AnyStr]],

@@ -286,13 +286,73 @@ def test_get_job_definition_version(requests_mock, api_base_url,
     assert version.job_definition_version == version_id
     assert version.handler == res['handler']
     assert version.image == res['image']
-    assert version.image == res['image']
     assert version.environment == {}
     assert version.created_at == res['created_at']
     assert version.modified_at == res['modified_at']
 
     assert version.job_definition
     assert version.job_definition_id == adapter.job_definition_id
+
+
+def test_get_job_definition_versions(requests_mock, api_base_url,
+                                     job_definition_factory, training_job_definition_version_response) -> None:
+    definition = job_definition_factory()  # type: JobDefinition
+    adapter = definition.job_definition_versions()
+
+    res1 = training_job_definition_version_response(
+        adapter.organization_id,
+        adapter.job_definition_id,
+        environment=None
+    )
+    res2 = training_job_definition_version_response(
+        adapter.organization_id,
+        adapter.job_definition_id,
+        environment={'foo': '1'}
+    )
+    requests_mock.get(
+        '{}/organizations/{}/training/definitions/{}/versions'.format(
+            api_base_url, adapter.organization_id, adapter.job_definition_name),
+        json={
+            'entries': [res1, res2]
+        })
+
+    it = adapter.list()
+    assert len(it) == 2
+
+    versions = list(it)
+    assert len(versions) == 2
+    for version, res in zip(versions, [res1, res2]):
+        assert version.organization_id == adapter.organization_id
+        assert version.job_definition_id == adapter.job_definition_id
+        assert version.job_definition_version == res['job_definition_version']
+        assert version.handler == res['handler']
+        assert version.image == res['image']
+        assert version.environment == {} if res['environment'] is None else res['environment']
+        assert version.created_at == res['created_at']
+        assert version.modified_at == res['modified_at']
+        assert version.job_definition
+        assert version.job_definition_id == adapter.job_definition_id
+
+
+def test_get_job_definition_versions_filter_archived(requests_mock, api_base_url,
+                                                     job_definition_factory, training_job_definition_version_response) -> None:
+    definition = job_definition_factory()  # type: JobDefinition
+    adapter = definition.job_definition_versions()
+
+    res1 = training_job_definition_version_response(
+        adapter.organization_id,
+        adapter.job_definition_id,
+        environment=None
+    )
+    requests_mock.get(
+        '{}/organizations/{}/training/definitions/{}/versions?filter_archived=exclude_archived'.format(
+            api_base_url, adapter.organization_id, adapter.job_definition_name),
+        json={
+            'entries': [res1]
+        })
+
+    versions = list(adapter.list(filter_archived=True))
+    assert len(versions) == 1
 
 
 def test_create_job_definition_version_zip(
