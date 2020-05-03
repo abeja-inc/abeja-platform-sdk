@@ -127,6 +127,7 @@ def test_archive_job_definition(requests_mock, api_base_url, api_client,
         json={'message': "test-1 archived"})
 
     adapter.archive(name=job_definition_id)
+    assert requests_mock.called
 
 
 def test_unarchive_job_definition(requests_mock, api_base_url, api_client,
@@ -138,6 +139,7 @@ def test_unarchive_job_definition(requests_mock, api_base_url, api_client,
         json={'message': "test-1 unarchived"})
 
     adapter.unarchive(name=job_definition_id)
+    assert requests_mock.called
 
 
 def test_delete_job_definition(requests_mock, api_base_url, api_client,
@@ -149,6 +151,7 @@ def test_delete_job_definition(requests_mock, api_base_url, api_client,
         json={'message': "test-1 deleted"})
 
     adapter.delete(name=job_definition_id)
+    assert requests_mock.called
 
 
 def test_list_job_definitions(requests_mock, api_base_url, api_client,
@@ -465,3 +468,17 @@ def test_update_job_definition_version(requests_mock, api_base_url,
     history = requests_mock.request_history
     assert len(history) == 1
     assert history[0].json() == {'description': description}
+
+
+def test_archive_job_definition_version(requests_mock, api_base_url, api_client,
+                                        job_definition_factory) -> None:
+    definition = job_definition_factory()  # type: JobDefinition
+    adapter = definition.job_definition_versions()
+
+    requests_mock.post(
+        '{}/organizations/{}/training/definitions/{}/versions/1/archive'.format(
+            api_base_url, adapter.organization_id, adapter.job_definition_name),
+        json={'message': "test-1 archived"})
+
+    adapter.archive(job_definition_version=1)
+    assert requests_mock.called

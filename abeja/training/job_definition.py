@@ -558,6 +558,23 @@ class JobDefinitionVersions():
             response=res,
             job_definition=self.__job_definition)
 
+    def archive(self, job_definition_version: int):
+        """Archive a training job definition version.
+
+        Request Syntax:
+            .. code-block:: python
+
+                versions.archive(job_definition_version=5)
+
+            Params:
+            - **job_definition_version** (int): the version number
+        """
+        self.__api.archive_training_job_definition_version(
+            organization_id=self.organization_id,
+            job_definition_name=self.job_definition_name,
+            version_id=job_definition_version)
+
+
 # Iterator classes
 
 

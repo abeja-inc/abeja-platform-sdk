@@ -64,7 +64,7 @@ class APIClient(BaseAPIClient):
         path = '/organizations/{}/training/definitions/'.format(organization_id)
         return self._connection.api_request(method='POST', path=path, json=data)
 
-    def archive_training_job_definition(self, organization_id: str, job_definition_name: str):
+    def archive_training_job_definition(self, organization_id: str, job_definition_name: str) -> dict:
         """archive a training job definition
 
         API reference: POST /organizations/<organization_id>/training/definitions/{name}/archive
@@ -89,7 +89,7 @@ class APIClient(BaseAPIClient):
         path = '/organizations/{}/training/definitions/{}/archive'.format(organization_id, job_definition_name)
         return self._connection.api_request(method='POST', path=path, json={})
 
-    def unarchive_training_job_definition(self, organization_id: str, job_definition_name: str):
+    def unarchive_training_job_definition(self, organization_id: str, job_definition_name: str) -> dict:
         """unarchive a training job definition
 
         API reference: POST /organizations/<organization_id>/training/definitions/{name}/unarchive
@@ -580,6 +580,46 @@ class APIClient(BaseAPIClient):
             organization_id, job_definition_name, version_id)
         params = {'description': description}
         return self._connection.api_request(method='PATCH', path=path, json=params)
+
+    def archive_training_job_definition_version(
+            self, organization_id: str, job_definition_name: str, version_id: int) -> dict:
+        """archive a training job definition version
+
+        API reference: POST /organizations/<organization_id>/training/definitions/<job_definition_name>/versions/<version_id>/archive
+
+        Request Syntax:
+            .. code-block:: python
+
+                organization_id = "1102940376065"
+                job_definition_name = "test_job_definition"
+                version_id = 1
+                response = api_client.archive_training_job_definition_version(organization_id, job_definition_name, version_id)
+
+        Params:
+            - **organization_id** (str): ORGANIZATION_ID
+            - **job_definition_name** (str): training job definition name
+            - **version_id** (int): training job version
+
+        Return type:
+            dict
+
+        Returns:
+            Response Syntax:
+
+            .. code-block:: json
+
+                {
+                    "message": "archived"
+                }
+
+        Raises:
+            - BadRequest
+            - Unauthorized: Authentication failed
+            - InternalServerError
+        """
+        path = '/organizations/{}/training/definitions/{}/versions/{}/archive'.format(
+            organization_id, job_definition_name, version_id)
+        return self._connection.api_request(method='POST', path=path)
 
     def delete_training_job_definition_version(
             self, organization_id: str, job_definition_name: str, version_id: int) -> dict:
