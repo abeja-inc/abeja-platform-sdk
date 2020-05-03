@@ -317,16 +317,21 @@ def test_create_job_definition_version_zip(
     history = requests_mock.request_history
     assert len(history) == 1
 
-    c_type, c_data = cgi.parse_header(history[0].headers['Content-Type'])
-    assert c_type == 'multipart/form-data'
+    fs = cgi.FieldStorage(fp=BytesIO(history[0].body), headers=history[0].headers, environ={'REQUEST_METHOD': 'POST'})
 
-    form_data = cgi.parse_multipart(BytesIO(history[0].body), {'boundary': c_data['boundary'].encode()})
-    parameters = json.loads(form_data['parameters'][0].decode('utf-8'))
+    item = fs['parameters']
+    parameters = json.loads(item.value.decode('utf-8'))
 
-    assert form_data['source_code'][0] == zip_content
+    assert item.filename == 'params.json'
+    assert item.headers['Content-Type'] == 'application/json'
     assert parameters['handler'] == 'train:main'
     assert parameters['image'] == 'abeja-inc/all-gpu:19.04'
     assert parameters['environment'] == {'key': 'value'}
+
+    item = fs['source_code']
+    assert item.filename == 'source_code.zip'
+    assert item.headers['Content-Type'] == 'application/zip'
+    assert item.value == zip_content
 
 
 def test_update_job_definition_version(requests_mock, api_base_url,
