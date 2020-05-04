@@ -284,9 +284,13 @@ def job_response():
             "description": None,
             "statistics": {
                 "stages": {
-                    "validation": {},
+                    "validation": {
+                        "loss": random.uniform(0, 1),
+                        "accuracy": random.uniform(0, 1)
+                    },
                     "train": {
                         "loss": random.uniform(0, 1),
+                        "accuracy": random.uniform(0, 1),
                         "debug": "debug"
                     }
                 },

@@ -3,7 +3,7 @@ from io import BytesIO
 import json
 import cgi
 from pathlib import Path
-from abeja.training import APIClient, JobDefinition, JobDefinitionVersion, JobDefinitions
+from abeja.training import APIClient, JobDefinition, Job, JobDefinitionVersion, JobDefinitions
 
 
 @pytest.fixture
@@ -23,10 +23,22 @@ def job_definition_factory(api_client, organization_id, job_definition_id, train
 
 
 @pytest.fixture
-def job_definition_version_factory(api_client, organization_id, job_definition_id, training_job_definition_version_response):
+def job_definition_version_factory(api_client, organization_id, job_definition_id, job_id, job_response):
+    def factory(organization_id=organization_id, job_definition_id=job_definition_id, job_id=job_id, **kwargs):
+        response = job_response(organization_id, job_definition_id, job_id, **kwargs)
+        return JobDefinitionVersion.from_response(
+            api=api_client,
+            organization_id=organization_id,
+            response=response
+        )
+    return factory
+
+
+@pytest.fixture
+def job_factory(api_client, organization_id, job_definition_id, training_job_definition_version_response):
     def factory(organization_id=organization_id, job_definition_id=job_definition_id, **kwargs):
         response = training_job_definition_version_response(organization_id, job_definition_id, **kwargs)
-        return JobDefinitionVersion.from_response(
+        return Job.from_response(
             api=api_client,
             organization_id=organization_id,
             response=response
@@ -510,3 +522,30 @@ def test_delete_job_definition_version(requests_mock, api_base_url, api_client,
 
     adapter.delete(job_definition_version_id=1)
     assert requests_mock.called
+
+# Job
+
+
+def test_job(requests_mock, api_base_url, job_factory, training_job_definition_response, training_job_definition_version_response) -> None:
+    job = job_factory()  # type: Job
+
+    res = training_job_definition_response(job.organization_id, job.job_definition_id)
+    requests_mock.get(
+        '{}/organizations/{}/training/definitions/{}?include_jobs=false'.format(
+            api_base_url, job.organization_id, job.job_definition_id),
+        json=res)
+    res = training_job_definition_version_response(job.organization_id, job.job_definition_id, job.job_definition_version_id)
+    requests_mock.get(
+        '{}/organizations/{}/training/definitions/{}/versions/{}'.format(
+            api_base_url, job.organization_id, job.job_definition.name, job.job_definition_version_id),
+        json=res)
+
+    definition = job.job_definition
+    assert definition
+    assert definition.organization_id == job.organization_id
+    assert definition.job_definition_id == job.job_definition_id
+    version = job.job_definition_version
+    assert version
+    assert version.organization_id == job.organization_id
+    assert version.job_definition_id == job.job_definition_id
+    assert version.job_definition_version_id == job.job_definition_version_id

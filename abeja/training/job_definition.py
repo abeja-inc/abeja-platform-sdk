@@ -270,7 +270,7 @@ class Job():
                  status: str,
                  description: str,
                  datasets: Dict[str, str],
-                 creator: Dict[str, Any],
+                 creator: Optional[Dict[str, Any]],
                  archived: bool,
                  start_time: str,
                  completion_time: str,
@@ -299,6 +299,49 @@ class Job():
         self.__modified_at = modified_at
         self.__job_definition = job_definition
         self.__job_definition_version = job_definition_version
+
+    @staticmethod
+    def from_response(api: APIClient,
+                      organization_id: str,
+                      response: Dict[str, Any],
+                      job_definition: Optional[JobDefinition] = None,
+                      job_definition_version: Optional[JobDefinitionVersion] = None) -> 'Job':
+        """Construct an object from API response.
+
+        NOTE: For convenient, this method DOES NOT validate the input response and
+        always returns an object filled with default values.
+        """
+        stats = (response.get('statistics') or {})
+        stages = {}
+        if 'stages' in stats:
+            stages = stats.pop('stages')
+
+        statistics = Statistics(**stats)
+        for name, values in stages.items():
+            statistics.add_stage(name=name, **values)
+
+        return Job(
+            api=api,
+            organization_id=organization_id,
+            job_definition_id=response.get('job_definition_id', ''),
+            job_definition_version_id=response.get('job_definition_version', 0),
+            job_id=response.get('id', response.get('training_job_id', '')),
+            instance_type=response.get('instance_type', ''),
+            exec_env=response.get('exec_env', ''),
+            environment=(response.get('environment') or {}),
+            statistics=statistics,
+            status_message=response.get('status_message', ''),
+            status=response.get('status', ''),
+            description=response.get('description', ''),
+            datasets=(response.get('datasets') or {}),
+            creator=response.get('creator'),
+            archived=bool(response.get('archived')),
+            start_time=response.get('start_time', ''),
+            completion_time=response.get('completion_time', ''),
+            created_at=response.get('created_at', ''),
+            modified_at=response.get('modified_at', ''),
+            job_definition=job_definition,
+            job_definition_version=job_definition_version)
 
     @property
     def organization_id(self) -> str:
@@ -361,7 +404,7 @@ class Job():
         return self.__datasets
 
     @property
-    def creator(self) -> Dict[str, Any]:
+    def creator(self) -> Optional[Dict[str, Any]]:
         """Get the creator of this job."""
         return self.__creator
 
@@ -391,13 +434,19 @@ class Job():
         return self.__modified_at
 
     @property
-    def job_definition(self) -> Optional[JobDefinition]:
+    def job_definition(self) -> JobDefinition:
         """Get the job definition of this job."""
+        if self.__job_definition is None:
+            self.__job_definition = JobDefinitions(api=self.__api, organization_id=self.organization_id).get(name=self.job_definition_id)
         return self.__job_definition
 
     @property
-    def job_definition_version(self) -> Optional[JobDefinitionVersion]:
+    def job_definition_version(self) -> JobDefinitionVersion:
         """Get the job definition version of this job."""
+        if self.__job_definition_version is None:
+            self.__job_definition_version = JobDefinitionVersions(
+                api=self.__api, job_definition=self.job_definition).get(
+                    job_definition_version_id=self.job_definition_version_id)
         return self.__job_definition_version
 
 
