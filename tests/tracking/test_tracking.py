@@ -49,7 +49,7 @@ class TestTracking(unittest.TestCase):
         Connection.BASE_URL = ABEJA_API_URL
 
     @mock.patch('tensorboardX.SummaryWriter.flush')
-    @mock.patch('abeja.train.api.client.APIClient.get_training_job')
+    @mock.patch('abeja.training.api.client.APIClient.get_training_job')
     @mock.patch('requests.Session.request')
     @mock.patch.dict('os.environ', PATCHED_ENVIRON)
     def test_tracking(self, m, m_get_training_job, m_flush):
@@ -92,7 +92,7 @@ class TestTracking(unittest.TestCase):
             self.assertEqual(1, m_flush.call_count)
 
     @mock.patch('tensorboardX.SummaryWriter.flush')
-    @mock.patch('abeja.train.api.client.APIClient.get_training_job')
+    @mock.patch('abeja.training.api.client.APIClient.get_training_job')
     @mock.patch('requests.Session.request')
     @mock.patch.dict('os.environ', PATCHED_ENVIRON)
     def test_tracking_2(self, m, m_get_training_job, m_flush):
@@ -184,14 +184,14 @@ class TestTracking(unittest.TestCase):
             'Please specify "ABEJA_ORGANIZATION_ID", "TRAINING_JOB_DEFINITION_NAME" '
             'and "TRAINING_JOB_ID" for uploading.')
 
-    @mock.patch('abeja.train.api.client.APIClient.get_training_job',
+    @mock.patch('abeja.training.api.client.APIClient.get_training_job',
                 side_effect=BadRequest('foo', 'bar', 400, 'https://api.abeja.io/'))
     @mock.patch.dict('os.environ', PATCHED_ENVIRON)
     def test_tracking_error_on_get_training_job(self, m_get_training_job):
         with self.assertRaises(BadRequest):
             Tracking()
 
-    @mock.patch('abeja.train.api.client.APIClient.get_training_job')
+    @mock.patch('abeja.training.api.client.APIClient.get_training_job')
     @mock.patch('abeja.models.api.client.APIClient.create_training_model',
                 side_effect=BadRequest('foo', 'bar', 400, 'https://api.abeja.io/'))
     @mock.patch.dict('os.environ', PATCHED_ENVIRON)
@@ -204,9 +204,9 @@ class TestTracking(unittest.TestCase):
                 tracking.log_artifact(filepath=zipfile.name)
                 tracking.flush()
 
-    @mock.patch('abeja.train.api.client.APIClient.get_training_job')
+    @mock.patch('abeja.training.api.client.APIClient.get_training_job')
     @mock.patch('abeja.models.api.client.APIClient.create_training_model')
-    @mock.patch('abeja.train.api.client.APIClient.update_statistics',
+    @mock.patch('abeja.training.api.client.APIClient.update_statistics',
                 side_effect=BadRequest('foo', 'bar', 400, 'https://api.abeja.io/'))
     @mock.patch.dict('os.environ', PATCHED_ENVIRON)
     def test_tracking_error_on_update_statistics(
@@ -229,9 +229,9 @@ class TestTracking(unittest.TestCase):
             tk.log_metric(key='hoge/fuga', value=0.5)
         self.assertEqual(4, m_add_scalar.call_count)
 
-    @mock.patch('abeja.train.api.client.APIClient.get_training_job')
+    @mock.patch('abeja.training.api.client.APIClient.get_training_job')
     @mock.patch('abeja.models.api.client.APIClient.create_training_model')
-    @mock.patch('abeja.train.api.client.APIClient.update_statistics')
+    @mock.patch('abeja.training.api.client.APIClient.update_statistics')
     @mock.patch.dict('os.environ', PATCHED_ENVIRON)
     def test_tracking_statistics(self, m_update_statistics, m_create_training_model, m_get_training_job):
         for i in range(2):
@@ -251,7 +251,7 @@ class TestTracking(unittest.TestCase):
         self.assertDictEqual(expect, m_update_statistics.call_args[1]['statistics']['stages']['train'])
         self.assertDictEqual(expect, m_update_statistics.call_args[1]['statistics']['stages']['validation'])
 
-    @mock.patch('abeja.train.api.client.APIClient.update_statistics')
+    @mock.patch('abeja.training.api.client.APIClient.update_statistics')
     def test_tracking_statistics_not_work(self, m_update_statistics):
         for i in range(2):
             with Tracking(total_steps=10) as tk:
@@ -262,7 +262,7 @@ class TestTracking(unittest.TestCase):
                 tk.log_metric(key='test/loss', value=0.5)
         self.assertEqual(0, m_update_statistics.call_count)
 
-    @mock.patch('abeja.train.api.client.APIClient.get_training_job')
+    @mock.patch('abeja.training.api.client.APIClient.get_training_job')
     @mock.patch('requests.Session.request')
     @mock.patch.dict('os.environ', PATCHED_ENVIRON)
     def test_tracking_delete_after_flush(self, m, m_get_training_job):
