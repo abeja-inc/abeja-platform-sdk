@@ -2,7 +2,7 @@ from enum import Enum
 from abeja.exceptions import BadRequest
 
 
-# This enum will be deprecated in the future.
+# WARNING. This enum will be deprecated in the future version.
 # It is now only used in parameter validation.
 class InstanceTypeValidator(Enum):
     CPU_1 = 'cpu-1'

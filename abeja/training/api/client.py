@@ -771,6 +771,7 @@ class APIClient(BaseAPIClient):
             - Unauthorized: Authentication failed
             - InternalServerError
         """
+        # TODO: Remove
         from abeja.train.instance_type import InstanceTypeValidator
 
         data = {}  # type: Dict[str, Any]
