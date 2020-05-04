@@ -6,7 +6,6 @@ from pathlib import Path
 from typing import AnyStr, IO, Optional, List, Dict, Any
 
 from abeja.common.api_client import BaseAPIClient
-from abeja.training.instance_type import InstanceType
 from abeja.common.utils import get_filter_archived_applied_params
 
 
@@ -772,6 +771,8 @@ class APIClient(BaseAPIClient):
             - Unauthorized: Authentication failed
             - InternalServerError
         """
+        from abeja.train.instance_type import InstanceTypeValidator
+
         data = {}  # type: Dict[str, Any]
         if environment is not None:
             data['environment'] = environment
@@ -779,7 +780,7 @@ class APIClient(BaseAPIClient):
             data['environment'] = user_parameters
         if datasets is not None:
             data['datasets'] = datasets
-        if instance_type is not None and InstanceType.to_enum(instance_type):
+        if instance_type is not None and InstanceTypeValidator.validate(instance_type):
             data['instance_type'] = instance_type
         if description is not None:
             data['description'] = description
