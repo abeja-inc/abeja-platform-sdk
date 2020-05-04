@@ -253,8 +253,11 @@ def training_job_definition_version_response():
 @pytest.fixture
 def job_response():
     def _job_response(_organization_id, training_job_definition_id, training_job_id, **extra):
+        user_id = fake_platform_id()
         return {
             "job_definition_id": training_job_definition_id,
+            "id": training_job_id,
+            "training_job_id": training_job_id,
             "user_parameters": {},
             "start_time": None,
             "created_at": fake_iso8601(),
@@ -263,18 +266,34 @@ def job_response():
             "status": "Pending",
             "instance_type": "cpu-1",
             "modified_at": fake_iso8601(),
-            "training_job_id": training_job_id,
             "creator": {
                 "email": "test@abeja.asia",
                 "is_registered": True,
+                "preferred_language": "ja",
                 "created_at": fake_iso8601(),
-                "id": fake_platform_id(),
+                "id": user_id,
                 "display_name": None,
                 "updated_at": fake_iso8601(),
-                "role": "admin"
+                "role": "admin",
+                "profile_icon": {
+                    "thumbnail_icon_url": "https://icon.example.com/users/{}".format(user_id),
+                    "original_icon_url": "https://icon.example.com/users/{}".format(user_id),
+                    "mini_icon_url": "https://icon.example.com/users/{}".format(user_id),
+                }
             },
             "description": None,
-            "statistics": None,
+            "statistics": {
+                "stages": {
+                    "validation": {},
+                    "train": {
+                        "loss": random.uniform(0, 1),
+                        "debug": "debug"
+                    }
+                },
+                "progress_percentage": random.uniform(0, 1),
+                "num_epochs": random.randint(1, 300),
+                "epoch": random.randint(1, 300)
+            },
             **extra
         }
 

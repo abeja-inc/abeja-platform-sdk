@@ -282,11 +282,11 @@ def test_get_job_definition_version(requests_mock, api_base_url,
             api_base_url, adapter.organization_id, adapter.job_definition_name, version_id),
         json=res)
 
-    version = adapter.get(job_definition_version=version_id)
+    version = adapter.get(job_definition_version_id=version_id)
     assert version
     assert version.organization_id == adapter.organization_id
     assert version.job_definition_id == adapter.job_definition_id
-    assert version.job_definition_version == version_id
+    assert version.job_definition_version_id == version_id
     assert version.handler == res['handler']
     assert version.image == res['image']
     assert version.environment == {}
@@ -327,7 +327,7 @@ def test_get_job_definition_versions(requests_mock, api_base_url,
     for version, res in zip(versions, [res1, res2]):
         assert version.organization_id == adapter.organization_id
         assert version.job_definition_id == adapter.job_definition_id
-        assert version.job_definition_version == res['job_definition_version']
+        assert version.job_definition_version_id == res['job_definition_version']
         assert version.handler == res['handler']
         assert version.image == res['image']
         assert version.environment == {} if res['environment'] is None else res['environment']
@@ -374,7 +374,7 @@ def test_create_job_definition_version_zip(
     zip_content = make_zip_content({'train.py': b'print(1)'})
     version = adapter.create(BytesIO(zip_content), 'train:main', 'abeja-inc/all-gpu:19.04', {'key': 'value'}, description='new version')
     assert version
-    assert version.job_definition_version == res['job_definition_version']
+    assert version.job_definition_version_id == res['job_definition_version']
     assert version.job_definition
     assert version.job_definition_id == adapter.job_definition_id
 
@@ -424,7 +424,7 @@ def test_create_job_definition_version_files(
 
         version = adapter.create(files, 'train:handler', 'abeja-inc/all-cpu:19.10', {'KEY': 'VALUE'}, description='new version')
         assert version
-        assert version.job_definition_version == res['job_definition_version']
+        assert version.job_definition_version_id == res['job_definition_version']
         assert version.job_definition
         assert version.job_definition_id == adapter.job_definition_id
 
@@ -460,7 +460,7 @@ def test_update_job_definition_version(requests_mock, api_base_url,
     description = 'new version'
     version = adapter.update(version_id, description)
     assert version
-    assert version.job_definition_version == version_id
+    assert version.job_definition_version_id == version_id
 
     assert version.job_definition
     assert version.job_definition_id == adapter.job_definition_id
@@ -480,7 +480,7 @@ def test_archive_job_definition_version(requests_mock, api_base_url, api_client,
             api_base_url, adapter.organization_id, adapter.job_definition_name),
         json={'message': "test-1 archived"})
 
-    adapter.archive(job_definition_version=1)
+    adapter.archive(job_definition_version_id=1)
     assert requests_mock.called
 
 
@@ -494,7 +494,7 @@ def test_unarchive_job_definition_version(requests_mock, api_base_url, api_clien
             api_base_url, adapter.organization_id, adapter.job_definition_name),
         json={'message': "test-1 unarchived"})
 
-    adapter.unarchive(job_definition_version=1)
+    adapter.unarchive(job_definition_version_id=1)
     assert requests_mock.called
 
 
@@ -508,5 +508,5 @@ def test_delete_job_definition_version(requests_mock, api_base_url, api_client,
             api_base_url, adapter.organization_id, adapter.job_definition_name),
         json={'message': "test-1 deleted"})
 
-    adapter.delete(job_definition_version=1)
+    adapter.delete(job_definition_version_id=1)
     assert requests_mock.called

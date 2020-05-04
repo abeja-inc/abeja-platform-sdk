@@ -2,6 +2,7 @@ from typing import cast, Any, Dict, List, Iterator, Optional, Union, IO, AnyStr
 import io
 from .api.client import APIClient
 from .common import SizedIterable
+from .statistics import Statistics
 
 # Entity classes
 
@@ -149,7 +150,7 @@ class JobDefinitionVersion():
     def __init__(self, api: APIClient,
                  organization_id: str,
                  job_definition_id: str,
-                 job_definition_version: int,
+                 job_definition_version_id: int,
                  handler: str,
                  image: str,
                  environment: Dict[str, str],
@@ -161,7 +162,7 @@ class JobDefinitionVersion():
         self.__api = api
         self.__organization_id = organization_id
         self.__job_definition_id = job_definition_id
-        self.__job_definition_version = job_definition_version
+        self.__job_definition_version_id = job_definition_version_id
         self.__handler = handler
         self.__image = image
         self.__environment = environment
@@ -185,7 +186,7 @@ class JobDefinitionVersion():
             api=api,
             organization_id=organization_id,
             job_definition_id=response.get('job_definition_id', ''),
-            job_definition_version=response.get('job_definition_version', 0),
+            job_definition_version_id=response.get('job_definition_version', 0),
             handler=response.get('handler', ''),
             image=response.get('image', ''),
             environment=(response.get('environment') or {}),
@@ -203,18 +204,18 @@ class JobDefinitionVersion():
 
     @property
     def organization_id(self) -> str:
-        """Get the organization ID of this job definition."""
+        """Get the organization ID of this job definition version."""
         return self.__organization_id
 
     @property
     def job_definition_id(self) -> str:
-        """Get the job_definition ID of this job definition."""
+        """Get the job_definition ID of this job definition version."""
         return self.__job_definition_id
 
     @property
-    def job_definition_version(self) -> int:
+    def job_definition_version_id(self) -> int:
         """Get the version of this job definition version."""
-        return self.__job_definition_version
+        return self.__job_definition_version_id
 
     @property
     def handler(self) -> str:
@@ -250,6 +251,155 @@ class JobDefinitionVersion():
     def modified_at(self) -> str:
         """Get the modified date string (ISO 8601) of this job definition version."""
         return self.__modified_at
+
+
+class Job():
+    """Training job object.
+    """
+
+    def __init__(self, api: APIClient,
+                 organization_id: str,
+                 job_definition_id: str,
+                 job_definition_version_id: int,
+                 job_id: str,
+                 instance_type: str,
+                 exec_env: str,
+                 environment: Dict[str, str],
+                 statistics: Optional[Statistics],
+                 status_message: Optional[str],
+                 status: str,
+                 description: str,
+                 datasets: Dict[str, str],
+                 creator: Dict[str, Any],
+                 archived: bool,
+                 start_time: str,
+                 completion_time: str,
+                 created_at: str,
+                 modified_at: str,
+                 job_definition: Optional[JobDefinition] = None,
+                 job_definition_version: Optional[JobDefinitionVersion] = None) -> None:
+        self.__api = api
+        self.__organization_id = organization_id
+        self.__job_definition_id = job_definition_id
+        self.__job_definition_version_id = job_definition_version_id
+        self.__job_id = job_id
+        self.__instance_type = instance_type
+        self.__exec_env = exec_env
+        self.__environment = environment
+        self.__statistics = statistics
+        self.__status_message = status_message
+        self.__status = status
+        self.__description = description
+        self.__datasets = datasets
+        self.__creator = creator
+        self.__archived = archived
+        self.__start_time = start_time
+        self.__completion_time = completion_time
+        self.__created_at = created_at
+        self.__modified_at = modified_at
+        self.__job_definition = job_definition
+        self.__job_definition_version = job_definition_version
+
+    @property
+    def organization_id(self) -> str:
+        """Get the organization id of this job."""
+        return self.__organization_id
+
+    @property
+    def job_definition_id(self) -> str:
+        """Get the job definition id of this job."""
+        return self.__job_definition_id
+
+    @property
+    def job_definition_version_id(self) -> int:
+        """Get the job definition version id of this job."""
+        return self.__job_definition_version_id
+
+    @property
+    def job_id(self) -> str:
+        """Get the id of this job."""
+        return self.__job_id
+
+    @property
+    def instance_type(self) -> str:
+        """Get the instance type of this job."""
+        return self.__instance_type
+
+    @property
+    def exec_env(self) -> str:
+        """Get the exec env of this job."""
+        return self.__exec_env
+
+    @property
+    def environment(self) -> Dict[str, str]:
+        """Get environment variables of this job."""
+        return self.__environment
+
+    @property
+    def statistics(self) -> Optional[Statistics]:
+        """Get the statistics of this job."""
+        return self.__statistics
+
+    @property
+    def status_message(self) -> Optional[str]:
+        """Get the status_message of this job."""
+        return self.__status_message
+
+    @property
+    def status(self) -> str:
+        """Get the status of this job."""
+        return self.__status
+
+    @property
+    def description(self) -> str:
+        """Get the description of this job."""
+        return self.__description
+
+    @property
+    def datasets(self) -> Dict[str, str]:
+        """Get the datasets of this job."""
+        return self.__datasets
+
+    @property
+    def creator(self) -> Dict[str, Any]:
+        """Get the creator of this job."""
+        return self.__creator
+
+    @property
+    def archived(self) -> bool:
+        """Get the archived of this job."""
+        return self.__archived
+
+    @property
+    def start_time(self) -> str:
+        """Get the start time of this job."""
+        return self.__start_time
+
+    @property
+    def completion_time(self) -> str:
+        """Get the completion time of this job."""
+        return self.__completion_time
+
+    @property
+    def created_at(self) -> str:
+        """Get the created datetime string of this job."""
+        return self.__created_at
+
+    @property
+    def modified_at(self) -> str:
+        """Get the modified datetime string of this job."""
+        return self.__modified_at
+
+    @property
+    def job_definition(self) -> Optional[JobDefinition]:
+        """Get the job definition of this job."""
+        return self.__job_definition
+
+    @property
+    def job_definition_version(self) -> Optional[JobDefinitionVersion]:
+        """Get the job definition version of this job."""
+        return self.__job_definition_version
+
 
 # Adapter classes
 
@@ -410,16 +560,16 @@ class JobDefinitionVersions():
         """Get the job definition name."""
         return self.__job_definition.name
 
-    def get(self, job_definition_version: int) -> JobDefinitionVersion:
+    def get(self, job_definition_version_id: int) -> JobDefinitionVersion:
         """Get a training job definition version.
 
         Request Syntax:
             .. code-block:: python
 
-                version = versions.get(job_definition_version=5)
+                version = versions.get(job_definition_version_id=5)
 
             Params:
-            - **job_definition_version** (int): the version number
+            - **job_definition_version_id** (int): the version number
 
         Return type:
             :class:`JobDefinitionVersion` object
@@ -428,7 +578,7 @@ class JobDefinitionVersions():
         res = self.__api.get_training_job_definition_version(
             organization_id=self.organization_id,
             job_definition_name=self.job_definition_name,
-            version_id=job_definition_version)
+            version_id=job_definition_version_id)
 
         return JobDefinitionVersion.from_response(
             api=self.__api,
@@ -484,7 +634,6 @@ class JobDefinitionVersions():
                     description='new version')
 
             Params:
-            - **job_definition_version** (int): the version number
             - **source** (List[str] | IO): an input source for training code. It's one of:
               - zip or tar.gz archived file-like object.
               - a list of file paths.
@@ -531,16 +680,16 @@ class JobDefinitionVersions():
                 response=res,
                 job_definition=self.__job_definition)
 
-    def update(self, job_definition_version: int, description: str) -> JobDefinitionVersion:
+    def update(self, job_definition_version_id: int, description: str) -> JobDefinitionVersion:
         """Update a training job definition version.
 
         Request Syntax:
             .. code-block:: python
 
-                version = versions.update(job_definition_version=5, description='new version')
+                version = versions.update(job_definition_version_id=5, description='new version')
 
             Params:
-            - **job_definition_version** (int): the version number
+            - **job_definition_version_id** (int): the version number
 
         Return type:
             :class:`JobDefinitionVersion` object
@@ -549,7 +698,7 @@ class JobDefinitionVersions():
         res = self.__api.patch_training_job_definition_version(
             organization_id=self.organization_id,
             job_definition_name=self.job_definition_name,
-            version_id=job_definition_version,
+            version_id=job_definition_version_id,
             description=description)
 
         return JobDefinitionVersion.from_response(
@@ -558,53 +707,53 @@ class JobDefinitionVersions():
             response=res,
             job_definition=self.__job_definition)
 
-    def archive(self, job_definition_version: int):
+    def archive(self, job_definition_version_id: int):
         """Archive a training job definition version.
 
         Request Syntax:
             .. code-block:: python
 
-                versions.archive(job_definition_version=5)
+                versions.archive(job_definition_version_id=5)
 
             Params:
-            - **job_definition_version** (int): the version number
+            - **job_definition_version_id** (int): the version number
         """
         self.__api.archive_training_job_definition_version(
             organization_id=self.organization_id,
             job_definition_name=self.job_definition_name,
-            version_id=job_definition_version)
+            version_id=job_definition_version_id)
 
-    def unarchive(self, job_definition_version: int):
+    def unarchive(self, job_definition_version_id: int):
         """Unarchive a training job definition version.
 
         Request Syntax:
             .. code-block:: python
 
-                versions.unarchive(job_definition_version=5)
+                versions.unarchive(job_definition_version_id=5)
 
             Params:
-            - **job_definition_version** (int): the version number
+            - **job_definition_version_id** (int): the version number
         """
         self.__api.unarchive_training_job_definition_version(
             organization_id=self.organization_id,
             job_definition_name=self.job_definition_name,
-            version_id=job_definition_version)
+            version_id=job_definition_version_id)
 
-    def delete(self, job_definition_version: int):
+    def delete(self, job_definition_version_id: int):
         """Delete a training job definition version.
 
         Request Syntax:
             .. code-block:: python
 
-                versions.delete(job_definition_version=5)
+                versions.delete(job_definition_version_id=5)
 
             Params:
-            - **job_definition_version** (int): the version number
+            - **job_definition_version_id** (int): the version number
         """
         self.__api.delete_training_job_definition_version(
             organization_id=self.organization_id,
             job_definition_name=self.job_definition_name,
-            version_id=job_definition_version)
+            version_id=job_definition_version_id)
 
 # Iterator classes
 
