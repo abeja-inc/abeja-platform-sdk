@@ -689,16 +689,7 @@ class APIClient(BaseAPIClient):
             .. code-block:: json
 
                 {
-                    "job_definition_version": 1,
-                    "user_parameters": {},
-                    "datasets": {
-                        "mnist": "1111111111111"
-                    },
-                    "modified_at": "2018-05-17T12:34:46.344076Z",
-                    "job_definition_id": "1443714239154",
-                    "handler": "train:handler",
-                    "created_at": "2018-05-17T12:34:46.296488Z",
-                    "image": "abeja-inc/all-gpu:19.04"
+                    "message": "deleted"
                 }
 
         Raises:

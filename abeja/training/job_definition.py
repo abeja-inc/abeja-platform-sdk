@@ -575,7 +575,7 @@ class JobDefinitionVersions():
             version_id=job_definition_version)
 
     def unarchive(self, job_definition_version: int):
-        """unarchive a training job definition version.
+        """Unarchive a training job definition version.
 
         Request Syntax:
             .. code-block:: python
@@ -586,6 +586,22 @@ class JobDefinitionVersions():
             - **job_definition_version** (int): the version number
         """
         self.__api.unarchive_training_job_definition_version(
+            organization_id=self.organization_id,
+            job_definition_name=self.job_definition_name,
+            version_id=job_definition_version)
+
+    def delete(self, job_definition_version: int):
+        """Delete a training job definition version.
+
+        Request Syntax:
+            .. code-block:: python
+
+                versions.delete(job_definition_version=5)
+
+            Params:
+            - **job_definition_version** (int): the version number
+        """
+        self.__api.delete_training_job_definition_version(
             organization_id=self.organization_id,
             job_definition_name=self.job_definition_name,
             version_id=job_definition_version)
