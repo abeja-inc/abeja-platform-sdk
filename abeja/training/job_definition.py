@@ -301,6 +301,20 @@ class Job():
         self.__job_definition_version = job_definition_version
 
     @staticmethod
+    def build_statistics(response: Optional[Dict[str, Any]]) -> Optional[Statistics]:
+        if response is None:
+            return None
+
+        stages = {}
+        if 'stages' in response:
+            stages = response.pop('stages')
+
+        statistics = Statistics(**response)
+        for name, values in stages.items():
+            statistics.add_stage(name=name, **values)
+        return statistics
+
+    @staticmethod
     def from_response(api: APIClient,
                       organization_id: str,
                       response: Dict[str, Any],
@@ -311,14 +325,7 @@ class Job():
         NOTE: For convenient, this method DOES NOT validate the input response and
         always returns an object filled with default values.
         """
-        stats = (response.get('statistics') or {})
-        stages = {}
-        if 'stages' in stats:
-            stages = stats.pop('stages')
-
-        statistics = Statistics(**stats)
-        for name, values in stages.items():
-            statistics.add_stage(name=name, **values)
+        statistics = Job.build_statistics(response.get('statistics'))
 
         return Job(
             api=api,

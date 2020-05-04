@@ -549,3 +549,20 @@ def test_job(requests_mock, api_base_url, job_factory, training_job_definition_r
     assert version.organization_id == job.organization_id
     assert version.job_definition_id == job.job_definition_id
     assert version.job_definition_version_id == job.job_definition_version_id
+
+
+def test_job_statistics_none(requests_mock, api_base_url, job_factory, training_job_definition_response, training_job_definition_version_response) -> None:
+    job = job_factory(statistics=None)  # type: Job
+    assert job.statistics is None
+
+
+def test_job_statistics_no_stages(requests_mock, api_base_url, job_factory, training_job_definition_response, training_job_definition_version_response) -> None:
+    job = job_factory(statistics={
+        "progress_percentage": 0.11,
+        "num_epochs": 100,
+        "epoch": 11
+    })  # type: Job
+    assert job.statistics
+    assert job.statistics.progress_percentage == 0.11
+    assert job.statistics.num_epochs == 100
+    assert job.statistics.epoch == 11
