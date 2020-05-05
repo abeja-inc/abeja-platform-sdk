@@ -129,19 +129,34 @@ class JobDefinition():
         return self.__modified_at
 
     def job_definition_versions(self) -> 'JobDefinitionVersions':
-        """Get a adapter object for handling training job definition versions under
+        """Return a adapter object for handling training job definition versions under
         this job definition.
 
         Request syntax:
             .. code-block:: python
 
                 adapter = definition.job_definition_versions()
-                version = adapter.get(version=1)
+                version = adapter.get(job_definition_version_id=1)
 
         Return type:
             :class:`JobDefinitions <abeja.training.JobDefinitions>` object
         """
         return JobDefinitionVersions(api=self.__api, job_definition=self)
+
+    def jobs(self) -> 'Jobs':
+        """Return a adapter object for handling training jobs under
+        this job definition.
+
+        Request syntax:
+            .. code-block:: python
+
+                adapter = definition.jobs()
+                version = adapter.get(job_id='1234567890123')
+
+        Return type:
+            :class:`JobDefinitions <abeja.training.Jobs>` object
+        """
+        return Jobs(api=self.__api, job_definition=self)
 
 
 class JobDefinitionVersion():
@@ -811,6 +826,30 @@ class JobDefinitionVersions():
             organization_id=self.organization_id,
             job_definition_name=self.job_definition_name,
             version_id=job_definition_version_id)
+
+
+class Jobs():
+    """The training jobs adapter class.
+    """
+
+    def __init__(self, api: APIClient, job_definition: JobDefinition) -> None:
+        self.__api = api
+        self.__job_definition = job_definition
+
+    @property
+    def organization_id(self) -> str:
+        """Get the organization ID."""
+        return self.__job_definition.organization_id
+
+    @property
+    def job_definition_id(self) -> str:
+        """Get the job definition ID."""
+        return self.__job_definition.job_definition_id
+
+    @property
+    def job_definition_name(self) -> str:
+        """Get the job definition name."""
+        return self.__job_definition.name
 
 # Iterator classes
 

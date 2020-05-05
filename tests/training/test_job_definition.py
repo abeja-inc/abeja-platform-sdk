@@ -580,3 +580,10 @@ def test_job_statistics_no_stages(requests_mock, api_base_url, job_factory, trai
 def test_job_exec_env_none(job_factory, exec_env, expected) -> None:
     job = job_factory(exec_env=exec_env)  # type: Job
     assert job.exec_env is expected
+
+
+def test_jobs(job_definition_factory) -> None:
+    definition = job_definition_factory()  # type: JobDefinition
+    adapter = definition.jobs()
+    assert adapter.organization_id == definition.organization_id
+    assert adapter.job_definition_id == definition.job_definition_id
