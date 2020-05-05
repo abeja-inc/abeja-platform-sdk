@@ -4,6 +4,7 @@ import json
 import cgi
 from pathlib import Path
 from abeja.training import APIClient, JobDefinition, Job, JobDefinitionVersion, JobDefinitions
+from abeja.common.exec_env import ExecEnv
 
 
 @pytest.fixture
@@ -23,9 +24,9 @@ def job_definition_factory(api_client, organization_id, job_definition_id, train
 
 
 @pytest.fixture
-def job_definition_version_factory(api_client, organization_id, job_definition_id, job_id, job_response):
-    def factory(organization_id=organization_id, job_definition_id=job_definition_id, job_id=job_id, **kwargs):
-        response = job_response(organization_id, job_definition_id, job_id, **kwargs)
+def job_definition_version_factory(api_client, organization_id, job_definition_id, training_job_definition_version_response):
+    def factory(organization_id=organization_id, job_definition_id=job_definition_id, **kwargs):
+        response = training_job_definition_version_response(organization_id, job_definition_id, **kwargs)
         return JobDefinitionVersion.from_response(
             api=api_client,
             organization_id=organization_id,
@@ -35,9 +36,9 @@ def job_definition_version_factory(api_client, organization_id, job_definition_i
 
 
 @pytest.fixture
-def job_factory(api_client, organization_id, job_definition_id, training_job_definition_version_response):
-    def factory(organization_id=organization_id, job_definition_id=job_definition_id, **kwargs):
-        response = training_job_definition_version_response(organization_id, job_definition_id, **kwargs)
+def job_factory(api_client, organization_id, job_definition_id, job_id, job_response):
+    def factory(organization_id=organization_id, job_definition_id=job_definition_id, job_id=job_id, **kwargs):
+        response = job_response(organization_id, job_definition_id, job_id, **kwargs)
         return Job.from_response(
             api=api_client,
             organization_id=organization_id,
@@ -540,6 +541,8 @@ def test_job(requests_mock, api_base_url, job_factory, training_job_definition_r
             api_base_url, job.organization_id, job.job_definition.name, job.job_definition_version_id),
         json=res)
 
+    assert job.exec_env is ExecEnv.CLOUD
+
     definition = job.job_definition
     assert definition
     assert definition.organization_id == job.organization_id
@@ -566,3 +569,13 @@ def test_job_statistics_no_stages(requests_mock, api_base_url, job_factory, trai
     assert job.statistics.progress_percentage == 0.11
     assert job.statistics.num_epochs == 100
     assert job.statistics.epoch == 11
+
+
+def test_job_exec_env_none(requests_mock, api_base_url, job_factory, training_job_definition_response, training_job_definition_version_response) -> None:
+    job = job_factory(exec_env=None)  # type: Job
+    assert job.exec_env is ExecEnv.UNKNOWN
+
+
+def test_job_exec_env_local(requests_mock, api_base_url, job_factory, training_job_definition_response, training_job_definition_version_response) -> None:
+    job = job_factory(exec_env='local')  # type: Job
+    assert job.exec_env is ExecEnv.LOCAL

@@ -3,6 +3,7 @@ import io
 from .api.client import APIClient
 from .common import SizedIterable
 from .statistics import Statistics
+from abeja.common.exec_env import ExecEnv
 
 # Entity classes
 
@@ -263,7 +264,7 @@ class Job():
                  job_definition_version_id: int,
                  job_id: str,
                  instance_type: str,
-                 exec_env: str,
+                 exec_env: ExecEnv,
                  environment: Dict[str, str],
                  statistics: Optional[Statistics],
                  status_message: Optional[str],
@@ -334,7 +335,7 @@ class Job():
             job_definition_version_id=response.get('job_definition_version', 0),
             job_id=response.get('id', response.get('training_job_id', '')),
             instance_type=response.get('instance_type', ''),
-            exec_env=response.get('exec_env', ''),
+            exec_env=ExecEnv.from_value(cast(str, response.get('exec_env'))),
             environment=(response.get('environment') or {}),
             statistics=statistics,
             status_message=response.get('status_message', ''),
@@ -376,8 +377,8 @@ class Job():
         return self.__instance_type
 
     @property
-    def exec_env(self) -> str:
-        """Get the exec env of this job."""
+    def exec_env(self) -> ExecEnv:
+        """Get the execution environment which this job runs."""
         return self.__exec_env
 
     @property

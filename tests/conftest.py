@@ -263,6 +263,7 @@ def job_response():
             "created_at": fake_iso8601(),
             "job_definition_version": 1,
             "completion_time": None,
+            "exec_env": "cloud",
             "status": "Pending",
             "instance_type": "cpu-1",
             "modified_at": fake_iso8601(),
