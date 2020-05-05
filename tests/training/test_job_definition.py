@@ -3,7 +3,7 @@ from io import BytesIO
 import json
 import cgi
 from pathlib import Path
-from abeja.training import APIClient, JobDefinition, Job, JobDefinitionVersion, JobDefinitions
+from abeja.training import APIClient, JobDefinition, Job, JobDefinitionVersion, JobDefinitions, JobStatus
 from abeja.common.exec_env import ExecEnv
 
 
@@ -577,9 +577,21 @@ def test_job_statistics_no_stages(requests_mock, api_base_url, job_factory, trai
     ('new value', ExecEnv.UNKNOWN),
     (None, ExecEnv.UNKNOWN),
 ])
-def test_job_exec_env_none(job_factory, exec_env, expected) -> None:
+def test_job_exec_env(job_factory, exec_env, expected) -> None:
     job = job_factory(exec_env=exec_env)  # type: Job
     assert job.exec_env is expected
+
+
+@pytest.mark.parametrize('job_status,expected', [
+    ('Pending', JobStatus.PENDING),
+    ('Complete', JobStatus.COMPLETE),
+    ('', JobStatus.UNKNOWN),
+    ('new value', JobStatus.UNKNOWN),
+    (None, JobStatus.UNKNOWN),
+])
+def test_job_status(job_factory, job_status, expected) -> None:
+    job = job_factory(status=job_status)  # type: Job
+    assert job.status is expected
 
 
 def test_jobs(job_definition_factory) -> None:

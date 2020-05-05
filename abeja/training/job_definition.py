@@ -3,6 +3,7 @@ import io
 from .api.client import APIClient
 from .common import SizedIterable
 from .statistics import Statistics
+from .job_status import JobStatus
 from abeja.common.exec_env import ExecEnv
 
 # Entity classes
@@ -283,7 +284,7 @@ class Job():
                  environment: Dict[str, str],
                  statistics: Optional[Statistics],
                  status_message: Optional[str],
-                 status: str,
+                 status: JobStatus,
                  description: str,
                  datasets: Dict[str, str],
                  creator: Optional[Dict[str, Any]],
@@ -354,7 +355,7 @@ class Job():
             environment=(response.get('environment') or {}),
             statistics=statistics,
             status_message=response.get('status_message', ''),
-            status=response.get('status', ''),
+            status=JobStatus.from_value(cast(str, response.get('status'))),
             description=response.get('description', ''),
             datasets=(response.get('datasets') or {}),
             creator=response.get('creator'),
@@ -412,8 +413,8 @@ class Job():
         return self.__status_message
 
     @property
-    def status(self) -> str:
-        """Get the status of this job."""
+    def status(self) -> JobStatus:
+        """Get the current status of this job."""
         return self.__status
 
     @property
