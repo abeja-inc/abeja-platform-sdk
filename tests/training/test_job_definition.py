@@ -541,7 +541,7 @@ def test_job(requests_mock, api_base_url, job_factory, training_job_definition_r
             api_base_url, job.organization_id, job.job_definition.name, job.job_definition_version_id),
         json=res)
 
-    assert job.exec_env is ExecEnv.CLOUD
+    assert job.exec_env == ExecEnv.CLOUD
 
     definition = job.job_definition
     assert definition
@@ -579,7 +579,7 @@ def test_job_statistics_no_stages(requests_mock, api_base_url, job_factory, trai
 ])
 def test_job_exec_env(job_factory, exec_env, expected) -> None:
     job = job_factory(exec_env=exec_env)  # type: Job
-    assert job.exec_env is expected
+    assert job.exec_env == expected
 
 
 @pytest.mark.parametrize('job_status,expected', [
@@ -591,7 +591,7 @@ def test_job_exec_env(job_factory, exec_env, expected) -> None:
 ])
 def test_job_status(job_factory, job_status, expected) -> None:
     job = job_factory(status=job_status)  # type: Job
-    assert job.status is expected
+    assert job.status == expected
 
 
 def test_jobs(job_definition_factory) -> None:
@@ -621,7 +621,7 @@ def test_get_job(requests_mock, api_base_url,
     assert job.organization_id == adapter.organization_id
     assert job.job_definition_id == adapter.job_definition_id
     assert job.job_definition_version_id == res['job_definition_version']
-    assert job.exec_env is ExecEnv.CLOUD
+    assert job.exec_env == ExecEnv.CLOUD
 
     assert job.job_definition
     assert job.job_definition.job_definition_id == adapter.job_definition_id
