@@ -6,6 +6,7 @@ from .common import SizedIterable
 from .statistics import Statistics
 from .job_status import JobStatus
 from abeja.common.exec_env import ExecEnv
+from abeja.common.instance_type import InstanceType
 
 # Entity classes
 
@@ -280,7 +281,7 @@ class Job():
                  job_definition_id: str,
                  job_definition_version_id: int,
                  job_id: str,
-                 instance_type: str,
+                 instance_type: InstanceType,
                  exec_env: ExecEnv,
                  environment: Dict[str, str],
                  statistics: Optional[Statistics],
@@ -351,7 +352,7 @@ class Job():
             job_definition_id=response.get('job_definition_id', ''),
             job_definition_version_id=response.get('job_definition_version', 0),
             job_id=response.get('id', response.get('training_job_id', '')),
-            instance_type=response.get('instance_type', ''),
+            instance_type=InstanceType.parse(response.get('instance_type', '')),
             exec_env=ExecEnv.from_value(cast(str, response.get('exec_env'))),
             environment=(response.get('environment') or {}),
             statistics=statistics,
@@ -389,7 +390,7 @@ class Job():
         return self.__job_id
 
     @property
-    def instance_type(self) -> str:
+    def instance_type(self) -> InstanceType:
         """Get the instance type of this job."""
         return self.__instance_type
 
