@@ -252,8 +252,11 @@ def training_job_definition_version_response():
 
 @pytest.fixture
 def job_response():
-    def _job_response(_organization_id, training_job_definition_id, training_job_id, **extra):
+    def _job_response(_organization_id, training_job_definition_id, training_job_id=None, **extra):
         user_id = fake_platform_id()
+        if training_job_id is None:
+            training_job_id = fake_platform_id()
+
         return {
             "job_definition_id": training_job_definition_id,
             "id": training_job_id,

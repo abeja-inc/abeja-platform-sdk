@@ -1,4 +1,5 @@
-from typing import cast, Any, Dict, List, Iterator, Optional, Union, IO, AnyStr
+from typing import cast, Any, Dict, List, Iterator, Optional, Union, IO, AnyStr, TypeVar
+from abc import abstractmethod
 import io
 from .api.client import APIClient
 from .common import SizedIterable
@@ -521,7 +522,7 @@ class JobDefinitions():
              offset: Optional[int] = None,
              limit: Optional[int] = None) -> SizedIterable[JobDefinition]:
         """Returns an iterator object that iterates training job definitions
-        under the this object.
+        under this object.
 
         This method returns an instance of :class:`SizedIterable`, so you can
         get the total number of training job definitions.
@@ -661,7 +662,7 @@ class JobDefinitionVersions():
 
     def list(self, filter_archived: Optional[bool] = None) -> SizedIterable[JobDefinitionVersion]:
         """Returns an iterator object that iterates training job definition versions
-        under the this object.
+        under this object.
 
         This method returns an instance of :class:`SizedIterable`, so you can
         get the total number of training job definition versions.
@@ -878,10 +879,38 @@ class Jobs():
             response=res,
             job_definition=self.__job_definition)
 
+    def list(self,
+             filter_archived: Optional[bool] = None,
+             offset: Optional[int] = None,
+             limit: Optional[int] = None) -> SizedIterable[Job]:
+        """Returns an iterator object that iterates training jobs
+        under this object.
+
+        This method returns an instance of :class:`SizedIterable`, so you can
+        get the total number of training jobs.
+
+        Params:
+            - **filter_archived** (bool): **[optional]** whether include archived ones or not. (default is not-filtered)
+            - **offset** (int): **[optional]** paging offset.
+            - **limit** (int): **[optional]** paging limit.
+
+        Return type:
+            SizedIterable[Job]
+        """
+        return JobIterator(
+            api=self.__api,
+            organization_id=self.organization_id,
+            job_definition=self.__job_definition,
+            filter_archived=filter_archived,
+            offset=offset,
+            limit=limit)
+
+
 # Iterator classes
+T = TypeVar('T')
 
 
-class JobDefinitionIterator(SizedIterable[JobDefinition]):
+class AbstractSizedIterator(SizedIterable[T]):
 
     def __init__(self, api: APIClient, organization_id: str,
                  filter_archived: Optional[bool],
@@ -895,32 +924,84 @@ class JobDefinitionIterator(SizedIterable[JobDefinition]):
         self.__total = None  # type: Optional[int]
         self.__page = None  # type: Optional[Dict[str, Any]]
 
-    def invoke_api(self) -> Dict[str, Any]:
-        return self.__api.get_training_job_definitions(
-            organization_id=self.organization_id,
-            filter_archived=self.__filter_archived,
-            offset=self.__offset,
-            limit=self.__limit)
+    @abstractmethod
+    def invoke_api(self, api: APIClient) -> Dict[str, Any]:
+        pass
+
+    @abstractmethod
+    def build_entry(self, api: APIClient, entry: Dict[str, Any]) -> T:
+        pass
 
     @property
     def organization_id(self) -> str:
-        """Get the organization ID."""
         return self.__organization_id
+
+    @property
+    def filter_archived(self) -> Optional[bool]:
+        return self.__filter_archived
+
+    @property
+    def offset(self) -> Optional[int]:
+        return self.__offset
+
+    @property
+    def limit(self) -> Optional[int]:
+        return self.__limit
 
     def __len__(self) -> int:
         if self.__page is None:
-            self.__page = self.invoke_api()
+            self.__page = self.invoke_api(self.__api)
         return self.__page['total']
 
-    def __iter__(self) -> Iterator[JobDefinition]:
+    def __iter__(self) -> Iterator[T]:
         if self.__page is None:
-            self.__page = self.invoke_api()
+            self.__page = self.invoke_api(self.__api)
 
         while self.__page['entries']:
             for entry in self.__page["entries"]:
-                yield JobDefinition.from_response(self.__api, self.organization_id, entry)
+                yield self.build_entry(self.__api, entry)
                 self.__offset += 1
             if self.__offset < self.__page['total']:
-                self.__page = self.invoke_api()
+                self.__page = self.invoke_api(self.__api)
             else:
                 break
+
+
+class JobDefinitionIterator(AbstractSizedIterator[JobDefinition]):
+
+    def invoke_api(self, api: APIClient) -> Dict[str, Any]:
+        return api.get_training_job_definitions(
+            organization_id=self.organization_id,
+            filter_archived=self.filter_archived,
+            offset=self.offset,
+            limit=self.limit)
+
+    def build_entry(self, api: APIClient, entry: Dict[str, Any]) -> JobDefinition:
+        return JobDefinition.from_response(api, self.organization_id, entry)
+
+
+class JobIterator(AbstractSizedIterator[Job]):
+
+    def __init__(self, api: APIClient,
+                 organization_id: str,
+                 job_definition: JobDefinition,
+                 filter_archived: Optional[bool],
+                 offset: Optional[int],
+                 limit: Optional[int]) -> None:
+        super().__init__(api=api,
+                         organization_id=organization_id,
+                         filter_archived=filter_archived,
+                         offset=offset,
+                         limit=limit)
+        self.__job_definition = job_definition
+
+    def invoke_api(self, api: APIClient) -> Dict[str, Any]:
+        return api.get_training_jobs(
+            organization_id=self.organization_id,
+            job_definition_name=self.__job_definition.name,
+            filter_archived=self.filter_archived,
+            offset=self.offset,
+            limit=self.limit)
+
+    def build_entry(self, api: APIClient, entry: Dict[str, Any]) -> Job:
+        return Job.from_response(api, self.organization_id, job_definition=self.__job_definition, response=entry)

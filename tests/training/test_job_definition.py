@@ -227,7 +227,7 @@ def test_list_job_definitions_paging(requests_mock, api_base_url, api_client,
     definition3 = training_job_definition_response(organization_id, job_definition_id)
 
     requests_mock.get(
-        '{}/organizations/{}/training/definitions/?limit=2'.format(
+        '{}/organizations/{}/training/definitions/?limit=2&offset=0'.format(
             api_base_url, organization_id),
         json={
             'entries': [definition1, definition2],
@@ -236,7 +236,7 @@ def test_list_job_definitions_paging(requests_mock, api_base_url, api_client,
             'total': 3
         })
     requests_mock.get(
-        '{}/organizations/{}/training/definitions/?limit=2'.format(
+        '{}/organizations/{}/training/definitions/?limit=2&offset=2'.format(
             api_base_url, organization_id),
         json={
             'entries': [definition3],
@@ -625,3 +625,91 @@ def test_get_job(requests_mock, api_base_url,
 
     assert job.job_definition
     assert job.job_definition.job_definition_id == adapter.job_definition_id
+
+
+def test_list_jobs(requests_mock, api_base_url,
+                   job_definition_factory, job_response) -> None:
+    definition = job_definition_factory()  # type: JobDefinition
+    adapter = definition.jobs()
+
+    job1 = job_response(adapter.organization_id, adapter.job_definition_id)
+    job2 = job_response(adapter.organization_id, adapter.job_definition_id)
+    requests_mock.get(
+        '{}/organizations/{}/training/definitions/{}/jobs'.format(
+            api_base_url, adapter.organization_id, adapter.job_definition_name),
+        json={
+            'entries': [job1, job2],
+            'limit': 50,
+            'offset': 0,
+            'total': 2
+        })
+
+    iterator = adapter.list()
+    assert len(iterator) == 2
+
+    jobs = list(iterator)
+    assert len(jobs) == 2
+    assert jobs[0].job_id == job1['training_job_id']
+    assert jobs[1].job_id == job2['training_job_id']
+
+
+def test_list_jobs_filter_archived(requests_mock, api_base_url,
+                                   job_definition_factory, job_response) -> None:
+    definition = job_definition_factory()  # type: JobDefinition
+    adapter = definition.jobs()
+
+    job1 = job_response(adapter.organization_id, adapter.job_definition_id)
+    requests_mock.get(
+        '{}/organizations/{}/training/definitions/{}/jobs?filter_archived=exclude_archived'.format(
+            api_base_url, adapter.organization_id, adapter.job_definition_name),
+        json={
+            'entries': [job1],
+            'limit': 50,
+            'offset': 0,
+            'total': 1
+        })
+
+    iterator = adapter.list(filter_archived=True)
+    assert len(iterator) == 1
+
+    jobs = list(iterator)
+    assert len(jobs) == 1
+    assert jobs[0].job_id == job1['training_job_id']
+
+
+def test_list_jobs_paging(requests_mock, api_base_url,
+                          job_definition_factory, job_response) -> None:
+    definition = job_definition_factory()  # type: JobDefinition
+    adapter = definition.jobs()
+
+    job1 = job_response(adapter.organization_id, adapter.job_definition_id)
+    job2 = job_response(adapter.organization_id, adapter.job_definition_id)
+    job3 = job_response(adapter.organization_id, adapter.job_definition_id)
+
+    requests_mock.get(
+        '{}/organizations/{}/training/definitions/{}/jobs?limit=2&offset=0'.format(
+            api_base_url, adapter.organization_id, adapter.job_definition_name),
+        json={
+            'entries': [job1, job2],
+            'limit': 2,
+            'offset': 0,
+            'total': 3
+        })
+    requests_mock.get(
+        '{}/organizations/{}/training/definitions/{}/jobs?limit=2&offset=2'.format(
+            api_base_url, adapter.organization_id, adapter.job_definition_name),
+        json={
+            'entries': [job3],
+            'limit': 2,
+            'offset': 2,
+            'total': 3
+        })
+
+    iterator = adapter.list(limit=2)
+    assert len(iterator) == 3
+
+    jobs = list(iterator)
+    assert len(jobs) == 3
+    assert jobs[0].job_id == job1['training_job_id']
+    assert jobs[1].job_id == job2['training_job_id']
+    assert jobs[2].job_id == job3['training_job_id']
