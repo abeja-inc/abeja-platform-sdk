@@ -571,11 +571,12 @@ def test_job_statistics_no_stages(requests_mock, api_base_url, job_factory, trai
     assert job.statistics.epoch == 11
 
 
-def test_job_exec_env_none(requests_mock, api_base_url, job_factory, training_job_definition_response, training_job_definition_version_response) -> None:
-    job = job_factory(exec_env=None)  # type: Job
-    assert job.exec_env is ExecEnv.UNKNOWN
-
-
-def test_job_exec_env_local(requests_mock, api_base_url, job_factory, training_job_definition_response, training_job_definition_version_response) -> None:
-    job = job_factory(exec_env='local')  # type: Job
-    assert job.exec_env is ExecEnv.LOCAL
+@pytest.mark.parametrize('exec_env,expected', [
+    ('local', ExecEnv.LOCAL),
+    ('', ExecEnv.UNKNOWN),
+    ('new value', ExecEnv.UNKNOWN),
+    (None, ExecEnv.UNKNOWN),
+])
+def test_job_exec_env_none(job_factory, exec_env, expected) -> None:
+    job = job_factory(exec_env=exec_env)  # type: Job
+    assert job.exec_env is expected
