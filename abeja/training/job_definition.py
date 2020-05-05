@@ -906,8 +906,49 @@ class Jobs():
             offset=offset,
             limit=limit)
 
+    def create(self,
+               job_definition_version_id: int,
+               instance_type: InstanceType,
+               datasets: Optional[Dict[str, str]] = None,
+               environment: Optional[Dict[str, Any]] = None,
+               description: Optional[str] = None):
+        """Create a new training job.
+
+        Request Syntax:
+            .. code-block:: python
+
+                job = jobs.create(
+                    job_definition_version_id=5,
+                    instance_type=InstanceType.parse('gpu-1'))
+
+        Params:
+            - **job_definition_version_id** (int): training job version
+            - **instance_type** (InstanceType): instance type of running environment
+            - **datasets** (dict): **[optional]** datasets, combination of alias and dataset_id
+            - **environment** (dict): **[optional]** user defined parameters set as environment variables
+            - **description** (str): **[optional]** description of this job
+
+        Return type:
+            :class:`Job` object
+        """
+        res = self.__api.create_training_job(
+            organization_id=self.organization_id,
+            job_definition_name=self.job_definition_name,
+            version_id=job_definition_version_id,
+            datasets=datasets,
+            instance_type=str(instance_type),
+            environment=environment,
+            description=description)
+
+        return Job.from_response(
+            api=self.__api,
+            organization_id=self.organization_id,
+            response=res,
+            job_definition=self.__job_definition)
+
 
 # Iterator classes
+
 T = TypeVar('T')
 
 

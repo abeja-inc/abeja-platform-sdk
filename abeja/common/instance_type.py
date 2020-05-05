@@ -62,6 +62,7 @@ class InstanceType(__InstanceType):
 
     def __str__(self):
         if self.cpu_category:
-            return '{}:{}-{}'.format(self.cpu_type.value, self.cpu_category.value, self.cpu)
+            s = '{}:{}-{:.2f}'.format(self.cpu_type.value, self.cpu_category.value, self.cpu)
         else:
-            return '{}-{}'.format(self.cpu_type.value, self.cpu)
+            s = '{}-{:.2f}'.format(self.cpu_type.value, self.cpu)
+        return s.rstrip('.0')

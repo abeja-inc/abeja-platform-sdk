@@ -726,3 +726,27 @@ def test_list_jobs_paging(requests_mock, api_base_url,
     assert jobs[0].job_id == job1['training_job_id']
     assert jobs[1].job_id == job2['training_job_id']
     assert jobs[2].job_id == job3['training_job_id']
+
+
+def test_create_job(
+        requests_mock, api_base_url,
+        job_definition_factory, job_response) -> None:
+    version_id = 4
+
+    definition = job_definition_factory()  # type: JobDefinition
+    adapter = definition.jobs()
+
+    res = job_response(adapter.organization_id, adapter.job_definition_id,
+                       job_definition_version=version_id,
+                       instance_type='gpu:b-4')
+
+    requests_mock.post(
+        '{}/organizations/{}/training/definitions/{}/versions/{}/jobs'.format(
+            api_base_url, adapter.organization_id, adapter.job_definition_name, version_id),
+        json=res)
+
+    instance_type = InstanceType.parse(res['instance_type'])
+    job = adapter.create(version_id, instance_type)
+
+    assert job.job_definition
+    assert job.job_definition.job_definition_id == definition.job_definition_id

@@ -19,6 +19,7 @@ mypy:
 	--package abeja.common \
 	--package abeja.train \
 	--package abeja.training \
+	--package tests.common \
 	--package tests.training
 
 .PHONY: test
