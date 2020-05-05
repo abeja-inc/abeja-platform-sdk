@@ -261,7 +261,7 @@ def job_response():
             "user_parameters": {},
             "start_time": None,
             "created_at": fake_iso8601(),
-            "job_definition_version": 1,
+            "job_definition_version": random.randint(1, 30),
             "completion_time": None,
             "exec_env": "cloud",
             "status": "Pending",

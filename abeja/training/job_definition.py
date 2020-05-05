@@ -851,6 +851,32 @@ class Jobs():
         """Get the job definition name."""
         return self.__job_definition.name
 
+    def get(self, job_id: str) -> Job:
+        """Get a training job.
+
+        Request Syntax:
+            .. code-block:: python
+
+                job = jobs.get(job_id)
+
+            Params:
+            - **job_id** (int): Job ID
+
+        Return type:
+            :class:`Job` object
+
+        """
+        res = self.__api.get_training_job(
+            organization_id=self.organization_id,
+            job_definition_name=self.job_definition_name,
+            training_job_id=job_id)
+
+        return Job.from_response(
+            api=self.__api,
+            organization_id=self.organization_id,
+            response=res,
+            job_definition=self.__job_definition)
+
 # Iterator classes
 
 

@@ -587,3 +587,29 @@ def test_jobs(job_definition_factory) -> None:
     adapter = definition.jobs()
     assert adapter.organization_id == definition.organization_id
     assert adapter.job_definition_id == definition.job_definition_id
+
+
+def test_get_job(requests_mock, api_base_url,
+                 job_definition_factory, job_response, job_id) -> None:
+    definition = job_definition_factory()  # type: JobDefinition
+    adapter = definition.jobs()
+
+    res = job_response(
+        adapter.organization_id,
+        adapter.job_definition_id,
+        job_id,
+        exec_env='cloud')
+    requests_mock.get(
+        '{}/organizations/{}/training/definitions/{}/jobs/{}'.format(
+            api_base_url, adapter.organization_id, adapter.job_definition_name, job_id),
+        json=res)
+
+    job = adapter.get(job_id=job_id)
+    assert job
+    assert job.organization_id == adapter.organization_id
+    assert job.job_definition_id == adapter.job_definition_id
+    assert job.job_definition_version_id == res['job_definition_version']
+    assert job.exec_env is ExecEnv.CLOUD
+
+    assert job.job_definition
+    assert job.job_definition.job_definition_id == adapter.job_definition_id
