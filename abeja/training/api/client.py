@@ -5,8 +5,10 @@ from io import BytesIO
 from pathlib import Path
 from typing import AnyStr, IO, Optional, List, Dict, Any
 
+from abeja.exceptions import BadRequest
 from abeja.common.api_client import BaseAPIClient
 from abeja.common.utils import get_filter_archived_applied_params
+from abeja.common.instance_type import InstanceType
 
 
 class APIClient(BaseAPIClient):
@@ -771,9 +773,6 @@ class APIClient(BaseAPIClient):
             - Unauthorized: Authentication failed
             - InternalServerError
         """
-        # TODO: Remove
-        from abeja.train.instance_type import InstanceTypeValidator
-
         data = {}  # type: Dict[str, Any]
         if environment is not None:
             data['environment'] = environment
@@ -781,8 +780,14 @@ class APIClient(BaseAPIClient):
             data['environment'] = user_parameters
         if datasets is not None:
             data['datasets'] = datasets
-        if instance_type is not None and InstanceTypeValidator.validate(instance_type):
-            data['instance_type'] = instance_type
+        if instance_type is not None:
+            # validation
+            try:
+                InstanceType.parse(instance_type)
+                data['instance_type'] = instance_type
+            except ValueError:
+                error_message = "'{}' is an invalid instance_type".format(instance_type)
+                raise BadRequest(error=error_message, error_description=error_message, status_code=400)
         if description is not None:
             data['description'] = description
         path = '/organizations/{}/training/definitions/{}/versions/{}/jobs'.format(
