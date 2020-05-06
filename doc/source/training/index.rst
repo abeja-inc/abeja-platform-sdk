@@ -5,7 +5,7 @@ ABEJA training library is SDK for python, which allows developers to create, get
 --------------
 High level API
 --------------
-High-level API is used trough following classes.
+High-level API is used through following classes.
 
 .. toctree::
    :glob:
@@ -15,19 +15,17 @@ High-level API is used trough following classes.
 Usage
 -----
 
-
 .. code-block:: python
 
-   from abeja.training import Client
-   from abeja.training.statistics import Statistics as ABEJAStatistics
+   from abeja.training import Client, JobStatus
 
    client = Client()
+   adapter = client.job_definitions()
+   definition = adapter.get('flower-classification')
 
-   statistics = ABEJAStatistics(num_epochs=10, epoch=1)
-   statistics.add_stage(name=ABEJAStatistics.STAGE_TRAIN, accuracy=90.0, loss=0.10)
-   statistics.add_stage(name=ABEJAStatistics.STAGE_VALIDATION, accuracy=75.0, loss=0.07)
-
-   client.update_statistics(statistics)
+   for job in definition.jobs().list():
+      if job.status == JobStatus.COMPLETE:
+         print('Job {} was completed!', job.job_id)
 
 
 API Mapping
