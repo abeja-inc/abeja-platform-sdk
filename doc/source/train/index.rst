@@ -3,9 +3,9 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-============================
-ABEJA Training documentation
-============================
+==========================================
+ABEJA Training documentation (abeja.train)
+==========================================
 ABEJA training library is SDK for python, which allows developers to create, get and delete training related resources.
 
 --------------

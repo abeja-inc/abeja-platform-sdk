@@ -1,11 +1,5 @@
-.. ABEJA Training Library documentation master file, created by
-   sphinx-quickstart on Sat Feb 10 15:14:37 2018.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
-
-============================
-ABEJA Training documentation
-============================
+ABEJA Training documentation (abeja.training)
+=============================================
 ABEJA training library is SDK for python, which allows developers to create, get and delete training related resources.
 
 --------------
