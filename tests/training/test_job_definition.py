@@ -5,6 +5,7 @@ import cgi
 from pathlib import Path
 from abeja.training import APIClient, JobDefinition, Job, JobDefinitionVersion, JobDefinitions, JobStatus
 from abeja.common.exec_env import ExecEnv
+from abeja.common import instance_type
 from abeja.common.instance_type import InstanceType, CPUType
 
 
@@ -596,11 +597,11 @@ def test_job_status(job_factory, job_status, expected) -> None:
 
 
 @pytest.mark.parametrize('instance_type,expected', [
-    ('cpu-0.25', InstanceType.CPU_0_25),
-    ('cpu-2', InstanceType.CPU_2),
+    ('cpu-0.25', instance_type.CPU_0_25),
+    ('cpu-2', instance_type.CPU_2),
     ('gpu-1', InstanceType(CPUType.GPU, None, 1)),
-    ('gpu:a-1', InstanceType.GPU_A1),
-    ('gpu:b-4', InstanceType.GPU_B4),
+    ('gpu:a-1', instance_type.GPU_A1),
+    ('gpu:b-4', instance_type.GPU_B4),
 ])
 def test_job_instance_type(job_factory, instance_type, expected) -> None:
     job = job_factory(instance_type=instance_type)  # type: Job

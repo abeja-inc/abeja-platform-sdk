@@ -1,4 +1,4 @@
-from typing import cast, Optional, NamedTuple
+from typing import Optional, NamedTuple
 from enum import Enum
 
 
@@ -66,27 +66,15 @@ class InstanceType(__InstanceType):
             s = '{}-{:.2f}'.format(self.cpu_type.value, self.cpu)
         return s.rstrip('.0')
 
-    # For typing only, declare pre-defined instance types.
-    CPU_0_25 = cast('InstanceType', None)
-    CPU_1 = cast('InstanceType', None)
-    CPU_2 = cast('InstanceType', None)
-    CPU_4 = cast('InstanceType', None)
-    CPU_8 = cast('InstanceType', None)
-    CPU_16 = cast('InstanceType', None)
-    GPU_A1 = cast('InstanceType', None)
-    GPU_B1 = cast('InstanceType', None)
-    GPU_B4 = cast('InstanceType', None)
-    GPU_B8 = cast('InstanceType', None)
-
 
 # Define pre-defined instance types
-InstanceType.CPU_0_25 = InstanceType.parse('cpu-0.25')
-InstanceType.CPU_1 = InstanceType.parse('cpu-1')
-InstanceType.CPU_2 = InstanceType.parse('cpu-2')
-InstanceType.CPU_4 = InstanceType.parse('cpu-4')
-InstanceType.CPU_8 = InstanceType.parse('cpu-8')
-InstanceType.CPU_16 = InstanceType.parse('cpu-16')
-InstanceType.GPU_A1 = InstanceType.parse('gpu:a-1')
-InstanceType.GPU_B1 = InstanceType.parse('gpu:b-1')
-InstanceType.GPU_B4 = InstanceType.parse('gpu:b-4')
-InstanceType.GPU_B8 = InstanceType.parse('gpu:b-8')
+CPU_0_25 = InstanceType.parse('cpu-0.25')
+CPU_1 = InstanceType.parse('cpu-1')
+CPU_2 = InstanceType.parse('cpu-2')
+CPU_4 = InstanceType.parse('cpu-4')
+CPU_8 = InstanceType.parse('cpu-8')
+CPU_16 = InstanceType.parse('cpu-16')
+GPU_A1 = InstanceType.parse('gpu:a-1')
+GPU_B1 = InstanceType.parse('gpu:b-1')
+GPU_B4 = InstanceType.parse('gpu:b-4')
+GPU_B8 = InstanceType.parse('gpu:b-8')
