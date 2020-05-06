@@ -911,7 +911,7 @@ class Jobs():
                instance_type: InstanceType,
                datasets: Optional[Dict[str, str]] = None,
                environment: Optional[Dict[str, Any]] = None,
-               description: Optional[str] = None):
+               description: Optional[str] = None) -> Job:
         """Create a new training job.
 
         Request Syntax:
@@ -946,8 +946,24 @@ class Jobs():
             response=res,
             job_definition=self.__job_definition)
 
+    def stop(self, job_id: str) -> None:
+        """Stop a training job.
+
+        Request Syntax:
+            .. code-block:: python
+
+                job = jobs.stop(job_id)
+
+        Params:
+            - **job_id** (str): Job ID
+        """
+        self.__api.stop_training_job(
+            organization_id=self.organization_id,
+            job_definition_name=self.job_definition_name,
+            training_job_id=job_id)
 
 # Iterator classes
+
 
 T = TypeVar('T')
 

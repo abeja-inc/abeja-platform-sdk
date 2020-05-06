@@ -750,3 +750,17 @@ def test_create_job(
 
     assert job.job_definition
     assert job.job_definition.job_definition_id == definition.job_definition_id
+
+
+def test_stop_job(requests_mock, api_base_url, api_client,
+                  job_id, job_definition_factory) -> None:
+    definition = job_definition_factory()  # type: JobDefinition
+    adapter = definition.jobs()
+
+    requests_mock.post(
+        '{}/organizations/{}/training/definitions/{}/jobs/{}/stop'.format(
+            api_base_url, adapter.organization_id, adapter.job_definition_name, job_id),
+        json={'message': "test-1 stopped"})
+
+    adapter.stop(job_id)
+    assert requests_mock.called
