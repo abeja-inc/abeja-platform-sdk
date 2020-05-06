@@ -8,6 +8,7 @@ from .job_status import JobStatus
 from abeja.common.docker_image_name import DockerImageName
 from abeja.common.exec_env import ExecEnv
 from abeja.common.instance_type import InstanceType
+from abeja.user import User
 
 # Entity classes
 
@@ -42,8 +43,8 @@ class JobDefinition():
         self.__created_at = created_at
         self.__modified_at = modified_at
 
-    @staticmethod
-    def from_response(api: APIClient, organization_id: str, response: Dict[str, Any]) -> 'JobDefinition':
+    @classmethod
+    def from_response(klass, api: APIClient, organization_id: str, response: Dict[str, Any]) -> 'JobDefinition':
         """Construct an object from API response.
 
         NOTE: For convenient, this method DOES NOT validate the input response and
@@ -56,7 +57,7 @@ class JobDefinition():
                 JobDefinitionVersion.from_response(api=api, organization_id=organization_id, response=v)
                 for v in vs]
 
-        return JobDefinition(
+        return klass(
             api=api,
             organization_id=organization_id,
             job_definition_id=response.get('job_definition_id', ''),
@@ -192,8 +193,8 @@ class JobDefinitionVersion():
         self.__modified_at = modified_at
         self.__job_definition = job_definition
 
-    @staticmethod
-    def from_response(api: APIClient,
+    @classmethod
+    def from_response(klass, api: APIClient,
                       organization_id: str,
                       response: Dict[str, Any],
                       job_definition: Optional[JobDefinition] = None) -> 'JobDefinitionVersion':
@@ -202,7 +203,7 @@ class JobDefinitionVersion():
         NOTE: For convenient, this method DOES NOT validate the input response and
         always returns an object filled with default values.
         """
-        return JobDefinitionVersion(
+        return klass(
             api=api,
             organization_id=organization_id,
             job_definition_id=response.get('job_definition_id', ''),
@@ -290,7 +291,7 @@ class Job():
                  status: JobStatus,
                  description: str,
                  datasets: Dict[str, str],
-                 creator: Optional[Dict[str, Any]],
+                 creator: Optional[User],
                  archived: bool,
                  start_time: str,
                  completion_time: str,
@@ -334,8 +335,8 @@ class Job():
             statistics.add_stage(name=name, **values)
         return statistics
 
-    @staticmethod
-    def from_response(api: APIClient,
+    @classmethod
+    def from_response(klass, api: APIClient,
                       organization_id: str,
                       response: Dict[str, Any],
                       job_definition: Optional[JobDefinition] = None,
@@ -346,8 +347,9 @@ class Job():
         always returns an object filled with default values.
         """
         statistics = Job.build_statistics(response.get('statistics'))
+        creator = User.from_response(response.get('creator'))
 
-        return Job(
+        return klass(
             api=api,
             organization_id=organization_id,
             job_definition_id=response.get('job_definition_id', ''),
@@ -361,7 +363,7 @@ class Job():
             status=JobStatus(str(response.get('status'))),
             description=response.get('description', ''),
             datasets=(response.get('datasets') or {}),
-            creator=response.get('creator'),
+            creator=creator,
             archived=bool(response.get('archived')),
             start_time=response.get('start_time', ''),
             completion_time=response.get('completion_time', ''),
@@ -431,7 +433,7 @@ class Job():
         return self.__datasets
 
     @property
-    def creator(self) -> Optional[Dict[str, Any]]:
+    def creator(self) -> Optional[User]:
         """Get the creator of this job."""
         return self.__creator
 

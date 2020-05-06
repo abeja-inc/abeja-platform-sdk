@@ -636,9 +636,34 @@ def test_get_job(requests_mock, api_base_url,
     assert job.job_definition_id == adapter.job_definition_id
     assert job.job_definition_version_id == res['job_definition_version']
     assert job.exec_env == exec_env.CLOUD
+    assert job.creator
+    assert job.creator.user_id == res['creator']['id']
+    assert job.creator.email == res['creator']['email']
+    assert job.creator.display_name == res['creator']['display_name']
+    assert job.creator.profile_icon
+    assert job.creator.profile_icon.thumbnail_icon_url == res['creator']['profile_icon']['thumbnail_icon_url']
 
     assert job.job_definition
     assert job.job_definition.job_definition_id == adapter.job_definition_id
+
+
+def test_get_job_creator_none(requests_mock, api_base_url,
+                              job_definition_factory, job_response, job_id) -> None:
+    definition = job_definition_factory()  # type: JobDefinition
+    adapter = definition.jobs()
+
+    res = job_response(
+        adapter.organization_id,
+        adapter.job_definition_id,
+        job_id,
+        creator=None)
+    requests_mock.get(
+        '{}/organizations/{}/training/definitions/{}/jobs/{}'.format(
+            api_base_url, adapter.organization_id, adapter.job_definition_name, job_id),
+        json=res)
+
+    job = adapter.get(job_id=job_id)
+    assert job.creator is None
 
 
 def test_list_jobs(requests_mock, api_base_url,
