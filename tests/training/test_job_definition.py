@@ -790,3 +790,23 @@ def test_stop_job(requests_mock, api_base_url, api_client,
 
     adapter.stop(job_id)
     assert requests_mock.called
+
+
+@pytest.mark.parametrize('expected,res', [
+    ('http://example.com/artifacts/1', {'download_uri': 'http://example.com/artifacts/1'}),
+    ('http://example.com/artifacts/1', {'artifacts': {'complete': {'uri': 'http://example.com/artifacts/1'}}}),
+])
+def test_get_training_result(requests_mock, api_base_url, api_client,
+                             job_id, job_definition_factory,
+                             expected, res) -> None:
+    definition = job_definition_factory()  # type: JobDefinition
+    adapter = definition.jobs()
+
+    requests_mock.get(
+        '{}/organizations/{}/training/definitions/{}/jobs/{}/result'.format(
+            api_base_url, adapter.organization_id, adapter.job_definition_name, job_id),
+        json=res)
+
+    artifacts = adapter.get_artifacts(job_id)
+    assert artifacts
+    assert artifacts.download_uri == expected

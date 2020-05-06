@@ -479,6 +479,23 @@ class Job():
         return self.__job_definition_version
 
 
+class JobArtifacts:
+
+    def __init__(self, download_uri: str) -> None:
+        self.__download_uri = download_uri
+
+    @classmethod
+    def from_response(klass, response: Dict[str, Any]) -> 'JobArtifacts':
+        if 'download_uri' in response:
+            return klass(download_uri=response['download_uri'])
+        else:
+            return klass(download_uri=response['artifacts']['complete']['uri'])
+
+    @property
+    def download_uri(self) -> str:
+        """Return the download URI where artifacts archive file exists."""
+        return self.__download_uri
+
 # Adapter classes
 
 
@@ -964,6 +981,23 @@ class Jobs():
             organization_id=self.organization_id,
             job_definition_name=self.job_definition_name,
             training_job_id=job_id)
+
+    def get_artifacts(self, job_id: str) -> 'JobArtifacts':
+        """Get artifacts object of this job.
+
+        Request Syntax:
+            .. code-block:: python
+
+                job = jobs.get_artifacts(job_id)
+
+        Params:
+            - **job_id** (str): Job ID
+        """
+        res = self.__api.get_training_result(
+            organization_id=self.organization_id,
+            job_definition_name=self.job_definition_name,
+            training_job_id=job_id)
+        return JobArtifacts.from_response(res)
 
 # Iterator classes
 
