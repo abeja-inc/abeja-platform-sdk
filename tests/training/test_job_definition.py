@@ -4,8 +4,7 @@ import json
 import cgi
 from pathlib import Path
 from abeja.training import APIClient, JobDefinition, Job, JobDefinitionVersion, JobDefinitions, JobStatus
-from abeja.common.exec_env import ExecEnv
-from abeja.common import instance_type
+from abeja.common import instance_type, exec_env
 from abeja.common.instance_type import InstanceType, CPUType
 
 
@@ -543,7 +542,7 @@ def test_job(requests_mock, api_base_url, job_factory, training_job_definition_r
             api_base_url, job.organization_id, job.job_definition.name, job.job_definition_version_id),
         json=res)
 
-    assert job.exec_env == ExecEnv.CLOUD
+    assert job.exec_env == exec_env.CLOUD
 
     definition = job.job_definition
     assert definition
@@ -574,10 +573,10 @@ def test_job_statistics_no_stages(requests_mock, api_base_url, job_factory, trai
 
 
 @pytest.mark.parametrize('exec_env,expected', [
-    ('local', ExecEnv.LOCAL),
-    ('', ExecEnv.UNKNOWN),
-    ('new value', ExecEnv.UNKNOWN),
-    (None, ExecEnv.UNKNOWN),
+    ('local', exec_env.LOCAL),
+    ('new value', exec_env.ExecEnv('new value')),
+    ('', exec_env.ExecEnv('')),
+    (None, exec_env.ExecEnv('None')),
 ])
 def test_job_exec_env(job_factory, exec_env, expected) -> None:
     job = job_factory(exec_env=exec_env)  # type: Job
@@ -635,7 +634,7 @@ def test_get_job(requests_mock, api_base_url,
     assert job.organization_id == adapter.organization_id
     assert job.job_definition_id == adapter.job_definition_id
     assert job.job_definition_version_id == res['job_definition_version']
-    assert job.exec_env == ExecEnv.CLOUD
+    assert job.exec_env == exec_env.CLOUD
 
     assert job.job_definition
     assert job.job_definition.job_definition_id == adapter.job_definition_id

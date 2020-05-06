@@ -353,7 +353,7 @@ class Job():
             job_definition_version_id=response.get('job_definition_version', 0),
             job_id=response.get('id', response.get('training_job_id', '')),
             instance_type=InstanceType.parse(response.get('instance_type', '')),
-            exec_env=ExecEnv.from_value(cast(str, response.get('exec_env'))),
+            exec_env=ExecEnv(str(response.get('exec_env'))),
             environment=(response.get('environment') or {}),
             statistics=statistics,
             status_message=response.get('status_message', ''),
