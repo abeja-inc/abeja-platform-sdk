@@ -3,7 +3,7 @@ from io import BytesIO
 import json
 import cgi
 from pathlib import Path
-from abeja.training import APIClient, JobDefinition, Job, JobDefinitionVersion, JobDefinitions, JobStatus
+from abeja.training import APIClient, JobDefinition, Job, JobDefinitionVersion, JobDefinitions, job_status
 from abeja.common import instance_type, exec_env
 from abeja.common.instance_type import InstanceType, CPUType
 
@@ -584,11 +584,11 @@ def test_job_exec_env(job_factory, exec_env, expected) -> None:
 
 
 @pytest.mark.parametrize('job_status,expected', [
-    ('Pending', JobStatus.PENDING),
-    ('Complete', JobStatus.COMPLETE),
-    ('', JobStatus.UNKNOWN),
-    ('new value', JobStatus.UNKNOWN),
-    (None, JobStatus.UNKNOWN),
+    ('Pending', job_status.PENDING),
+    ('Complete', job_status.COMPLETE),
+    ('', job_status.JobStatus('')),
+    ('new value', job_status.JobStatus('new value')),
+    (None, job_status.JobStatus('None')),
 ])
 def test_job_status(job_factory, job_status, expected) -> None:
     job = job_factory(status=job_status)  # type: Job

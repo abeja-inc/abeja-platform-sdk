@@ -357,7 +357,7 @@ class Job():
             environment=(response.get('environment') or {}),
             statistics=statistics,
             status_message=response.get('status_message', ''),
-            status=JobStatus.from_value(cast(str, response.get('status'))),
+            status=JobStatus(str(response.get('status'))),
             description=response.get('description', ''),
             datasets=(response.get('datasets') or {}),
             creator=response.get('creator'),

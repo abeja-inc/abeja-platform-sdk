@@ -1,28 +1,28 @@
-from enum import Enum
+from typing import NamedTuple
 
 
-class JobStatus(Enum):
+__JobStatus = NamedTuple('InstanceType', [
+    ('value', str),
+])
+
+
+class JobStatus(__JobStatus):
     """Set of job statuses which indicates a job is pending, running or
     failed and what ever.
 
     - **PENDING**: Necessary resources for running job is currently prepared
-    - **ACTIVE**: The job is currently running
+    - **ACTIVE**: The job is actively running
     - **STOPPED**: The job was stopped by user
     - **COMPLETE**: The job was successfully completed
     - **FAILED**: The job was failed by some reason
-    - **UNKNOWN**: Unrecognized value
     """
-    PENDING = 'Pending'
-    ACTIVE = 'Active'
-    STOPPED = 'Stopped'
-    COMPLETE = 'Complete'
-    FAILED = 'Failed'
-    UNKNOWN = 'unknown'
 
-    @staticmethod
-    def from_value(value: str) -> 'JobStatus':
-        """Get a member by ``value`` if exists, otherwise return ``UNKNOWN``."""
-        try:
-            return JobStatus(value)
-        except ValueError:
-            return JobStatus.UNKNOWN
+    def __str__(self) -> str:
+        return self.value
+
+
+PENDING = JobStatus('Pending')
+ACTIVE = JobStatus('Active')
+STOPPED = JobStatus('Stopped')
+COMPLETE = JobStatus('Complete')
+FAILED = JobStatus('Failed')
