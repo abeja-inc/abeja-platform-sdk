@@ -5,6 +5,7 @@ from .api.client import APIClient
 from .common import SizedIterable
 from .statistics import Statistics
 from .job_status import JobStatus
+from abeja.common.docker_image_name import DockerImageName
 from abeja.common.exec_env import ExecEnv
 from abeja.common.instance_type import InstanceType
 
@@ -171,7 +172,7 @@ class JobDefinitionVersion():
                  job_definition_id: str,
                  job_definition_version_id: int,
                  handler: str,
-                 image: str,
+                 image: DockerImageName,
                  environment: Dict[str, str],
                  description: str,
                  archived: bool,
@@ -207,7 +208,7 @@ class JobDefinitionVersion():
             job_definition_id=response.get('job_definition_id', ''),
             job_definition_version_id=response.get('job_definition_version', 0),
             handler=response.get('handler', ''),
-            image=response.get('image', ''),
+            image=DockerImageName.parse(str(response.get('image'))),
             environment=(response.get('environment') or {}),
             description=response.get('description', ''),
             archived=bool(response.get('archived')),
@@ -242,8 +243,8 @@ class JobDefinitionVersion():
         return self.__handler
 
     @property
-    def image(self) -> str:
-        """Get the image of this job definition version."""
+    def image(self) -> DockerImageName:
+        """Get the :class:`DockerImageName` of this job definition version."""
         return self.__image
 
     @property
@@ -693,18 +694,19 @@ class JobDefinitionVersions():
     def create(self,
                source: Union[List[str], IO[AnyStr]],
                handler: str,
-               image: Optional[str] = None,
+               image: DockerImageName,
                environment: Optional[Dict[str, Any]] = None,
                description: Optional[str] = None):
         """Create a new training job definition version.
 
         Request Syntax:
             .. code-block:: python
+                from abeja.common.docker_image_name import ALL_GPU_19_10
 
                 version = versions.create(
                     source=['train.py'],
                     handler='train:handler',
-                    image='abeja-inc/all-gpu:19.04',
+                    image=ALL_GPU_19_10,
                     environment={'key': 'value'},
                     description='new version')
 
@@ -712,7 +714,7 @@ class JobDefinitionVersions():
             - **source** (List[str] | IO): an input source for training code. It's one of:
               - zip or tar.gz archived file-like object.
               - a list of file paths.
-            - **image** (Optional[str]): runtime environment
+            - **image** (DockerImageName): runtime environment
             - **environment** (Optional[dict]): user defined parameters set as environment variables
             - **description** (Optional[str]): description
 
@@ -721,9 +723,8 @@ class JobDefinitionVersions():
 
         """
         if isinstance(source, io.IOBase):
-            parameters = {'handler': handler}  # type: Dict[str, Any]
-            if image is not None:
-                parameters['image'] = image
+            parameters = {'handler': handler, 'image': str(image)}  # type: Dict[str, Any]
+
             if environment is not None:
                 parameters['environment'] = environment
             if description is not None:
@@ -746,7 +747,7 @@ class JobDefinitionVersions():
                 job_definition_name=self.job_definition_name,
                 filepaths=cast(List[str], source),
                 handler=handler,
-                image=image,
+                image=str(image),
                 environment=environment,
                 description=description)
             return JobDefinitionVersion.from_response(

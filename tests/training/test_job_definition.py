@@ -6,6 +6,7 @@ from pathlib import Path
 from abeja.training import APIClient, JobDefinition, Job, JobDefinitionVersion, JobDefinitions, job_status
 from abeja.common import instance_type, exec_env
 from abeja.common.instance_type import InstanceType, CPUType
+from abeja.common.docker_image_name import DockerImageName, ALL_GPU_19_04, ALL_CPU_19_10
 
 
 @pytest.fixture
@@ -302,7 +303,7 @@ def test_get_job_definition_version(requests_mock, api_base_url,
     assert version.job_definition_id == adapter.job_definition_id
     assert version.job_definition_version_id == version_id
     assert version.handler == res['handler']
-    assert version.image == res['image']
+    assert version.image == DockerImageName.parse(res['image'])
     assert version.environment == {}
     assert version.created_at == res['created_at']
     assert version.modified_at == res['modified_at']
@@ -343,7 +344,7 @@ def test_get_job_definition_versions(requests_mock, api_base_url,
         assert version.job_definition_id == adapter.job_definition_id
         assert version.job_definition_version_id == res['job_definition_version']
         assert version.handler == res['handler']
-        assert version.image == res['image']
+        assert version.image == DockerImageName.parse(res['image'])
         assert version.environment == {} if res['environment'] is None else res['environment']
         assert version.created_at == res['created_at']
         assert version.modified_at == res['modified_at']
@@ -386,7 +387,7 @@ def test_create_job_definition_version_zip(
         json=res)
 
     zip_content = make_zip_content({'train.py': b'print(1)'})
-    version = adapter.create(BytesIO(zip_content), 'train:main', 'abeja-inc/all-gpu:19.04', {'key': 'value'}, description='new version')
+    version = adapter.create(BytesIO(zip_content), 'train:main', ALL_GPU_19_04, {'key': 'value'}, description='new version')
     assert version
     assert version.job_definition_version_id == res['job_definition_version']
     assert version.job_definition
@@ -436,7 +437,7 @@ def test_create_job_definition_version_files(
                 api_base_url, adapter.organization_id, adapter.job_definition_name),
             json=res)
 
-        version = adapter.create(files, 'train:handler', 'abeja-inc/all-cpu:19.10', {'KEY': 'VALUE'}, description='new version')
+        version = adapter.create(files, 'train:handler', ALL_CPU_19_10, {'KEY': 'VALUE'}, description='new version')
         assert version
         assert version.job_definition_version_id == res['job_definition_version']
         assert version.job_definition

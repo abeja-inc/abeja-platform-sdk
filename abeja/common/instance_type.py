@@ -34,8 +34,8 @@ class InstanceType(__InstanceType):
     An instance type is generally formatted as ``{CPUType}-{cpu}`` or
     ``{CPUType}:{CPUCategory}-{cpu}`` (e.g. ``cpu-0.25``, ``gpu:b-2``)
     """
-    @staticmethod
-    def parse(value: str) -> 'InstanceType':
+    @classmethod
+    def parse(klass, value: str) -> 'InstanceType':
         items = value.split('-', maxsplit=1)
         if len(items) != 2:
             raise ValueError('invalid format: {}'.format(value))
@@ -51,15 +51,15 @@ class InstanceType(__InstanceType):
         else:
             raise ValueError('invalid format: {}'.format(value))
 
-        return InstanceType(cpu_type=cpu_type, cpu_category=cpu_category, cpu=cpu)
+        return klass(cpu_type=cpu_type, cpu_category=cpu_category, cpu=cpu)
 
-    def is_gpu(self):
+    def is_gpu(self) -> bool:
         return self.cpu_type == CPUType.GPU
 
-    def is_cpu(self):
+    def is_cpu(self) -> bool:
         return self.cpu_type == CPUType.CPU
 
-    def __str__(self):
+    def __str__(self) -> str:
         if self.cpu_category:
             s = '{}:{}-{:.2f}'.format(self.cpu_type.value, self.cpu_category.value, self.cpu)
         else:
