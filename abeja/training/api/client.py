@@ -1030,7 +1030,7 @@ class APIClient(BaseAPIClient):
                 statistics.add_stage(name=Statistics.STAGE_TRAIN, accuracy=0.9, loss=0.05)
                 statistics.add_stage(name=Statistics.STAGE_VALIDATION, accuracy=0.8, loss=0.1, key2=2)
 
-                response = api_client.update_statistics(statistics)
+                response = api_client.update_statistics(statistics.get_statistics())
 
         Params:
             - **statistics** (str): statistics needs to be saved and updated

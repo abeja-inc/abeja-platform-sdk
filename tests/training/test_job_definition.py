@@ -3,7 +3,7 @@ from io import BytesIO
 import json
 import cgi
 from pathlib import Path
-from abeja.training import APIClient, JobDefinition, Job, JobDefinitionVersion, JobDefinitions, job_status
+from abeja.training import APIClient, JobDefinition, Job, Statistics, JobDefinitionVersion, JobDefinitions, job_status
 from abeja.common import instance_type, exec_env
 from abeja.common.instance_type import InstanceType, CPUType
 from abeja.common.docker_image_name import DockerImageName, ALL_GPU_19_04, ALL_CPU_19_10
@@ -810,3 +810,27 @@ def test_get_training_result(requests_mock, api_base_url, api_client,
     artifacts = adapter.get_artifacts(job_id)
     assert artifacts
     assert artifacts.download_uri == expected
+
+
+def test_update_statistics(requests_mock, api_base_url, api_client,
+                           job_id, job_definition_factory) -> None:
+    definition = job_definition_factory()  # type: JobDefinition
+    adapter = definition.jobs()
+
+    requests_mock.post(
+        '{}/organizations/{}/training/definitions/{}/jobs/{}/statistics'.format(
+            api_base_url, adapter.organization_id, adapter.job_definition_name, job_id),
+        json={'message': "test-1 updated"})
+
+    statistics = Statistics(num_epochs=10, epoch=1)
+    statistics.add_stage(name=Statistics.STAGE_TRAIN, accuracy=90.0, loss=0.10)
+    statistics.add_stage(name=Statistics.STAGE_VALIDATION, accuracy=75.0, loss=0.07)
+
+    adapter.update_statistics(job_id, statistics)
+    assert requests_mock.called
+
+    history = requests_mock.request_history
+    req = history[0]
+    req_statistics = req.json()['statistics']
+    assert req_statistics['num_epochs'] == statistics.num_epochs
+    assert req_statistics['epoch'] == statistics.epoch

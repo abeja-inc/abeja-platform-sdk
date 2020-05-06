@@ -999,6 +999,29 @@ class Jobs():
             training_job_id=job_id)
         return JobArtifacts.from_response(res)
 
+    def update_statistics(self, job_id: str, statistics: Statistics) -> None:
+        """ Notify a job statistics for ABEJA Platform.
+
+        Request Syntax:
+            .. code-block:: python
+
+                from abeja.training import Statistics
+
+                statistics = Statistics(num_epochs=10, epoch=1)
+                statistics.add_stage(name=Statistics.STAGE_TRAIN, accuracy=90.0, loss=0.10)
+                statistics.add_stage(name=Statistics.STAGE_VALIDATION, accuracy=75.0, loss=0.07)
+
+                jobs.update_statistics(job_id, statistics)
+
+        Params:
+            - **job_id** (str): Job ID
+            - **statistics** (:class:`Statistics`): statistics
+        """
+        self.__api.update_statistics(organization_id=self.organization_id,
+                                     job_definition_name=self.job_definition_name,
+                                     training_job_id=job_id,
+                                     statistics=statistics.get_statistics())
+
 # Iterator classes
 
 
