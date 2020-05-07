@@ -1,6 +1,7 @@
 from typing import cast, Any, Dict, List, Iterator, Optional, Union, IO, AnyStr, TypeVar
 from abc import abstractmethod
 import io
+from logging import getLogger
 from .api.client import APIClient
 from .common import SizedIterable
 from .statistics import Statistics
@@ -9,6 +10,7 @@ from abeja.common.docker_image_name import DockerImageName
 from abeja.common.exec_env import ExecEnv
 from abeja.common.instance_type import InstanceType
 from abeja.user import User
+import abeja.exceptions
 
 # Entity classes
 
@@ -321,20 +323,6 @@ class Job():
         self.__job_definition = job_definition
         self.__job_definition_version = job_definition_version
 
-    @staticmethod
-    def build_statistics(response: Optional[Dict[str, Any]]) -> Optional[Statistics]:
-        if response is None:
-            return None
-
-        stages = {}
-        if 'stages' in response:
-            stages = response.pop('stages')
-
-        statistics = Statistics(**response)
-        for name, values in stages.items():
-            statistics.add_stage(name=name, **values)
-        return statistics
-
     @classmethod
     def from_response(klass, api: APIClient,
                       organization_id: str,
@@ -346,7 +334,7 @@ class Job():
         NOTE: For convenient, this method DOES NOT validate the input response and
         always returns an object filled with default values.
         """
-        statistics = Job.build_statistics(response.get('statistics'))
+        statistics = Statistics.from_response(response.get('statistics'))
         creator = User.from_response(response.get('creator'))
 
         return klass(
@@ -858,6 +846,7 @@ class Jobs():
     def __init__(self, api: APIClient, job_definition: JobDefinition) -> None:
         self.__api = api
         self.__job_definition = job_definition
+        self.__logger = getLogger('train-api')
 
     @property
     def organization_id(self) -> str:
@@ -999,7 +988,7 @@ class Jobs():
             training_job_id=job_id)
         return JobArtifacts.from_response(res)
 
-    def update_statistics(self, job_id: str, statistics: Statistics) -> None:
+    def update_statistics(self, job_id: str, statistics: Optional[Statistics]) -> Optional[Job]:
         """ Notify a job statistics for ABEJA Platform.
 
         Request Syntax:
@@ -1016,11 +1005,35 @@ class Jobs():
         Params:
             - **job_id** (str): Job ID
             - **statistics** (:class:`Statistics`): statistics
+
+        Return type:
+            :class:`Job` object
         """
-        self.__api.update_statistics(organization_id=self.organization_id,
-                                     job_definition_name=self.job_definition_name,
-                                     training_job_id=job_id,
-                                     statistics=statistics.get_statistics())
+        if not statistics:
+            self.__logger.warning('no statistics found.')
+            return None
+
+        raw_statistics = statistics.get_statistics()
+        if not raw_statistics:
+            self.__logger.warning('empty statistics found.')
+            return None
+
+        try:
+            res = self.__api.update_statistics(organization_id=self.organization_id,
+                                               job_definition_name=self.job_definition_name,
+                                               training_job_id=job_id,
+                                               statistics=raw_statistics)
+            return Job.from_response(
+                api=self.__api,
+                organization_id=self.organization_id,
+                response=res,
+                job_definition=self.__job_definition)
+        except abeja.exceptions.HttpError as e:
+            self.__logger.warning('update_statistics result was {}.'.format(str(e)))
+            return None
+        except Exception:
+            self.__logger.exception('update_statistics result was unexpected error:')
+            return None
 
 # Iterator classes
 

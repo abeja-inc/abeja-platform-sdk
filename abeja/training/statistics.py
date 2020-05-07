@@ -1,4 +1,4 @@
-from typing import Dict, Any
+from typing import Dict, Any, Optional
 
 STATISTICS = Dict[str, Any]
 STAGES = Dict[str, STATISTICS]
@@ -20,6 +20,20 @@ class Statistics:
         self.progress_percentage = progress_percentage
         self.other_information = kwargs
         self.stages = {}  # type: STAGES
+
+    @classmethod
+    def from_response(klass, response: Optional[Dict[str, Any]]) -> Optional['Statistics']:
+        if response is None:
+            return None
+
+        stages = {}
+        if 'stages' in response:
+            stages = response.pop('stages')
+
+        statistics = klass(**response)
+        for name, values in stages.items():
+            statistics.add_stage(name=name, **values)
+        return statistics
 
     def add_stage(self, name: str, accuracy: float=None, loss: float=None, **kwargs) -> None:
         """ add stage information

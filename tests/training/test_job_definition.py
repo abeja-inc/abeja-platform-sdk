@@ -2,6 +2,7 @@ import pytest
 from io import BytesIO
 import json
 import cgi
+import random
 from pathlib import Path
 from abeja.training import APIClient, JobDefinition, Job, Statistics, JobDefinitionVersion, JobDefinitions, job_status
 from abeja.common import instance_type, exec_env
@@ -46,6 +47,16 @@ def job_factory(api_client, organization_id, job_definition_id, job_id, job_resp
             organization_id=organization_id,
             response=response
         )
+    return factory
+
+
+@pytest.fixture
+def statistics_factory():
+    def factory():
+        statistics = Statistics(num_epochs=random.choice([10, 20, 30]), epoch=random.randint(1, 10))
+        statistics.add_stage(name=Statistics.STAGE_TRAIN, accuracy=random.uniform(0.0, 100.0), loss=random.uniform(0.0, 100.0))
+        statistics.add_stage(name=Statistics.STAGE_VALIDATION, accuracy=random.uniform(0.0, 100.0), loss=random.uniform(0.0, 100.0))
+        return statistics
     return factory
 
 # JobDefinitions
@@ -812,21 +823,27 @@ def test_get_training_result(requests_mock, api_base_url, api_client,
     assert artifacts.download_uri == expected
 
 
-def test_update_statistics(requests_mock, api_base_url, api_client,
-                           job_id, job_definition_factory) -> None:
+def test_update_statistics(requests_mock, api_base_url,
+                           job_id, job_definition_factory, statistics_factory,
+                           job_response) -> None:
     definition = job_definition_factory()  # type: JobDefinition
     adapter = definition.jobs()
 
+    statistics = statistics_factory()
+    res = job_response(adapter.organization_id, adapter.job_definition_name, job_id,
+                       statistics=statistics.get_statistics())
     requests_mock.post(
         '{}/organizations/{}/training/definitions/{}/jobs/{}/statistics'.format(
             api_base_url, adapter.organization_id, adapter.job_definition_name, job_id),
-        json={'message': "test-1 updated"})
+        json=res)
 
-    statistics = Statistics(num_epochs=10, epoch=1)
-    statistics.add_stage(name=Statistics.STAGE_TRAIN, accuracy=90.0, loss=0.10)
-    statistics.add_stage(name=Statistics.STAGE_VALIDATION, accuracy=75.0, loss=0.07)
+    job = adapter.update_statistics(job_id, statistics)
+    assert job
+    assert job.job_id == job_id
+    assert job.statistics
+    assert job.statistics.num_epochs == statistics.num_epochs
+    assert job.statistics.epoch == statistics.epoch
 
-    adapter.update_statistics(job_id, statistics)
     assert requests_mock.called
 
     history = requests_mock.request_history
@@ -834,3 +851,28 @@ def test_update_statistics(requests_mock, api_base_url, api_client,
     req_statistics = req.json()['statistics']
     assert req_statistics['num_epochs'] == statistics.num_epochs
     assert req_statistics['epoch'] == statistics.epoch
+
+
+def test_update_empty_statistics(requests_mock, job_id, job_definition_factory) -> None:
+    definition = job_definition_factory()  # type: JobDefinition
+    adapter = definition.jobs()
+    adapter.update_statistics(job_id, None)
+
+
+@pytest.mark.parametrize('status_code', [
+    400, 401, 403, 404, 405,
+    500, 503
+])
+def test_update_statistics_with_exception(requests_mock, api_base_url, status_code,
+                                          job_id, job_definition_factory, statistics_factory) -> None:
+    definition = job_definition_factory()  # type: JobDefinition
+    adapter = definition.jobs()
+
+    statistics = statistics_factory()
+    requests_mock.post(
+        '{}/organizations/{}/training/definitions/{}/jobs/{}/statistics'.format(
+            api_base_url, adapter.organization_id, adapter.job_definition_name, job_id),
+        status_code=status_code,
+        json={'error': 'error'})
+
+    adapter.update_statistics(job_id, statistics)
