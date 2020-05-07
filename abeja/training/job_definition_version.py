@@ -6,6 +6,9 @@ from abeja.common.docker_image_name import DockerImageName
 from . import job_definition
 
 
+# Entity class
+
+
 class JobDefinitionVersion():
     """Training job definition version object.
     """
