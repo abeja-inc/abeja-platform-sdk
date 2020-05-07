@@ -1,9 +1,8 @@
-from typing import cast, Any, Dict, List, Iterator, Optional, Union, IO, AnyStr, TypeVar
-from abc import abstractmethod
+from typing import cast, Any, Dict, List, Optional, Union, IO, AnyStr
 import io
 from logging import getLogger
 from .api.client import APIClient
-from .common import SizedIterable
+from .common import SizedIterable, AbstractSizedIterator
 from .statistics import Statistics
 from .job_status import JobStatus
 from abeja.common.docker_image_name import DockerImageName
@@ -1036,66 +1035,6 @@ class Jobs():
             return None
 
 # Iterator classes
-
-
-T = TypeVar('T')
-
-
-class AbstractSizedIterator(SizedIterable[T]):
-
-    def __init__(self, api: APIClient, organization_id: str,
-                 filter_archived: Optional[bool],
-                 offset: Optional[int],
-                 limit: Optional[int]) -> None:
-        self.__api = api
-        self.__organization_id = organization_id
-        self.__filter_archived = filter_archived
-        self.__offset = offset if offset is not None else 0
-        self.__limit = limit if limit is not None else 50
-        self.__total = None  # type: Optional[int]
-        self.__page = None  # type: Optional[Dict[str, Any]]
-
-    @abstractmethod
-    def invoke_api(self, api: APIClient) -> Dict[str, Any]:
-        pass
-
-    @abstractmethod
-    def build_entry(self, api: APIClient, entry: Dict[str, Any]) -> T:
-        pass
-
-    @property
-    def organization_id(self) -> str:
-        return self.__organization_id
-
-    @property
-    def filter_archived(self) -> Optional[bool]:
-        return self.__filter_archived
-
-    @property
-    def offset(self) -> Optional[int]:
-        return self.__offset
-
-    @property
-    def limit(self) -> Optional[int]:
-        return self.__limit
-
-    def __len__(self) -> int:
-        if self.__page is None:
-            self.__page = self.invoke_api(self.__api)
-        return self.__page['total']
-
-    def __iter__(self) -> Iterator[T]:
-        if self.__page is None:
-            self.__page = self.invoke_api(self.__api)
-
-        while self.__page['entries']:
-            for entry in self.__page["entries"]:
-                yield self.build_entry(self.__api, entry)
-                self.__offset += 1
-            if self.__offset < self.__page['total']:
-                self.__page = self.invoke_api(self.__api)
-            else:
-                break
 
 
 class JobDefinitionIterator(AbstractSizedIterator[JobDefinition]):
