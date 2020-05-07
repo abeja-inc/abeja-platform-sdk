@@ -5,9 +5,10 @@ from io import BytesIO
 from pathlib import Path
 from typing import AnyStr, IO, Optional, List, Dict, Any
 
+from abeja.exceptions import BadRequest
 from abeja.common.api_client import BaseAPIClient
-from abeja.training.instance_type import InstanceType
 from abeja.common.utils import get_filter_archived_applied_params
+from abeja.common.instance_type import InstanceType
 
 
 class APIClient(BaseAPIClient):
@@ -779,8 +780,14 @@ class APIClient(BaseAPIClient):
             data['environment'] = user_parameters
         if datasets is not None:
             data['datasets'] = datasets
-        if instance_type is not None and InstanceType.to_enum(instance_type):
-            data['instance_type'] = instance_type
+        if instance_type is not None:
+            # validation
+            try:
+                InstanceType.parse(instance_type)
+                data['instance_type'] = instance_type
+            except ValueError:
+                error_message = "'{}' is an invalid instance_type".format(instance_type)
+                raise BadRequest(error=error_message, error_description=error_message, status_code=400)
         if description is not None:
             data['description'] = description
         path = '/organizations/{}/training/definitions/{}/versions/{}/jobs'.format(
@@ -1023,7 +1030,7 @@ class APIClient(BaseAPIClient):
                 statistics.add_stage(name=Statistics.STAGE_TRAIN, accuracy=0.9, loss=0.05)
                 statistics.add_stage(name=Statistics.STAGE_VALIDATION, accuracy=0.8, loss=0.1, key2=2)
 
-                response = api_client.update_statistics(statistics)
+                response = api_client.update_statistics(statistics.get_statistics())
 
         Params:
             - **statistics** (str): statistics needs to be saved and updated
