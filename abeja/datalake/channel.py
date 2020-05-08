@@ -311,10 +311,10 @@ class Channels:
                 }
                 channel = channels.create(**params)
 
-            Params:
-                - **name** (str): channel name
-                - **description** (str): channel description
-                - **storage_type** (str): type of storage, datalake or file
+        Params:
+            - **name** (str): channel name
+            - **description** (str): channel description
+            - **storage_type** (str): type of storage, datalake or file
 
         Return type:
             :class:`Channel <abeja.datalake.channel.Channel>` object
@@ -377,8 +377,8 @@ class Channels:
                 channel_id = '1234567890123'
                 channel = channels.get(channel_id=channel_id)
 
-            Params:
-                - **channel_id** (str): identifier of channel
+        Params:
+            - **channel_id** (str): identifier of channel
 
         Return type:
             :class:`Channel <abeja.datalake.channel.Channel>` object
@@ -415,10 +415,10 @@ class Channels:
                 }
                 channel = channels.patch(**params)
 
-            Params:
-                - **channel_id** (str): identifier of channel
-                - **name** (str): channel name
-                - **description** (str): channel description
+        Params:
+            - **channel_id** (str): identifier of channel
+            - **name** (str): channel name
+            - **description** (str): channel description
 
         Return type:
             :class:`Channel <abeja.datalake.channel.Channel>` object

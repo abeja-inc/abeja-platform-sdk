@@ -150,7 +150,7 @@ class JobDefinitionVersions():
 
                 version = versions.get(job_definition_version_id=5)
 
-            Params:
+        Params:
             - **job_definition_version_id** (int): the version number
 
         Return type:
@@ -271,7 +271,7 @@ class JobDefinitionVersions():
 
                 version = versions.update(job_definition_version_id=5, description='new version')
 
-            Params:
+        Params:
             - **job_definition_version_id** (int): the version number
 
         Return type:
@@ -298,7 +298,7 @@ class JobDefinitionVersions():
 
                 versions.archive(job_definition_version_id=5)
 
-            Params:
+        Params:
             - **job_definition_version_id** (int): the version number
         """
         self.__api.archive_training_job_definition_version(
@@ -314,7 +314,7 @@ class JobDefinitionVersions():
 
                 versions.unarchive(job_definition_version_id=5)
 
-            Params:
+        Params:
             - **job_definition_version_id** (int): the version number
         """
         self.__api.unarchive_training_job_definition_version(
@@ -330,7 +330,7 @@ class JobDefinitionVersions():
 
                 versions.delete(job_definition_version_id=5)
 
-            Params:
+        Params:
             - **job_definition_version_id** (int): the version number
         """
         self.__api.delete_training_job_definition_version(

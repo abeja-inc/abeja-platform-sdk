@@ -180,7 +180,7 @@ class JobDefinitions():
 
                 definition = definitions.get(name=job_definition_name)
 
-            Params:
+        Params:
             - **name** (str): The identifier of a training job definition. It can be either **name or job_definition_id**.
             - **include_jobs** (bool): If ``True``, also returns training jobs in response. (Default: ``False``)
 
@@ -231,7 +231,7 @@ class JobDefinitions():
 
                 definition = definitions.create(name)
 
-            Params:
+        Params:
             - **name** (str): training job definition name
 
         Return type:
@@ -254,7 +254,7 @@ class JobDefinitions():
 
                 definitions.archive(name=job_definition_name)
 
-            Params:
+        Params:
             - **name** (str): The identifier of a training job definition. It can be either **name or job_definition_id**.
         """
         self.__api.archive_training_job_definition(
@@ -269,7 +269,7 @@ class JobDefinitions():
 
                 definitions.unarchive(name=job_definition_name)
 
-            Params:
+        Params:
             - **name** (str): The identifier of a training job definition. It can be either **name or job_definition_id**.
         """
         self.__api.unarchive_training_job_definition(
@@ -284,7 +284,7 @@ class JobDefinitions():
 
                 definitions.delete(name=job_definition_name)
 
-            Params:
+        Params:
             - **name** (str): The identifier of a training job definition. It can be either **name or job_definition_id**.
         """
         self.__api.delete_training_job_definition(
