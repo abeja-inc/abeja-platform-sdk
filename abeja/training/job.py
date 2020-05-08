@@ -256,7 +256,7 @@ class Jobs():
 
                 job = jobs.get(job_id)
 
-            Params:
+        Params:
             - **job_id** (int): Job ID
 
         Return type:

@@ -1,17 +1,11 @@
-.. ABEJA Training Library documentation master file, created by
-   sphinx-quickstart on Sat Feb 10 15:14:37 2018.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
-
-============================
-ABEJA Training documentation
-============================
+ABEJA Training documentation (abeja.training)
+=============================================
 ABEJA training library is SDK for python, which allows developers to create, get and delete training related resources.
 
 --------------
 High level API
 --------------
-High-level API is used trough following classes.
+High-level API is used through following classes.
 
 .. toctree::
    :glob:
@@ -21,32 +15,18 @@ High-level API is used trough following classes.
 Usage
 -----
 
-
 .. code-block:: python
 
-   from abeja.training import Client
-   from abeja.training.statistics import Statistics as ABEJAStatistics
+   from abeja.training import Client, JobStatus
 
    client = Client()
+   adapter = client.job_definitions()
+   definition = adapter.get('flower-classification')
 
-   statistics = ABEJAStatistics(num_epochs=10, epoch=1)
-   statistics.add_stage(name=ABEJAStatistics.STAGE_TRAIN, accuracy=90.0, loss=0.10)
-   statistics.add_stage(name=ABEJAStatistics.STAGE_VALIDATION, accuracy=75.0, loss=0.07)
+   for job in definition.jobs().list():
+      if job.status == JobStatus.COMPLETE:
+         print('Job {} was completed!', job.job_id)
 
-   client.update_statistics(statistics)
-
-
-API Mapping
------------
-
-
-+--------+---------------------------------------------------------------------------------------------------------------+--------------------------------------------------------------------------------------------+
-| method |                                                     path                                                      |                                                                                            |
-+========+===============================================================================================================+============================================================================================+
-| get    | /organizations/<organization_id>/training/definitions/<job_definition_name>/jobs/<training_job_id>/result     | :meth:`Client.download_training_result() <abeja.training.Client.download_training_result>` |
-+--------+---------------------------------------------------------------------------------------------------------------+--------------------------------------------------------------------------------------------+
-| post   | /organizations/<organization_id>/training/definitions/<job_definition_name>/jobs/<training_job_id>/statistics | :meth:`Client.update_statistics() <abeja.training.Client.update_statistics>`               |
-+--------+---------------------------------------------------------------------------------------------------------------+--------------------------------------------------------------------------------------------+
 
 -------------
 Low level API
@@ -83,6 +63,10 @@ API Mapping
 +--------+---------------------------------------------------------------------------------------------------------------+------------------------------------------------------------------------------------------------------------------------------+
 | get    | /organizations/<organization_id>/training/definitions/<job_definition_name>                                   | :meth:`APIClient.get_training_job_definition() <abeja.training.APIClient.get_training_job_definition>`                       |
 +--------+---------------------------------------------------------------------------------------------------------------+------------------------------------------------------------------------------------------------------------------------------+
+| post   | /organizations/<organization_id>/training/definitions/<job_definition_name>/archive                           | :meth:`APIClient.archive_training_job_definition() <abeja.training.APIClient.archive_training_job_definition>`               |
++--------+---------------------------------------------------------------------------------------------------------------+------------------------------------------------------------------------------------------------------------------------------+
+| post   | /organizations/<organization_id>/training/definitions/<job_definition_name>/unarchive                         | :meth:`APIClient.unarchive_training_job_definition() <abeja.training.APIClient.unarchive_training_job_definition>`           |
++--------+---------------------------------------------------------------------------------------------------------------+------------------------------------------------------------------------------------------------------------------------------+
 | delete | /organizations/<organization_id>/training/definitions/<job_definition_name>                                   | :meth:`APIClient.delete_training_job_definition() <abeja.training.APIClient.delete_training_job_definition>`                 |
 +--------+---------------------------------------------------------------------------------------------------------------+------------------------------------------------------------------------------------------------------------------------------+
 | post   | /organizations/<organization_id>/training/definitions/<job_definition_name>/versions                          | :meth:`APIClient.create_training_job_definition_version() <abeja.training.APIClient.create_training_job_definition_version>` |
@@ -90,6 +74,8 @@ API Mapping
 | get    | /organizations/<organization_id>/training/definitions/<job_definition_name>/versions                          | :meth:`APIClient.get_training_job_definition_versions() <abeja.training.APIClient.get_training_job_definition_versions>`     |
 +--------+---------------------------------------------------------------------------------------------------------------+------------------------------------------------------------------------------------------------------------------------------+
 | get    | /organizations/<organization_id>/training/definitions/<job_definition_name>/versions/<version_id>             | :meth:`APIClient.get_training_job_definition_version() <abeja.training.APIClient.get_training_job_definition_version>`       |
++--------+---------------------------------------------------------------------------------------------------------------+------------------------------------------------------------------------------------------------------------------------------+
+| patch  | /organizations/<organization_id>/training/definitions/<job_definition_name>/versions/<version_id>             | :meth:`APIClient.patch_training_job_definition_version() <abeja.training.APIClient.patch_training_job_definition_version>`   |
 +--------+---------------------------------------------------------------------------------------------------------------+------------------------------------------------------------------------------------------------------------------------------+
 | delete | /organizations/<organization_id>/training/definitions/<job_definition_name>/versions/<version_id>             | :meth:`APIClient.delete_training_job_definition_version() <abeja.training.APIClient.delete_training_job_definition_version>` |
 +--------+---------------------------------------------------------------------------------------------------------------+------------------------------------------------------------------------------------------------------------------------------+

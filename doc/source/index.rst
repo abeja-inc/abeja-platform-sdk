@@ -14,6 +14,7 @@ Contents:
    :maxdepth: 2
 
    dataset/index
+   training/index
    train/index
    notebooks/index
    datalake/index
@@ -25,8 +26,6 @@ Contents:
    runs/index
    triggers/index
    registry/index
-
-.. _authentication:
 
 ==============
 Authentication

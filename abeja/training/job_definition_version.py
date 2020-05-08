@@ -150,7 +150,7 @@ class JobDefinitionVersions():
 
                 version = versions.get(job_definition_version_id=5)
 
-            Params:
+        Params:
             - **job_definition_version_id** (int): the version number
 
         Return type:
@@ -207,6 +207,7 @@ class JobDefinitionVersions():
 
         Request Syntax:
             .. code-block:: python
+
                 from abeja.common.docker_image_name import ALL_GPU_19_10
 
                 version = versions.create(
@@ -216,7 +217,7 @@ class JobDefinitionVersions():
                     environment={'key': 'value'},
                     description='new version')
 
-            Params:
+        Params:
             - **source** (List[str] | IO): an input source for training code. It's one of:
               - zip or tar.gz archived file-like object.
               - a list of file paths.
@@ -270,7 +271,7 @@ class JobDefinitionVersions():
 
                 version = versions.update(job_definition_version_id=5, description='new version')
 
-            Params:
+        Params:
             - **job_definition_version_id** (int): the version number
 
         Return type:
@@ -297,7 +298,7 @@ class JobDefinitionVersions():
 
                 versions.archive(job_definition_version_id=5)
 
-            Params:
+        Params:
             - **job_definition_version_id** (int): the version number
         """
         self.__api.archive_training_job_definition_version(
@@ -313,7 +314,7 @@ class JobDefinitionVersions():
 
                 versions.unarchive(job_definition_version_id=5)
 
-            Params:
+        Params:
             - **job_definition_version_id** (int): the version number
         """
         self.__api.unarchive_training_job_definition_version(
@@ -329,7 +330,7 @@ class JobDefinitionVersions():
 
                 versions.delete(job_definition_version_id=5)
 
-            Params:
+        Params:
             - **job_definition_version_id** (int): the version number
         """
         self.__api.delete_training_job_definition_version(
