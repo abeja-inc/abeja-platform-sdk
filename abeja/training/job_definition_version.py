@@ -207,6 +207,7 @@ class JobDefinitionVersions():
 
         Request Syntax:
             .. code-block:: python
+
                 from abeja.common.docker_image_name import ALL_GPU_19_10
 
                 version = versions.create(
@@ -216,7 +217,7 @@ class JobDefinitionVersions():
                     environment={'key': 'value'},
                     description='new version')
 
-            Params:
+        Params:
             - **source** (List[str] | IO): an input source for training code. It's one of:
               - zip or tar.gz archived file-like object.
               - a list of file paths.
