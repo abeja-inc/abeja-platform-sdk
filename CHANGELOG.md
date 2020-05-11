@@ -1,5 +1,12 @@
+# 1.1.0
+- Documentation for abeja.training (#23)
+- Restructure training package modules (#24)
+- Add abeja.training.Jobs/Job (#22)
+- High Level APIs for training job definition (#20)
+- Add type checker (my.py) for some files (#19)
+
 # 1.0.10
-- change create_training_job_definition_version interface (#16)
+- change create training job definition version interface (#16)
 - fix precommit and apply fmt (#17)
 - Send all params/metrics to statistics from tracker (#18)
 
