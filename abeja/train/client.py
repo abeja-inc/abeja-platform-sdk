@@ -66,9 +66,13 @@ class Client(BaseClient):
             - ValueError
             - IOError
         """
-        training_job_id = training_job_id or self.training_job_id
+        # To keep backward compatibility with the older SDK (<= 1.0.10),
+        # we have to allow a case which either job definition or job id is `None`.
+        training_job_id = training_job_id or self.training_job_id or 'None'
+        job_definition_name = self.job_definition_name or 'None'
+
         response = self.api.get_training_result(organization_id=self.organization_id,
-                                                job_definition_name=self.job_definition_name,
+                                                job_definition_name=job_definition_name,
                                                 training_job_id=training_job_id)
         try:
             artifact_uri = response['artifacts']['complete']['uri']
@@ -119,14 +123,19 @@ class Client(BaseClient):
         Returns:
             None
         """
+        # To keep backward compatibility with the older SDK (<= 1.0.10),
+        # we have to allow a case which either job definition or job id is `None`.
+        training_job_id = self.training_job_id or 'None'
+        job_definition_name = self.job_definition_name or 'None'
+
         if not statistics or not statistics.get_statistics():
             self.logger.warning('empty statistics found.')
             return
 
         try:
             response = self.api.update_statistics(organization_id=self.organization_id,
-                                                  job_definition_name=self.job_definition_name,
-                                                  training_job_id=self.training_job_id,
+                                                  job_definition_name=job_definition_name,
+                                                  training_job_id=training_job_id,
                                                   statistics=statistics.get_statistics())
             self.logger.info('update_statistics result: %s', response)
         except (BadRequest, Unauthorized, Forbidden, NotFound, MethodNotAllowed) as e:

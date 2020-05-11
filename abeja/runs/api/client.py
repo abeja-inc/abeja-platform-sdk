@@ -36,7 +36,7 @@ class APIClient(BaseAPIClient):
                 distribution = 0
                 retry_count = 0
                 environment = {
-                    "EXAMPLE_ENV": "exmaple"
+                    "EXAMPLE_ENV": "example"
                 }
                 response = api_client.create_run(
                     organization_id, deployment_id, version_id, input_data,
@@ -47,11 +47,18 @@ class APIClient(BaseAPIClient):
             - **deployment_id** (str): The ID of the deployment.
             - **version_id** (str): The ID of the version of a model.
             - **model_id** (str): training model identifier
-            - **input_data** (dict): **[optional]** specifies input data in json format for INPUT. The format is like following ``{"<operator>:<protocol_version>": "<operator_payload>"}``. The value specified in INPUT is passed to the first argument of the handler of the user-defined code.
-            - **output_data** (dict): **[optional]** specifies output data in json format for OUTPUT. The format is like following ``{"<operator>:<protocol_version>": "<operator_payload>"}``.
-            - **distribution** (int): **[optional]** specifies the id whose remainder determine distributed queue, as default, round-robin is used.
-            - **retry_count** (int): **[optional]** specifies the number of attempts from 0 to 9, defaults to 5.
-            - **environment** (int): **[optional]** specifies the environment variables which can be referred from user code.
+            - **input_data** (dict): **[optional]** specifies input data in json format for INPUT.
+              The format is like following ``{"<operator>:<protocol_version>": "<operator_payload>"}``.
+              The value specified in INPUT is passed to the first argument of the handler of
+              the user-defined code.
+            - **output_data** (dict): **[optional]** specifies output data in json format for OUTPUT.
+              The format is like following ``{"<operator>:<protocol_version>": "<operator_payload>"}``.
+            - **distribution** (int): **[optional]** specifies the id whose remainder determine distributed
+              queue, as default, round-robin is used.
+            - **retry_count** (int): **[optional]** specifies the number of attempts from 0 to 9,
+              defaults to 5.
+            - **environment** (int): **[optional]** specifies the environment variables which can be
+              referred from user code.
 
         Return type:
             dict
@@ -170,7 +177,8 @@ class APIClient(BaseAPIClient):
             - **output_template** (str): output data in json format for OUTPUT.
             - **retry_count** (int): the number of attempts.
             - **run_id** (str): The ID of the run.
-            - **status** (str): The status of the run, which is each one of ``SUBMITTED``, ``PENDING``, ``RUNNABLE``, ``STARTING``, ``RUNNING``, ``SUCCEEDED``, ``FAILED``.
+            - **status** (str): The status of the run, which is each one of ``SUBMITTED``, ``PENDING``,
+              ``RUNNABLE``, ``STARTING``, ``RUNNING``, ``SUCCEEDED``, ``FAILED``.
             - **user_env_vars** (str): environment variables which are available in user code.
             - **created_at** (str): created date of the run.
             - **modified_at** (str): modified date of the run.

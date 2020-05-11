@@ -280,7 +280,10 @@ class DatasetItems:
         Params:
             - **next_page_token** (str) : next page token to get the next items. **[optional]**
             - **limit** (int): limit of items. **[optional]**
-            - **prefetch** (bool) : False by default. if True, download source_data of all dataset_item concurrently (therefore the order of dataset_items can be changed) and save them in the path specified in environment variable as ``ABEJA_STORAGE_DIR_PATH`` or current directory by default. **[optional]**
+            - **prefetch** (bool) : False by default. if True, download source_data of all dataset_item
+              concurrently (therefore the order of dataset_items can be changed) and save them in
+              the path specified in environment variable as ``ABEJA_STORAGE_DIR_PATH`` or current
+              directory by default. **[optional]**
 
         Return type:
             :class:`DatasetItemIterator <abeja.datasets.dataset_item.DatasetItemIterator>` object
@@ -328,7 +331,7 @@ class DatasetItems:
             - **attribute** (dict): list of source data stored in external storage.
 
         Return type:
-            return the updateed dataset item
+            return the updated dataset item
             :class:`DatasetItem <abeja.datasets.dataset_item.DatasetItem>` object
         """
         res = self._api.update_dataset_item(self.organization_id, self.dataset_id, dataset_item_id, attributes)
@@ -375,7 +378,7 @@ class DatasetItems:
             - **bulk_attributes** (dict): list of attributes.
 
         Return type:
-            return the updateed dataset item list
+            return the updated dataset item list
             :class:`DatasetItem <abeja.datasets.dataset_item.DatasetItem>` object
         """
         res = self._api.bulk_update_dataset_item(self.organization_id, self.dataset_id, bulk_attributes)

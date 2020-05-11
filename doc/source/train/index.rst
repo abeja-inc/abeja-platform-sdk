@@ -3,9 +3,14 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-============================
-ABEJA Training documentation
-============================
+.. warning::
+   We're planning to deprecate ``abeja.train`` package in the future version.
+   Instead, the :doc:`abeja.training </training/index>` package contains far more detailed new high-level
+   APIs. Furthermore, these classes provide more consistent and cleaner interface for developers.
+
+==========================================
+ABEJA Training documentation (abeja.train)
+==========================================
 ABEJA training library is SDK for python, which allows developers to create, get and delete training related resources.
 
 --------------

@@ -1,7 +1,7 @@
 [tool]
 [tool.poetry]
 name = "abeja-sdk"
-version = "1.0.10"
+version = "1.1.0"
 description = "ABEJA Platform Software Development Kit"
 classifiers = [
     "Development Status :: 3 - Alpha",
@@ -38,3 +38,4 @@ tensorflow = "~=1.13.0"
 Sphinx = "==1.6.7"
 guzzle_sphinx_theme = "==0.7.11"
 pre-commit = "1.18.3"
+mypy = "^0.770"

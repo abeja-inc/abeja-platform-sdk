@@ -14,6 +14,7 @@ Contents:
    :maxdepth: 2
 
    dataset/index
+   training/index
    train/index
    notebooks/index
    datalake/index
@@ -32,6 +33,8 @@ Authentication
 
 There are two ways to set credential information for ABEJA Platform SDK usage.
 
+.. _authentication_environment_variables:
+
 Environment Variables
 =====================
 
@@ -48,6 +51,7 @@ ABEJA Platform SDK reads env vars with keys below and use these as credential in
 +--------------------------------------+--------------------------------------------------------------------+
 
 
+.. _authentication_client_parameter:
 
 Client Parameter
 ================
