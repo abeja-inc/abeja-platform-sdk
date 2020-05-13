@@ -1,3 +1,6 @@
+# 1.1.1
+- Relax version specifier (#25)
+
 # 1.1.0
 - Documentation for abeja.training (#23)
 - Restructure training package modules (#24)
