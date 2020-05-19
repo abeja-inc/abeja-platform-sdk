@@ -1,3 +1,6 @@
+# 1.1.2
+- add py.typed (#26)
+
 # 1.1.1
 - Relax version specifier (#25)
 
