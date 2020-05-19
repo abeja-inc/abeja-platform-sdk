@@ -16,6 +16,7 @@ license = "Apache-2.0"
 packages = [
     { include = "abeja" }
 ]
+include = ["abeja/training/py.typed"]
 
 [tool.poetry.dependencies]
 python = "~=3.5"
