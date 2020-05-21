@@ -137,7 +137,7 @@ class JobDefinition():
                 version = adapter.get(job_definition_version_id=1)
 
         Return type:
-            :class:`JobDefinitions <abeja.training.JobDefinitions>` object
+            :class:`JobDefinitionVersions <abeja.training.JobDefinitionVersions>` object
         """
         return job_definition_version.JobDefinitionVersions(api=self.__api, job_definition=self)
 
@@ -152,7 +152,7 @@ class JobDefinition():
                 version = adapter.get(job_id='1234567890123')
 
         Return type:
-            :class:`JobDefinitions <abeja.training.Jobs>` object
+            :class:`Jobs <abeja.training.Jobs>` object
         """
         return job.Jobs(api=self.__api, job_definition=self)
 
