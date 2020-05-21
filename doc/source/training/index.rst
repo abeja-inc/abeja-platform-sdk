@@ -17,14 +17,14 @@ Usage
 
 .. code-block:: python
 
-   from abeja.training import Client, JobStatus
+   from abeja.training import Client, job_status
 
    client = Client()
    adapter = client.job_definitions()
    definition = adapter.get('flower-classification')
 
    for job in definition.jobs().list():
-      if job.status == JobStatus.COMPLETE:
+      if job.status == job_status.COMPLETE:
          print('Job {} was completed!', job.job_id)
 
 
