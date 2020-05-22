@@ -22,5 +22,6 @@ def calc_s3etag(target: bytes, chunk_size: int) -> str:
         dgst_part = hashlib.md5(buf)
         dgst_whole.update(dgst_part.digest())
 
-    etag = "{}-{}".format(dgst_whole.hexdigest(), count) if count > 1 else dgst_part.hexdigest()
+    etag = "{}-{}".format(dgst_whole.hexdigest(),
+                          count) if count > 1 else dgst_part.hexdigest()
     return etag

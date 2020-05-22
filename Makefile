@@ -30,9 +30,11 @@ test: lint mypy
 integration_test:
 	poetry run pytest -vs integration_tests
 
-.PHONY: fmt
-fmt:
-	poetry run autopep8 -i -r abeja tests
+.PHONY: fmt format
+fmt: format
+
+format:
+	poetry run autopep8 -r --in-place --aggressive --aggressive abeja tests
 
 .PHONY: docs
 docs:

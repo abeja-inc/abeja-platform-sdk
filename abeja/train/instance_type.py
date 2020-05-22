@@ -21,7 +21,10 @@ class InstanceTypeValidator(Enum):
             if elm.value == status:
                 return elm
         error_message = "'{}' is not supported as InstanceType".format(status)
-        raise BadRequest(error=error_message, error_description=error_message, status_code=400)
+        raise BadRequest(
+            error=error_message,
+            error_description=error_message,
+            status_code=400)
 
     @classmethod
     def to_enum(cls, status: str):

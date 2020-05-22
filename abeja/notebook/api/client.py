@@ -14,8 +14,13 @@ class APIClient(BaseAPIClient):
        api_client = APIClient()
     """
 
-    def create_notebook(self, organization_id: str, job_definition_name: str,
-                        instance_type: Optional[str] = None, image: Optional[str] = None, notebook_type: Optional[str] = None) -> dict:
+    def create_notebook(
+            self,
+            organization_id: str,
+            job_definition_name: str,
+            instance_type: Optional[str] = None,
+            image: Optional[str] = None,
+            notebook_type: Optional[str] = None) -> dict:
         """create a notebook.
 
         API reference: POST /organizations/{organization_id}/training/definitions/{job_definition_name}/notebooks
@@ -80,10 +85,15 @@ class APIClient(BaseAPIClient):
             params['image'] = image
         if notebook_type is not None and NotebookType.to_enum(notebook_type):
             params['notebook_type'] = notebook_type
-        path = '/organizations/{}/training/definitions/{}/notebooks'.format(organization_id, job_definition_name)
-        return self._connection.api_request(method='POST', path=path, json=params)
+        path = '/organizations/{}/training/definitions/{}/notebooks'.format(
+            organization_id, job_definition_name)
+        return self._connection.api_request(
+            method='POST', path=path, json=params)
 
-    def get_notebooks(self, organization_id: str, job_definition_name: str) -> dict:
+    def get_notebooks(
+            self,
+            organization_id: str,
+            job_definition_name: str) -> dict:
         """get notebooks.
 
         API reference: GET /organizations/{organization_id}/training/definitions/{job_definition_name}/notebooks
@@ -141,10 +151,15 @@ class APIClient(BaseAPIClient):
             - Unauthorized: Authentication failed
             - InternalServerError
         """
-        path = '/organizations/{}/training/definitions/{}/notebooks'.format(organization_id, job_definition_name)
+        path = '/organizations/{}/training/definitions/{}/notebooks'.format(
+            organization_id, job_definition_name)
         return self._connection.api_request(method='GET', path=path)
 
-    def get_notebook(self, organization_id: str, job_definition_name: str, notebook_id: str=None) -> dict:
+    def get_notebook(
+            self,
+            organization_id: str,
+            job_definition_name: str,
+            notebook_id: str=None) -> dict:
         """get a notebook.
 
         API reference: GET /organizations/{organization_id}/training/definitions/{job_definition_name}/notebooks/{notebook_id}
@@ -202,9 +217,13 @@ class APIClient(BaseAPIClient):
         return self._connection.api_request(method='GET', path=path)
 
     def update_notebook(
-        self, organization_id: str, job_definition_name: str, notebook_id: str,
-        instance_type: Optional[str] = None, image: Optional[str] = None, notebook_type: Optional[str] = None
-    ) -> dict:
+            self,
+            organization_id: str,
+            job_definition_name: str,
+            notebook_id: str,
+            instance_type: Optional[str] = None,
+            image: Optional[str] = None,
+            notebook_type: Optional[str] = None) -> dict:
         """update a notebook.
 
         API reference: PUT /organizations/{organization_id}/training/definitions/{job_definition_name}/notebooks/{notebook_id}
@@ -273,9 +292,14 @@ class APIClient(BaseAPIClient):
             params['notebook_type'] = notebook_type
         path = '/organizations/{}/training/definitions/{}/notebooks/{}'.format(
             organization_id, job_definition_name, notebook_id)
-        return self._connection.api_request(method='PUT', path=path, json=params)
+        return self._connection.api_request(
+            method='PUT', path=path, json=params)
 
-    def delete_notebook(self, organization_id: str, job_definition_name: str, notebook_id: str) -> dict:
+    def delete_notebook(
+            self,
+            organization_id: str,
+            job_definition_name: str,
+            notebook_id: str) -> dict:
         """delete a notebook.
 
         API reference: DELETE /organizations/{organization_id}/training/definitions/{job_definition_name}/notebooks/{notebook_id}
@@ -315,7 +339,12 @@ class APIClient(BaseAPIClient):
             organization_id, job_definition_name, notebook_id)
         return self._connection.api_request(method='DELETE', path=path)
 
-    def start_notebook(self, organization_id: str, job_definition_name: str, notebook_id: str, notebook_type: Optional[str] = None) -> dict:
+    def start_notebook(
+            self,
+            organization_id: str,
+            job_definition_name: str,
+            notebook_id: str,
+            notebook_type: Optional[str] = None) -> dict:
         """start a notebook.
 
         API reference: POST /organizations/{organization_id}/training/definitions/{job_definition_name}/notebooks/{notebook_id}/start
@@ -374,9 +403,14 @@ class APIClient(BaseAPIClient):
             params['notebook_type'] = notebook_type
         path = '/organizations/{}/training/definitions/{}/notebooks/{}/start'.format(
             organization_id, job_definition_name, notebook_id)
-        return self._connection.api_request(method='POST', path=path, json=params)
+        return self._connection.api_request(
+            method='POST', path=path, json=params)
 
-    def stop_notebook(self, organization_id: str, job_definition_name: str, notebook_id: str) -> dict:
+    def stop_notebook(
+            self,
+            organization_id: str,
+            job_definition_name: str,
+            notebook_id: str) -> dict:
         """stop a notebook.
 
         API reference: POST /organizations/{organization_id}/training/definitions/{job_definition_name}/notebooks/{notebook_id}/stop
@@ -434,8 +468,12 @@ class APIClient(BaseAPIClient):
         return self._connection.api_request(method='POST', path=path, json={})
 
     def get_notebook_recent_logs(
-        self, organization_id: str, job_definition_name: str, notebook_id: str,
-        next_forward_token: Optional[str]=None, next_backward_token: Optional[str]=None,
+        self,
+        organization_id: str,
+        job_definition_name: str,
+        notebook_id: str,
+        next_forward_token: Optional[str]=None,
+        next_backward_token: Optional[str]=None,
     ) -> dict:
         """get recent logs of the notebook.
 
@@ -487,4 +525,5 @@ class APIClient(BaseAPIClient):
             params['next_backward_token'] = next_backward_token
         path = '/organizations/{}/training/definitions/{}/notebooks/{}/recentlogs'.format(
             organization_id, job_definition_name, notebook_id)
-        return self._connection.api_request(method='GET', path=path, params=params)
+        return self._connection.api_request(
+            method='GET', path=path, params=params)

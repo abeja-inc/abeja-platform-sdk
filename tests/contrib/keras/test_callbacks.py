@@ -19,8 +19,18 @@ class TestStatistics(object):
                                  'val_acc': 0.914, 'val_loss': 0.393})
         url = '{}/organizations/None/training/definitions/None/jobs/None/statistics'.format(
             ABEJA_API_URL)
-        expected_data = {'statistics': {'num_epochs': 20, 'epoch': 2, 'stages': {'train': {
-            'accuracy': 0.756, 'loss': 0.078}, 'validation': {'accuracy': 0.914, 'loss': 0.393}}}}
-        m.assert_called_once_with('POST', url, params=None,
-                                  headers={'User-Agent': 'abeja-platform-sdk/{}'.format(VERSION)},
-                                  timeout=30, data=None, json=expected_data)
+        expected_data = {
+            'statistics': {
+                'num_epochs': 20, 'epoch': 2, 'stages': {
+                    'train': {
+                        'accuracy': 0.756, 'loss': 0.078}, 'validation': {
+                        'accuracy': 0.914, 'loss': 0.393}}}}
+        m.assert_called_once_with(
+            'POST',
+            url,
+            params=None,
+            headers={
+                'User-Agent': 'abeja-platform-sdk/{}'.format(VERSION)},
+            timeout=30,
+            data=None,
+            json=expected_data)

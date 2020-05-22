@@ -28,7 +28,10 @@ class Client(BaseClient):
                  timeout: Optional[int] = None,
                  max_retry_count: Optional[int] = None) -> None:
         super().__init__(organization_id, credential)
-        self.api = APIClient(credential=credential, timeout=timeout, max_retry_count=max_retry_count)
+        self.api = APIClient(
+            credential=credential,
+            timeout=timeout,
+            max_retry_count=max_retry_count)
         self.logger = getLogger('train-api')
 
     def job_definitions(self) -> JobDefinitions:
@@ -43,4 +46,5 @@ class Client(BaseClient):
         Return type:
             :class:`JobDefinitions <abeja.training.JobDefinitions>` object
         """
-        return JobDefinitions(api=self.api, organization_id=self.organization_id)
+        return JobDefinitions(api=self.api,
+                              organization_id=self.organization_id)

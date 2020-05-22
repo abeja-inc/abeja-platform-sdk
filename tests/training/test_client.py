@@ -18,7 +18,9 @@ def test_adapters(requests_mock, api_base_url,
     # Make sure returned adapter work
     requests_mock.get(
         '{}/organizations/{}/training/definitions/{}?include_jobs=false'.format(
-            api_base_url, organization_id, job_definition_name),
+            api_base_url,
+            organization_id,
+            job_definition_name),
         json=training_job_definition_response(
             organization_id,
             job_definition_id))

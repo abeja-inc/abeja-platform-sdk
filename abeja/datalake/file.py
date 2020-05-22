@@ -63,11 +63,22 @@ class DatalakeFile(FileMixin):
         '6months'
     )
 
-    def __init__(self, api: APIClient, organization_id: str=None, channel_id: str=None,
-                 file_id: str=None, uri: str=None, type: str=None,
-                 upload_url: str=None, download_uri: str=None, content_type: str=None,
-                 url_expires_on: str=None, metadata: dict=None, uploaded_at: str=None,
-                 lifetime: str=None, **kwargs) -> None:
+    def __init__(
+            self,
+            api: APIClient,
+            organization_id: str=None,
+            channel_id: str=None,
+            file_id: str=None,
+            uri: str=None,
+            type: str=None,
+            upload_url: str=None,
+            download_uri: str=None,
+            content_type: str=None,
+            url_expires_on: str=None,
+            metadata: dict=None,
+            uploaded_at: str=None,
+            lifetime: str=None,
+            **kwargs) -> None:
         super(DatalakeFile, self).__init__(api, uri, type, **kwargs)
         self.organization_id = organization_id
         if self.uri:
@@ -94,7 +105,9 @@ class DatalakeFile(FileMixin):
     @lifetime.setter
     def lifetime(self, lifetime) -> None:
         # not allow to update with None if lifetime exists
-        if hasattr(self, '_lifetime') and self._lifetime is not None and lifetime is None:
+        if hasattr(
+                self,
+                '_lifetime') and self._lifetime is not None and lifetime is None:
             raise RuntimeError(
                 'lifetime cannot be updated with {}'.format(lifetime))
         if lifetime is not None and lifetime not in DatalakeFile.LIFETIME:
@@ -125,7 +138,11 @@ class DatalakeFile(FileMixin):
             return decorated(self)
         return self._get_content_from_remote()
 
-    def get_iter_content(self, cache: bool=True, chunk_size: int=DEFAULT_CHUNK_SIZE) -> Generator[bytes, None, None]:
+    def get_iter_content(self,
+                         cache: bool=True,
+                         chunk_size: int=DEFAULT_CHUNK_SIZE) -> Generator[bytes,
+                                                                          None,
+                                                                          None]:
         """Get content iteratively from a binary file
 
         Request syntax:
@@ -152,7 +169,10 @@ class DatalakeFile(FileMixin):
             return decorated(self, chunk_size)
         return self._get_iter_content_from_remote(chunk_size)
 
-    def get_text(self, cache: bool = True, encoding: Optional[str] = None) -> str:
+    def get_text(
+            self,
+            cache: bool = True,
+            encoding: Optional[str] = None) -> str:
         """Get content from a text file
 
         Request syntax:
@@ -286,7 +306,8 @@ class DatalakeFile(FileMixin):
         res = self._do_download()
         return self._validate_etag(res)
 
-    def _get_iter_content_from_remote(self, chunk_size) -> Generator[bytes, None, None]:
+    def _get_iter_content_from_remote(
+            self, chunk_size) -> Generator[bytes, None, None]:
         res = self._do_download(stream=True)
         return res.iter_content(chunk_size=chunk_size)
 
@@ -339,7 +360,8 @@ class DatalakeFile(FileMixin):
         # In the future, instance info can be reflected by a single request.
         file_info = self.get_file_info()
 
-        # update metadata first because lifetime does not support deletion for now.
+        # update metadata first because lifetime does not support deletion for
+        # now.
         datalake_metadata = {
             'x-abeja-meta-{}'.format(k): v for k, v in self.metadata.items()}
         self._api.put_channel_file_metadata(
@@ -366,10 +388,19 @@ def _download_file_content(item: DatalakeFile) -> DatalakeFile:
 
 
 class FileIterator(Iterator):
-    def __init__(self, api: APIClient, organization_id: str, channel_id: str,
-                 start: str=None, end: str=None, timezone: str=None,
-                 items_per_page: int=None, sort: str=None,
-                 next_page_token: str=None, prefetch=False, query: str=None) -> None:
+    def __init__(
+            self,
+            api: APIClient,
+            organization_id: str,
+            channel_id: str,
+            start: str=None,
+            end: str=None,
+            timezone: str=None,
+            items_per_page: int=None,
+            sort: str=None,
+            next_page_token: str=None,
+            prefetch=False,
+            query: str=None) -> None:
         self._api = api
         self.organization_id = organization_id
         self.channel_id = channel_id
@@ -397,16 +428,16 @@ class FileIterator(Iterator):
         with ThreadPoolExecutor(max_workers=FETCH_WORKER_COUNT) as executor:
             futures = []
             while page:
-                futures += [
-                    executor.submit(_download_file_content, item) for item in page
-                ]
+                futures += [executor.submit(_download_file_content, item)
+                            for item in page]
                 page = self._page()
             for f in as_completed(futures):
                 download_item = f.result()
                 yield download_item
 
     def __next__(self):
-        if self._current_page is None or self._current_page_file_idx >= len(self._current_page):
+        if self._current_page is None or self._current_page_file_idx >= len(
+                self._current_page):
             self._current_page_file_idx = 0
             self._current_page = self._page()
 
@@ -476,7 +507,11 @@ class FileIterator(Iterator):
 
 
 class Files:
-    def __init__(self, api: APIClient, organization_id: str, channel_id: str) -> None:
+    def __init__(
+            self,
+            api: APIClient,
+            organization_id: str,
+            channel_id: str) -> None:
         self._api = api
         self.organization_id = organization_id
         self.channel_id = channel_id
@@ -513,6 +548,14 @@ class Files:
         Return type:
             :class:`FileIterator <abeja.datalake.file.FileIterator>`
         """
-        return FileIterator(self._api, self.organization_id, self.channel_id,
-                            start=start, end=end, timezone=timezone, sort=sort, next_page_token=next_page_token,
-                            items_per_page=limit, prefetch=prefetch)
+        return FileIterator(
+            self._api,
+            self.organization_id,
+            self.channel_id,
+            start=start,
+            end=end,
+            timezone=timezone,
+            sort=sort,
+            next_page_token=next_page_token,
+            items_per_page=limit,
+            prefetch=prefetch)

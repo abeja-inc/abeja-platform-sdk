@@ -37,8 +37,14 @@ class TestRegistryAPIClient:
             (REPOSITORY_NAME, None, {'name': REPOSITORY_NAME})
         ]
     )
-    def test_create_repository(self, requests_mock, name, description, expected):
-        path = '/organizations/{}/registry/repositories'.format(ORGANIZATION_ID)
+    def test_create_repository(
+            self,
+            requests_mock,
+            name,
+            description,
+            expected):
+        path = '/organizations/{}/registry/repositories'.format(
+            ORGANIZATION_ID)
         requests_mock.post(path, json=REGISTRY_RES)
 
         client = APIClient()
@@ -59,7 +65,8 @@ class TestRegistryAPIClient:
         ]
     )
     def test_get_repositories(self, requests_mock, limit, offset, expected):
-        path = '/organizations/{}/registry/repositories'.format(ORGANIZATION_ID)
+        path = '/organizations/{}/registry/repositories'.format(
+            ORGANIZATION_ID)
         requests_mock.get(path, json=REGISTRY_RES)
 
         client = APIClient()

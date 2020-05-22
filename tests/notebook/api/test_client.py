@@ -41,7 +41,8 @@ class TestAPIClient(unittest.TestCase):
 
     @requests_mock.Mocker()
     def test_create_notebook(self, m):
-        path = '/organizations/{}/training/definitions/{}/notebooks'.format(ORGANIZATION_ID, JOB_DEFINITION_NAME)
+        path = '/organizations/{}/training/definitions/{}/notebooks'.format(
+            ORGANIZATION_ID, JOB_DEFINITION_NAME)
         m.post(path, json=NOTEBOOK_RES)
 
         client = APIClient()
@@ -51,15 +52,18 @@ class TestAPIClient(unittest.TestCase):
 
     @requests_mock.Mocker()
     def test_create_notebook_with_params(self, m):
-        path = '/organizations/{}/training/definitions/{}/notebooks'.format(ORGANIZATION_ID, JOB_DEFINITION_NAME)
+        path = '/organizations/{}/training/definitions/{}/notebooks'.format(
+            ORGANIZATION_ID, JOB_DEFINITION_NAME)
         m.post(path, json=NOTEBOOK_RES)
 
         client = APIClient()
 
         ret = client.create_notebook(
-            ORGANIZATION_ID, JOB_DEFINITION_NAME,
-            instance_type="gpu-1", image="abeja-inc/all-gpu:18.10", notebook_type="lab"
-        )
+            ORGANIZATION_ID,
+            JOB_DEFINITION_NAME,
+            instance_type="gpu-1",
+            image="abeja-inc/all-gpu:18.10",
+            notebook_type="lab")
         expected_payload = {
             "instance_type": "gpu-1",
             "image": 'abeja-inc/all-gpu:18.10',
@@ -75,12 +79,16 @@ class TestAPIClient(unittest.TestCase):
         m.get(path, json=NOTEBOOK_RES)
 
         client = APIClient()
-        ret = client.get_notebook(ORGANIZATION_ID, JOB_DEFINITION_NAME, NOTEBOOK_ID)
+        ret = client.get_notebook(
+            ORGANIZATION_ID,
+            JOB_DEFINITION_NAME,
+            NOTEBOOK_ID)
         self.assertDictEqual(ret, NOTEBOOK_RES)
 
     @requests_mock.Mocker()
     def test_get_notebooks(self, m):
-        path = '/organizations/{}/training/definitions/{}/notebooks'.format(ORGANIZATION_ID, JOB_DEFINITION_NAME)
+        path = '/organizations/{}/training/definitions/{}/notebooks'.format(
+            ORGANIZATION_ID, JOB_DEFINITION_NAME)
         m.get(path, json=NOTEBOOK_LIST_RES)
 
         client = APIClient()
@@ -94,7 +102,8 @@ class TestAPIClient(unittest.TestCase):
         m.put(path, json=NOTEBOOK_RES)
 
         client = APIClient()
-        ret = client.update_notebook(ORGANIZATION_ID, JOB_DEFINITION_NAME, NOTEBOOK_ID)
+        ret = client.update_notebook(
+            ORGANIZATION_ID, JOB_DEFINITION_NAME, NOTEBOOK_ID)
         self.assertDictEqual(m.request_history[0].json(), {})
         self.assertDictEqual(ret, NOTEBOOK_RES)
 
@@ -106,9 +115,12 @@ class TestAPIClient(unittest.TestCase):
 
         client = APIClient()
         ret = client.update_notebook(
-            ORGANIZATION_ID, JOB_DEFINITION_NAME, NOTEBOOK_ID,
-            instance_type="gpu-1", image="abeja-inc/all-gpu:18.10", notebook_type="lab"
-        )
+            ORGANIZATION_ID,
+            JOB_DEFINITION_NAME,
+            NOTEBOOK_ID,
+            instance_type="gpu-1",
+            image="abeja-inc/all-gpu:18.10",
+            notebook_type="lab")
         expected_payload = {
             "instance_type": "gpu-1",
             "image": 'abeja-inc/all-gpu:18.10',
@@ -127,7 +139,8 @@ class TestAPIClient(unittest.TestCase):
         m.delete(path, json=message_res)
 
         client = APIClient()
-        ret = client.delete_notebook(ORGANIZATION_ID, JOB_DEFINITION_NAME, NOTEBOOK_ID)
+        ret = client.delete_notebook(
+            ORGANIZATION_ID, JOB_DEFINITION_NAME, NOTEBOOK_ID)
         self.assertDictEqual(ret, message_res)
 
     @requests_mock.Mocker()
@@ -140,7 +153,10 @@ class TestAPIClient(unittest.TestCase):
         m.post(path, json=message_res)
 
         client = APIClient()
-        ret = client.stop_notebook(ORGANIZATION_ID, JOB_DEFINITION_NAME, NOTEBOOK_ID)
+        ret = client.stop_notebook(
+            ORGANIZATION_ID,
+            JOB_DEFINITION_NAME,
+            NOTEBOOK_ID)
         self.assertDictEqual(ret, message_res)
 
     @requests_mock.Mocker()
@@ -153,7 +169,10 @@ class TestAPIClient(unittest.TestCase):
         m.post(path, json=message_res)
 
         client = APIClient()
-        ret = client.start_notebook(ORGANIZATION_ID, JOB_DEFINITION_NAME, NOTEBOOK_ID)
+        ret = client.start_notebook(
+            ORGANIZATION_ID,
+            JOB_DEFINITION_NAME,
+            NOTEBOOK_ID)
         self.assertDictEqual(ret, message_res)
 
     @requests_mock.Mocker()
@@ -164,16 +183,14 @@ class TestAPIClient(unittest.TestCase):
             "events": [
                 {
                     "message": "start executing model with abeja-runtime-python36 (version: 0.X.X)",
-                    "timestamp": "2019-10-16T00:00:00.000Z"
-                }
-            ],
+                    "timestamp": "2019-10-16T00:00:00.000Z"}],
             "next_backward_token": "AAA",
-            "next_forward_token": "BBB"
-        }
+            "next_forward_token": "BBB"}
         m.get(path, json=message_res)
 
         client = APIClient()
-        ret = client.get_notebook_recent_logs(ORGANIZATION_ID, JOB_DEFINITION_NAME, NOTEBOOK_ID)
+        ret = client.get_notebook_recent_logs(
+            ORGANIZATION_ID, JOB_DEFINITION_NAME, NOTEBOOK_ID)
         self.assertDictEqual(ret, message_res)
 
     @requests_mock.Mocker()
@@ -184,12 +201,9 @@ class TestAPIClient(unittest.TestCase):
             "events": [
                 {
                     "message": "start executing model with abeja-runtime-python36 (version: 0.X.X)",
-                    "timestamp": "2019-10-16T00:00:00.000Z"
-                }
-            ],
+                    "timestamp": "2019-10-16T00:00:00.000Z"}],
             "next_backward_token": "AAA",
-            "next_forward_token": "BBB"
-        }
+            "next_forward_token": "BBB"}
         m.get(path, json=message_res)
 
         client = APIClient()
@@ -207,12 +221,9 @@ class TestAPIClient(unittest.TestCase):
             "events": [
                 {
                     "message": "start executing model with abeja-runtime-python36 (version: 0.X.X)",
-                    "timestamp": "2019-10-16T00:00:00.000Z"
-                }
-            ],
+                    "timestamp": "2019-10-16T00:00:00.000Z"}],
             "next_backward_token": "AAA",
-            "next_forward_token": "BBB"
-        }
+            "next_forward_token": "BBB"}
         m.get(path, json=message_res)
 
         client = APIClient()

@@ -29,20 +29,30 @@ class TestApiClient:
         expected_data = {
             'name': JOB_DEFINITION_NAME
         }
-        m.assert_called_once_with('POST', url, params=None,
-                                  headers={
-                                      'User-Agent': 'abeja-platform-sdk/{}'.format(VERSION)},
-                                  timeout=30, data=None, json=expected_data)
+        m.assert_called_once_with(
+            'POST',
+            url,
+            params=None,
+            headers={
+                'User-Agent': 'abeja-platform-sdk/{}'.format(VERSION)},
+            timeout=30,
+            data=None,
+            json=expected_data)
 
     @patch('requests.Session.request')
     def test_get_training_job_definitions(self, m):
         self.api_client.get_training_job_definitions(ORGANIZATION_ID)
         url = '{}/organizations/{}/training/definitions/'.format(
             ABEJA_API_URL, ORGANIZATION_ID)
-        m.assert_called_once_with('GET', url, params=None,
-                                  headers={
-                                      'User-Agent': 'abeja-platform-sdk/{}'.format(VERSION)},
-                                  timeout=30, data=None, json=None)
+        m.assert_called_once_with(
+            'GET',
+            url,
+            params=None,
+            headers={
+                'User-Agent': 'abeja-platform-sdk/{}'.format(VERSION)},
+            timeout=30,
+            data=None,
+            json=None)
 
     @patch('requests.Session.request')
     def test_get_training_job_definitions_filter_archived_true(self, m):
@@ -53,10 +63,15 @@ class TestApiClient:
         expected_params = {
             'filter_archived': 'exclude_archived'
         }
-        m.assert_called_once_with('GET', url, params=expected_params,
-                                  headers={
-                                      'User-Agent': 'abeja-platform-sdk/{}'.format(VERSION)},
-                                  timeout=30, data=None, json=None)
+        m.assert_called_once_with(
+            'GET',
+            url,
+            params=expected_params,
+            headers={
+                'User-Agent': 'abeja-platform-sdk/{}'.format(VERSION)},
+            timeout=30,
+            data=None,
+            json=None)
 
     @patch('requests.Session.request')
     def test_get_training_job_definitions_filter_archived_false(self, m):
@@ -67,10 +82,15 @@ class TestApiClient:
         expected_params = {
             'filter_archived': 'include_archived'
         }
-        m.assert_called_once_with('GET', url, params=expected_params,
-                                  headers={
-                                      'User-Agent': 'abeja-platform-sdk/{}'.format(VERSION)},
-                                  timeout=30, data=None, json=None)
+        m.assert_called_once_with(
+            'GET',
+            url,
+            params=expected_params,
+            headers={
+                'User-Agent': 'abeja-platform-sdk/{}'.format(VERSION)},
+            timeout=30,
+            data=None,
+            json=None)
 
     @patch('requests.Session.request')
     def test_get_training_job_definition(self, m):
@@ -78,10 +98,15 @@ class TestApiClient:
             ORGANIZATION_ID, JOB_DEFINITION_NAME)
         url = '{}/organizations/{}/training/definitions/{}'.format(
             ABEJA_API_URL, ORGANIZATION_ID, JOB_DEFINITION_NAME)
-        m.assert_called_once_with('GET', url, params=None,
-                                  headers={
-                                      'User-Agent': 'abeja-platform-sdk/{}'.format(VERSION)},
-                                  timeout=30, data=None, json=None)
+        m.assert_called_once_with(
+            'GET',
+            url,
+            params=None,
+            headers={
+                'User-Agent': 'abeja-platform-sdk/{}'.format(VERSION)},
+            timeout=30,
+            data=None,
+            json=None)
 
     @patch('requests.Session.request')
     @pytest.mark.parametrize(
@@ -91,7 +116,8 @@ class TestApiClient:
             (False, 'false'),
         ]
     )
-    def test_get_training_job_definition_with_include_jobs(self, m, include_jobs, expected):
+    def test_get_training_job_definition_with_include_jobs(
+            self, m, include_jobs, expected):
         self.api_client.get_training_job_definition(
             ORGANIZATION_ID, JOB_DEFINITION_NAME, include_jobs=include_jobs)
         url = '{}/organizations/{}/training/definitions/{}'.format(
@@ -99,10 +125,15 @@ class TestApiClient:
         expected_params = {
             'include_jobs': expected
         }
-        m.assert_called_once_with('GET', url, params=expected_params,
-                                  headers={
-                                      'User-Agent': 'abeja-platform-sdk/{}'.format(VERSION)},
-                                  timeout=30, data=None, json=None)
+        m.assert_called_once_with(
+            'GET',
+            url,
+            params=expected_params,
+            headers={
+                'User-Agent': 'abeja-platform-sdk/{}'.format(VERSION)},
+            timeout=30,
+            data=None,
+            json=None)
 
     @patch('requests.Session.request')
     def test_delete_training_job_definition(self, m):
@@ -110,10 +141,15 @@ class TestApiClient:
             ORGANIZATION_ID, JOB_DEFINITION_NAME)
         url = '{}/organizations/{}/training/definitions/{}'.format(
             ABEJA_API_URL, ORGANIZATION_ID, JOB_DEFINITION_NAME)
-        m.assert_called_once_with('DELETE', url, params=None,
-                                  headers={
-                                      'User-Agent': 'abeja-platform-sdk/{}'.format(VERSION)},
-                                  timeout=30, data=None, json=None)
+        m.assert_called_once_with(
+            'DELETE',
+            url,
+            params=None,
+            headers={
+                'User-Agent': 'abeja-platform-sdk/{}'.format(VERSION)},
+            timeout=30,
+            data=None,
+            json=None)
 
     @patch('requests.Session.request')
     def test_create_training_job_definition_version_native_api(self, m):
@@ -126,15 +162,26 @@ class TestApiClient:
                 new_zip.writestr('requirements.txt', 'requests==1.0.0')
                 source_code.seek(0)
                 self.api_client.create_training_job_definition_version_native_api(
-                    ORGANIZATION_ID, JOB_DEFINITION_NAME, source_code=source_code,
-                    parameters={'handler': handler, 'imag': image, 'environment': environment, 'description': description})
+                    ORGANIZATION_ID,
+                    JOB_DEFINITION_NAME,
+                    source_code=source_code,
+                    parameters={
+                        'handler': handler,
+                        'imag': image,
+                        'environment': environment,
+                        'description': description})
         url = '{}/organizations/{}/training/definitions/{}/versions'.format(
             ABEJA_API_URL, ORGANIZATION_ID, JOB_DEFINITION_NAME)
-        m.assert_called_once_with('POST', url, params=None,
-                                  headers={
-                                      'User-Agent': 'abeja-platform-sdk/{}'.format(VERSION)},
-                                  timeout=30, data=None,
-                                  json=None, files=m.call_args[1]['files'])
+        m.assert_called_once_with(
+            'POST',
+            url,
+            params=None,
+            headers={
+                'User-Agent': 'abeja-platform-sdk/{}'.format(VERSION)},
+            timeout=30,
+            data=None,
+            json=None,
+            files=m.call_args[1]['files'])
 
     @patch('requests.Session.request')
     def test_create_training_job_definition_version(self, m):
@@ -152,11 +199,16 @@ class TestApiClient:
                 image=image, environment=environment, description=description)
         url = '{}/organizations/{}/training/definitions/{}/versions'.format(
             ABEJA_API_URL, ORGANIZATION_ID, JOB_DEFINITION_NAME)
-        m.assert_called_once_with('POST', url, params=None,
-                                  headers={
-                                      'User-Agent': 'abeja-platform-sdk/{}'.format(VERSION)},
-                                  timeout=30, data=None,
-                                  json=None, files=m.call_args[1]['files'])
+        m.assert_called_once_with(
+            'POST',
+            url,
+            params=None,
+            headers={
+                'User-Agent': 'abeja-platform-sdk/{}'.format(VERSION)},
+            timeout=30,
+            data=None,
+            json=None,
+            files=m.call_args[1]['files'])
 
     @patch('requests.Session.request')
     def test_create_training_job_definition_version_file_not_found(self, m):
@@ -176,13 +228,20 @@ class TestApiClient:
             ORGANIZATION_ID, JOB_DEFINITION_NAME)
         url = '{}/organizations/{}/training/definitions/{}/versions'.format(
             ABEJA_API_URL, ORGANIZATION_ID, JOB_DEFINITION_NAME)
-        m.assert_called_once_with('GET', url, params=None,
-                                  headers={
-                                      'User-Agent': 'abeja-platform-sdk/{}'.format(VERSION)},
-                                  timeout=30, data=None, json=None)
+        m.assert_called_once_with(
+            'GET',
+            url,
+            params=None,
+            headers={
+                'User-Agent': 'abeja-platform-sdk/{}'.format(VERSION)},
+            timeout=30,
+            data=None,
+            json=None)
 
     @patch('requests.Session.request')
-    def test_get_training_job_definition_versions_filter_archived_true(self, m):
+    def test_get_training_job_definition_versions_filter_archived_true(
+            self,
+            m):
         self.api_client.get_training_job_definition_versions(
             ORGANIZATION_ID, JOB_DEFINITION_NAME, filter_archived=True)
         url = '{}/organizations/{}/training/definitions/{}/versions'.format(
@@ -190,13 +249,20 @@ class TestApiClient:
         expected_params = {
             'filter_archived': 'exclude_archived'
         }
-        m.assert_called_once_with('GET', url, params=expected_params,
-                                  headers={
-                                      'User-Agent': 'abeja-platform-sdk/{}'.format(VERSION)},
-                                  timeout=30, data=None, json=None)
+        m.assert_called_once_with(
+            'GET',
+            url,
+            params=expected_params,
+            headers={
+                'User-Agent': 'abeja-platform-sdk/{}'.format(VERSION)},
+            timeout=30,
+            data=None,
+            json=None)
 
     @patch('requests.Session.request')
-    def test_get_training_job_definition_versions_filter_archived_false(self, m):
+    def test_get_training_job_definition_versions_filter_archived_false(
+            self,
+            m):
         self.api_client.get_training_job_definition_versions(
             ORGANIZATION_ID, JOB_DEFINITION_NAME, filter_archived=False)
         url = '{}/organizations/{}/training/definitions/{}/versions'.format(
@@ -204,10 +270,15 @@ class TestApiClient:
         expected_params = {
             'filter_archived': 'include_archived'
         }
-        m.assert_called_once_with('GET', url, params=expected_params,
-                                  headers={
-                                      'User-Agent': 'abeja-platform-sdk/{}'.format(VERSION)},
-                                  timeout=30, data=None, json=None)
+        m.assert_called_once_with(
+            'GET',
+            url,
+            params=expected_params,
+            headers={
+                'User-Agent': 'abeja-platform-sdk/{}'.format(VERSION)},
+            timeout=30,
+            data=None,
+            json=None)
 
     @patch('requests.Session.request')
     def test_get_training_job_definition_version(self, m):
@@ -215,10 +286,15 @@ class TestApiClient:
             ORGANIZATION_ID, JOB_DEFINITION_NAME, VERSION_ID)
         url = '{}/organizations/{}/training/definitions/{}/versions/{}'.format(
             ABEJA_API_URL, ORGANIZATION_ID, JOB_DEFINITION_NAME, VERSION_ID)
-        m.assert_called_once_with('GET', url, params=None,
-                                  headers={
-                                      'User-Agent': 'abeja-platform-sdk/{}'.format(VERSION)},
-                                  timeout=30, data=None, json=None)
+        m.assert_called_once_with(
+            'GET',
+            url,
+            params=None,
+            headers={
+                'User-Agent': 'abeja-platform-sdk/{}'.format(VERSION)},
+            timeout=30,
+            data=None,
+            json=None)
 
     @patch('requests.Session.request')
     def test_delete_training_job_definition_version(self, m):
@@ -226,10 +302,15 @@ class TestApiClient:
             ORGANIZATION_ID, JOB_DEFINITION_NAME, VERSION_ID)
         url = '{}/organizations/{}/training/definitions/{}/versions/{}'.format(
             ABEJA_API_URL, ORGANIZATION_ID, JOB_DEFINITION_NAME, VERSION_ID)
-        m.assert_called_once_with('DELETE', url, params=None,
-                                  headers={
-                                      'User-Agent': 'abeja-platform-sdk/{}'.format(VERSION)},
-                                  timeout=30, data=None, json=None)
+        m.assert_called_once_with(
+            'DELETE',
+            url,
+            params=None,
+            headers={
+                'User-Agent': 'abeja-platform-sdk/{}'.format(VERSION)},
+            timeout=30,
+            data=None,
+            json=None)
 
     @patch('requests.Session.request')
     @pytest.mark.parametrize(
@@ -291,33 +372,54 @@ class TestApiClient:
             ),
         ]
     )
-    def test_create_training_job(self, m, user_params, environment, datasets, instance_type, description, expected):
+    def test_create_training_job(
+            self,
+            m,
+            user_params,
+            environment,
+            datasets,
+            instance_type,
+            description,
+            expected):
         self.api_client.create_training_job(
             ORGANIZATION_ID, JOB_DEFINITION_NAME, VERSION_ID,
             user_params, datasets, instance_type, environment, description)
         url = '{}/organizations/{}/training/definitions/{}/versions/{}/jobs'.format(
             ABEJA_API_URL, ORGANIZATION_ID, JOB_DEFINITION_NAME, VERSION_ID)
-        m.assert_called_once_with('POST', url, params=None,
-                                  headers={
-                                      'User-Agent': 'abeja-platform-sdk/{}'.format(VERSION)},
-                                  timeout=30, data=None, json=expected)
+        m.assert_called_once_with(
+            'POST',
+            url,
+            params=None,
+            headers={
+                'User-Agent': 'abeja-platform-sdk/{}'.format(VERSION)},
+            timeout=30,
+            data=None,
+            json=expected)
 
     @patch('requests.Session.request')
     def test_create_training_job_invalid_instance_type(self, m):
         instance_type = "dummy"
         with pytest.raises(BadRequest):
             self.api_client.create_training_job(
-                ORGANIZATION_ID, JOB_DEFINITION_NAME, VERSION_ID, instance_type=instance_type)
+                ORGANIZATION_ID,
+                JOB_DEFINITION_NAME,
+                VERSION_ID,
+                instance_type=instance_type)
 
     @patch('requests.Session.request')
     def test_get_training_jobs(self, m):
         self.api_client.get_training_jobs(ORGANIZATION_ID, JOB_DEFINITION_NAME)
         url = '{}/organizations/{}/training/definitions/{}/jobs'.format(
             ABEJA_API_URL, ORGANIZATION_ID, JOB_DEFINITION_NAME, VERSION_ID)
-        m.assert_called_once_with('GET', url, params={},
-                                  headers={
-                                      'User-Agent': 'abeja-platform-sdk/{}'.format(VERSION)},
-                                  timeout=30, data=None, json=None)
+        m.assert_called_once_with(
+            'GET',
+            url,
+            params={},
+            headers={
+                'User-Agent': 'abeja-platform-sdk/{}'.format(VERSION)},
+            timeout=30,
+            data=None,
+            json=None)
 
     @patch('requests.Session.request')
     def test_get_training_jobs_with_limit(self, m):
@@ -328,10 +430,15 @@ class TestApiClient:
         expected_params = {
             'limit': 100
         }
-        m.assert_called_once_with('GET', url, params=expected_params,
-                                  headers={
-                                      'User-Agent': 'abeja-platform-sdk/{}'.format(VERSION)},
-                                  timeout=30, data=None, json=None)
+        m.assert_called_once_with(
+            'GET',
+            url,
+            params=expected_params,
+            headers={
+                'User-Agent': 'abeja-platform-sdk/{}'.format(VERSION)},
+            timeout=30,
+            data=None,
+            json=None)
 
     @patch('requests.Session.request')
     def test_get_training_jobs_with_offset(self, m):
@@ -342,10 +449,15 @@ class TestApiClient:
         expected_params = {
             'offset': 20
         }
-        m.assert_called_once_with('GET', url, params=expected_params,
-                                  headers={
-                                      'User-Agent': 'abeja-platform-sdk/{}'.format(VERSION)},
-                                  timeout=30, data=None, json=None)
+        m.assert_called_once_with(
+            'GET',
+            url,
+            params=expected_params,
+            headers={
+                'User-Agent': 'abeja-platform-sdk/{}'.format(VERSION)},
+            timeout=30,
+            data=None,
+            json=None)
 
     @patch('requests.Session.request')
     def test_get_training_jobs_with_limit_and_offset(self, m):
@@ -357,10 +469,15 @@ class TestApiClient:
             'offset': 20,
             'limit': 5
         }
-        m.assert_called_once_with('GET', url, params=expected_params,
-                                  headers={
-                                      'User-Agent': 'abeja-platform-sdk/{}'.format(VERSION)},
-                                  timeout=30, data=None, json=None)
+        m.assert_called_once_with(
+            'GET',
+            url,
+            params=expected_params,
+            headers={
+                'User-Agent': 'abeja-platform-sdk/{}'.format(VERSION)},
+            timeout=30,
+            data=None,
+            json=None)
 
     @patch('requests.Session.request')
     def test_get_training_jobs_filter_archived_true(self, m):
@@ -371,10 +488,15 @@ class TestApiClient:
         expected_params = {
             'filter_archived': 'exclude_archived'
         }
-        m.assert_called_once_with('GET', url, params=expected_params,
-                                  headers={
-                                      'User-Agent': 'abeja-platform-sdk/{}'.format(VERSION)},
-                                  timeout=30, data=None, json=None)
+        m.assert_called_once_with(
+            'GET',
+            url,
+            params=expected_params,
+            headers={
+                'User-Agent': 'abeja-platform-sdk/{}'.format(VERSION)},
+            timeout=30,
+            data=None,
+            json=None)
 
     @patch('requests.Session.request')
     def test_get_training_jobs_filter_archived_false(self, m):
@@ -385,10 +507,15 @@ class TestApiClient:
         expected_params = {
             'filter_archived': 'include_archived'
         }
-        m.assert_called_once_with('GET', url, params=expected_params,
-                                  headers={
-                                      'User-Agent': 'abeja-platform-sdk/{}'.format(VERSION)},
-                                  timeout=30, data=None, json=None)
+        m.assert_called_once_with(
+            'GET',
+            url,
+            params=expected_params,
+            headers={
+                'User-Agent': 'abeja-platform-sdk/{}'.format(VERSION)},
+            timeout=30,
+            data=None,
+            json=None)
 
     @patch('requests.Session.request')
     def test_get_training_job(self, m):
@@ -396,24 +523,33 @@ class TestApiClient:
             ORGANIZATION_ID, JOB_DEFINITION_NAME, TRAINING_JOB_ID)
         url = '{}/organizations/{}/training/definitions/{}/jobs/{}'.format(
             ABEJA_API_URL, ORGANIZATION_ID, JOB_DEFINITION_NAME, TRAINING_JOB_ID)
-        m.assert_called_once_with('GET', url, params=None,
-                                  headers={
-                                      'User-Agent': 'abeja-platform-sdk/{}'.format(VERSION)},
-                                  timeout=30, data=None, json=None)
+        m.assert_called_once_with(
+            'GET',
+            url,
+            params=None,
+            headers={
+                'User-Agent': 'abeja-platform-sdk/{}'.format(VERSION)},
+            timeout=30,
+            data=None,
+            json=None)
 
     def test_stop_training_job(self, requests_mock):
         path = '/organizations/{}/training/definitions/{}/jobs/{}/stop'.format(
             ORGANIZATION_ID, JOB_DEFINITION_NAME, TRAINING_JOB_ID)
-        requests_mock.post(path, json={
-            'message': '{}:{} stopped'.format(JOB_DEFINITION_NAME, TRAINING_JOB_ID)
-        })
+        requests_mock.post(
+            path,
+            json={
+                'message': '{}:{} stopped'.format(
+                    JOB_DEFINITION_NAME,
+                    TRAINING_JOB_ID)})
         self.api_client.stop_training_job(
             ORGANIZATION_ID, JOB_DEFINITION_NAME, TRAINING_JOB_ID)
 
         request = requests_mock.request_history[0]
         assert request.method == 'POST'
         assert 'User-Agent' in request.headers
-        assert request.headers['User-Agent'] == 'abeja-platform-sdk/{}'.format(VERSION)
+        assert request.headers['User-Agent'] == 'abeja-platform-sdk/{}'.format(
+            VERSION)
         assert request.timeout == 30
         assert request.query == ''
         assert request.text is None

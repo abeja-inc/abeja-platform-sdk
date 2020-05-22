@@ -5,18 +5,32 @@ from abeja.common.instance_type import InstanceType, CPUType
 from abeja.training import JobDefinition, Job  # noqa: F401
 
 
-def test_job(requests_mock, api_base_url, job_factory, training_job_definition_response, training_job_definition_version_response) -> None:
+def test_job(
+        requests_mock,
+        api_base_url,
+        job_factory,
+        training_job_definition_response,
+        training_job_definition_version_response) -> None:
     job = job_factory()  # type: Job
 
-    res = training_job_definition_response(job.organization_id, job.job_definition_id)
+    res = training_job_definition_response(
+        job.organization_id, job.job_definition_id)
     requests_mock.get(
         '{}/organizations/{}/training/definitions/{}?include_jobs=false'.format(
-            api_base_url, job.organization_id, job.job_definition_id),
+            api_base_url,
+            job.organization_id,
+            job.job_definition_id),
         json=res)
-    res = training_job_definition_version_response(job.organization_id, job.job_definition_id, job.job_definition_version_id)
+    res = training_job_definition_version_response(
+        job.organization_id,
+        job.job_definition_id,
+        job.job_definition_version_id)
     requests_mock.get(
         '{}/organizations/{}/training/definitions/{}/versions/{}'.format(
-            api_base_url, job.organization_id, job.job_definition.name, job.job_definition_version_id),
+            api_base_url,
+            job.organization_id,
+            job.job_definition.name,
+            job.job_definition_version_id),
         json=res)
 
     assert job.exec_env == exec_env.CLOUD
@@ -32,12 +46,22 @@ def test_job(requests_mock, api_base_url, job_factory, training_job_definition_r
     assert version.job_definition_version_id == job.job_definition_version_id
 
 
-def test_job_statistics_none(requests_mock, api_base_url, job_factory, training_job_definition_response, training_job_definition_version_response) -> None:
+def test_job_statistics_none(
+        requests_mock,
+        api_base_url,
+        job_factory,
+        training_job_definition_response,
+        training_job_definition_version_response) -> None:
     job = job_factory(statistics=None)  # type: Job
     assert job.statistics is None
 
 
-def test_job_statistics_no_stages(requests_mock, api_base_url, job_factory, training_job_definition_response, training_job_definition_version_response) -> None:
+def test_job_statistics_no_stages(
+        requests_mock,
+        api_base_url,
+        job_factory,
+        training_job_definition_response,
+        training_job_definition_version_response) -> None:
     job = job_factory(statistics={
         "progress_percentage": 0.11,
         "num_epochs": 100,
@@ -103,7 +127,10 @@ def test_get_job(requests_mock, api_base_url,
         exec_env='cloud')
     requests_mock.get(
         '{}/organizations/{}/training/definitions/{}/jobs/{}'.format(
-            api_base_url, adapter.organization_id, adapter.job_definition_name, job_id),
+            api_base_url,
+            adapter.organization_id,
+            adapter.job_definition_name,
+            job_id),
         json=res)
 
     job = adapter.get(job_id=job_id)
@@ -117,14 +144,19 @@ def test_get_job(requests_mock, api_base_url,
     assert job.creator.email == res['creator']['email']
     assert job.creator.display_name == res['creator']['display_name']
     assert job.creator.profile_icon
-    assert job.creator.profile_icon.thumbnail_icon_url == res['creator']['profile_icon']['thumbnail_icon_url']
+    assert job.creator.profile_icon.thumbnail_icon_url == res[
+        'creator']['profile_icon']['thumbnail_icon_url']
 
     assert job.job_definition
     assert job.job_definition.job_definition_id == adapter.job_definition_id
 
 
-def test_get_job_creator_none(requests_mock, api_base_url,
-                              job_definition_factory, job_response, job_id) -> None:
+def test_get_job_creator_none(
+        requests_mock,
+        api_base_url,
+        job_definition_factory,
+        job_response,
+        job_id) -> None:
     definition = job_definition_factory()  # type: JobDefinition
     adapter = definition.jobs()
 
@@ -135,7 +167,10 @@ def test_get_job_creator_none(requests_mock, api_base_url,
         creator=None)
     requests_mock.get(
         '{}/organizations/{}/training/definitions/{}/jobs/{}'.format(
-            api_base_url, adapter.organization_id, adapter.job_definition_name, job_id),
+            api_base_url,
+            adapter.organization_id,
+            adapter.job_definition_name,
+            job_id),
         json=res)
 
     job = adapter.get(job_id=job_id)
@@ -151,13 +186,16 @@ def test_list_jobs(requests_mock, api_base_url,
     job2 = job_response(adapter.organization_id, adapter.job_definition_id)
     requests_mock.get(
         '{}/organizations/{}/training/definitions/{}/jobs'.format(
-            api_base_url, adapter.organization_id, adapter.job_definition_name),
+            api_base_url,
+            adapter.organization_id,
+            adapter.job_definition_name),
         json={
-            'entries': [job1, job2],
+            'entries': [
+                job1,
+                job2],
             'limit': 50,
             'offset': 0,
-            'total': 2
-        })
+            'total': 2})
 
     iterator = adapter.list()
     assert len(iterator) == 2
@@ -168,21 +206,25 @@ def test_list_jobs(requests_mock, api_base_url,
     assert jobs[1].job_id == job2['training_job_id']
 
 
-def test_list_jobs_filter_archived(requests_mock, api_base_url,
-                                   job_definition_factory, job_response) -> None:
+def test_list_jobs_filter_archived(
+        requests_mock,
+        api_base_url,
+        job_definition_factory,
+        job_response) -> None:
     definition = job_definition_factory()  # type: JobDefinition
     adapter = definition.jobs()
 
     job1 = job_response(adapter.organization_id, adapter.job_definition_id)
     requests_mock.get(
         '{}/organizations/{}/training/definitions/{}/jobs?filter_archived=exclude_archived'.format(
-            api_base_url, adapter.organization_id, adapter.job_definition_name),
+            api_base_url,
+            adapter.organization_id,
+            adapter.job_definition_name),
         json={
             'entries': [job1],
             'limit': 50,
             'offset': 0,
-            'total': 1
-        })
+            'total': 1})
 
     iterator = adapter.list(filter_archived=True)
     assert len(iterator) == 1
@@ -203,22 +245,26 @@ def test_list_jobs_paging(requests_mock, api_base_url,
 
     requests_mock.get(
         '{}/organizations/{}/training/definitions/{}/jobs?limit=2&offset=0'.format(
-            api_base_url, adapter.organization_id, adapter.job_definition_name),
+            api_base_url,
+            adapter.organization_id,
+            adapter.job_definition_name),
         json={
-            'entries': [job1, job2],
+            'entries': [
+                job1,
+                job2],
             'limit': 2,
             'offset': 0,
-            'total': 3
-        })
+            'total': 3})
     requests_mock.get(
         '{}/organizations/{}/training/definitions/{}/jobs?limit=2&offset=2'.format(
-            api_base_url, adapter.organization_id, adapter.job_definition_name),
+            api_base_url,
+            adapter.organization_id,
+            adapter.job_definition_name),
         json={
             'entries': [job3],
             'limit': 2,
             'offset': 2,
-            'total': 3
-        })
+            'total': 3})
 
     iterator = adapter.list(limit=2)
     assert len(iterator) == 3
@@ -244,7 +290,10 @@ def test_create_job(
 
     requests_mock.post(
         '{}/organizations/{}/training/definitions/{}/versions/{}/jobs'.format(
-            api_base_url, adapter.organization_id, adapter.job_definition_name, version_id),
+            api_base_url,
+            adapter.organization_id,
+            adapter.job_definition_name,
+            version_id),
         json=res)
 
     instance_type = InstanceType.parse(res['instance_type'])
@@ -261,17 +310,23 @@ def test_stop_job(requests_mock, api_base_url, training_api_client,
 
     requests_mock.post(
         '{}/organizations/{}/training/definitions/{}/jobs/{}/stop'.format(
-            api_base_url, adapter.organization_id, adapter.job_definition_name, job_id),
-        json={'message': "test-1 stopped"})
+            api_base_url,
+            adapter.organization_id,
+            adapter.job_definition_name,
+            job_id),
+        json={
+            'message': "test-1 stopped"})
 
     adapter.stop(job_id)
     assert requests_mock.called
 
 
-@pytest.mark.parametrize('expected,res', [
-    ('http://example.com/artifacts/1', {'download_uri': 'http://example.com/artifacts/1'}),
-    ('http://example.com/artifacts/1', {'artifacts': {'complete': {'uri': 'http://example.com/artifacts/1'}}}),
-])
+@pytest.mark.parametrize('expected,res',
+                         [('http://example.com/artifacts/1',
+                           {'download_uri': 'http://example.com/artifacts/1'}),
+                             ('http://example.com/artifacts/1',
+                              {'artifacts': {'complete': {'uri': 'http://example.com/artifacts/1'}}}),
+                          ])
 def test_get_training_result(requests_mock, api_base_url, training_api_client,
                              job_id, job_definition_factory,
                              expected, res) -> None:
@@ -280,7 +335,10 @@ def test_get_training_result(requests_mock, api_base_url, training_api_client,
 
     requests_mock.get(
         '{}/organizations/{}/training/definitions/{}/jobs/{}/result'.format(
-            api_base_url, adapter.organization_id, adapter.job_definition_name, job_id),
+            api_base_url,
+            adapter.organization_id,
+            adapter.job_definition_name,
+            job_id),
         json=res)
 
     artifacts = adapter.get_artifacts(job_id)
@@ -295,11 +353,17 @@ def test_update_statistics(requests_mock, api_base_url,
     adapter = definition.jobs()
 
     statistics = statistics_factory()
-    res = job_response(adapter.organization_id, adapter.job_definition_name, job_id,
-                       statistics=statistics.get_statistics())
+    res = job_response(
+        adapter.organization_id,
+        adapter.job_definition_name,
+        job_id,
+        statistics=statistics.get_statistics())
     requests_mock.post(
         '{}/organizations/{}/training/definitions/{}/jobs/{}/statistics'.format(
-            api_base_url, adapter.organization_id, adapter.job_definition_name, job_id),
+            api_base_url,
+            adapter.organization_id,
+            adapter.job_definition_name,
+            job_id),
         json=res)
 
     job = adapter.update_statistics(job_id, statistics)
@@ -318,7 +382,10 @@ def test_update_statistics(requests_mock, api_base_url,
     assert req_statistics['epoch'] == statistics.epoch
 
 
-def test_update_empty_statistics(requests_mock, job_id, job_definition_factory) -> None:
+def test_update_empty_statistics(
+        requests_mock,
+        job_id,
+        job_definition_factory) -> None:
     definition = job_definition_factory()  # type: JobDefinition
     adapter = definition.jobs()
     adapter.update_statistics(job_id, None)
@@ -328,16 +395,25 @@ def test_update_empty_statistics(requests_mock, job_id, job_definition_factory) 
     400, 401, 403, 404, 405,
     500, 503
 ])
-def test_update_statistics_with_exception(requests_mock, api_base_url, status_code,
-                                          job_id, job_definition_factory, statistics_factory) -> None:
+def test_update_statistics_with_exception(
+        requests_mock,
+        api_base_url,
+        status_code,
+        job_id,
+        job_definition_factory,
+        statistics_factory) -> None:
     definition = job_definition_factory()  # type: JobDefinition
     adapter = definition.jobs()
 
     statistics = statistics_factory()
     requests_mock.post(
         '{}/organizations/{}/training/definitions/{}/jobs/{}/statistics'.format(
-            api_base_url, adapter.organization_id, adapter.job_definition_name, job_id),
+            api_base_url,
+            adapter.organization_id,
+            adapter.job_definition_name,
+            job_id),
         status_code=status_code,
-        json={'error': 'error'})
+        json={
+            'error': 'error'})
 
     adapter.update_statistics(job_id, statistics)

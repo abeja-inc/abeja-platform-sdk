@@ -57,8 +57,16 @@ class Channel:
         """
         return Files(self._api, self.organization_id, self.channel_id)
 
-    def list_files(self, start: str=None, end: str=None, timezone: str=None, sort: str=None,
-                   next_page_token: str=None, limit: int=None, prefetch: bool=False, query: str=None) -> FileIterator:
+    def list_files(
+            self,
+            start: str=None,
+            end: str=None,
+            timezone: str=None,
+            sort: str=None,
+            next_page_token: str=None,
+            limit: int=None,
+            prefetch: bool=False,
+            query: str=None) -> FileIterator:
         """get datalake files in the channel
 
         Request syntax:
@@ -83,9 +91,18 @@ class Channel:
         Return type:
             :class:`FileIterator <abeja.datalake.file.FileIterator>` object
         """
-        return FileIterator(self._api, self.organization_id, self.channel_id,
-                            start=start, end=end, timezone=timezone, next_page_token=next_page_token,
-                            items_per_page=limit, sort=sort, prefetch=prefetch, query=query)
+        return FileIterator(
+            self._api,
+            self.organization_id,
+            self.channel_id,
+            start=start,
+            end=end,
+            timezone=timezone,
+            next_page_token=next_page_token,
+            items_per_page=limit,
+            sort=sort,
+            prefetch=prefetch,
+            query=query)
 
     def get_file(self, file_id: str) -> DatalakeFile:
         """get a datalake file in the channel
@@ -102,7 +119,8 @@ class Channel:
         Return type:
             :class:`DatalakeFile <abeja.datalake.file.DatalakeFile>` object
         """
-        download_info = self._api.get_channel_file_download(self.channel_id, file_id)
+        download_info = self._api.get_channel_file_download(
+            self.channel_id, file_id)
 
         return DatalakeFile(
             api=self._api,
@@ -146,13 +164,23 @@ class Channel:
             metadata = {}
 
         # ignore Content-Type in metadata
-        metadata = {k: v for k, v in metadata.items() if k.lower() not in {'content_type', 'content-type'}}
+        metadata = {
+            k: v for k,
+            v in metadata.items() if k.lower() not in {
+                'content_type',
+                'content-type'}}
 
         # add x-abeja-meta- prefix
-        metadata = {'x-abeja-meta-{}'.format(k): str(v) for k, v in metadata.items()}
+        metadata = {
+            'x-abeja-meta-{}'.format(k): str(v) for k,
+            v in metadata.items()}
 
         res = self._api.post_channel_file_upload(
-            self.channel_id, file_obj, content_type, metadata=metadata, lifetime=lifetime)
+            self.channel_id,
+            file_obj,
+            content_type,
+            metadata=metadata,
+            lifetime=lifetime)
 
         return DatalakeFile(
             api=self._api,
@@ -206,10 +234,20 @@ class Channel:
             update_metadata['filename'] = os.path.basename(file_path)
 
         with open(file_path, 'rb') as f:
-            return self.upload(f, content_type, metadata=update_metadata, lifetime=lifetime)
+            return self.upload(
+                f,
+                content_type,
+                metadata=update_metadata,
+                lifetime=lifetime)
 
-    def upload_dir(self, dir_path: str, metadata: dict=None, content_type: str=None, lifetime: str=None,
-                   recursive: bool=False, use_thread: bool=True) -> Iterable[DatalakeFile]:
+    def upload_dir(
+            self,
+            dir_path: str,
+            metadata: dict=None,
+            content_type: str=None,
+            lifetime: str=None,
+            recursive: bool=False,
+            use_thread: bool=True) -> Iterable[DatalakeFile]:
         """upload files in directory to a channel.
         This method infers the content_type of given file if content_type is not specified,
         and set the filename as `x-abeja-meta-filename` in metadata.
@@ -242,7 +280,10 @@ class Channel:
         else:
             upload_files_func = self._upload_files_unthreaded
         return upload_files_func(
-            file_path_iter, content_type=content_type, metadata=metadata, lifetime=lifetime)
+            file_path_iter,
+            content_type=content_type,
+            metadata=metadata,
+            lifetime=lifetime)
 
     def _upload_files_threaded(
             self, file_paths: Iterable[str], content_type: str=None,
@@ -256,7 +297,11 @@ class Channel:
             for f in file_paths:
                 futures.append(
                     executor.submit(
-                        self.upload_file, f, metadata=metadata, content_type=content_type, lifetime=lifetime))
+                        self.upload_file,
+                        f,
+                        metadata=metadata,
+                        content_type=content_type,
+                        lifetime=lifetime))
             for f in as_completed(futures):
                 try:
                     files.append(f.result())
@@ -264,8 +309,12 @@ class Channel:
                     logger.error(e)
         return files
 
-    def _upload_files_unthreaded(self, file_paths: Iterable[str], content_type: str=None,
-                                 metadata: dict=None, lifetime: str=None) -> Iterable[DatalakeFile]:
+    def _upload_files_unthreaded(
+            self,
+            file_paths: Iterable[str],
+            content_type: str=None,
+            metadata: dict=None,
+            lifetime: str=None) -> Iterable[DatalakeFile]:
         """upload files synchronously using thread
         this method does not return generator to avoid lazy evaluation.
         """
@@ -273,7 +322,10 @@ class Channel:
         for file_path in file_paths:
             try:
                 file = self.upload_file(
-                    file_path, content_type=content_type, metadata=metadata, lifetime=lifetime)
+                    file_path,
+                    content_type=content_type,
+                    metadata=metadata,
+                    lifetime=lifetime)
                 files.append(file)
             except Exception as e:
                 logger.error(e)
@@ -296,7 +348,11 @@ class Channels:
         self._api = api
         self.organization_id = organization_id
 
-    def create(self, name: str, description: str, storage_type: str) -> Channel:
+    def create(
+            self,
+            name: str,
+            description: str,
+            storage_type: str) -> Channel:
         """create a channel
 
         API reference: POST /organizations/<organization_id>/channels/
@@ -351,7 +407,8 @@ class Channels:
             generator of :class:`Channel <abeja.datalake.channel.Channel>` objects
 
         """
-        res = self._api.list_channels(self.organization_id, limit=limit, offset=offset)
+        res = self._api.list_channels(
+            self.organization_id, limit=limit, offset=offset)
         for item in res['channels']:
 
             yield Channel(
@@ -400,7 +457,11 @@ class Channels:
             created_at=channel_info.get('created_at'),
             updated_at=channel_info.get('updated_at'))
 
-    def patch(self, channel_id: str, name: str=None, description: str=None) -> Channel:
+    def patch(
+            self,
+            channel_id: str,
+            name: str=None,
+            description: str=None) -> Channel:
         """patch a channel
 
         API reference: PATCH /organizations/<organization_id>/channels/<channel_id>

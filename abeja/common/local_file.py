@@ -166,7 +166,8 @@ def _write_iter_file(path, file_type, iter_content):
     # temporary file, then rename it to the original path.
     #
     # 'Path.PID-DateTime-Random'
-    # e.g. 20171128T113546-9fa120a3-96bc-4b84-b56b-1bc2273178a1.30304-20191220162525-ee5a
+    # e.g.
+    # 20171128T113546-9fa120a3-96bc-4b84-b56b-1bc2273178a1.30304-20191220162525-ee5a
     suffix = '{}-{}-{:04x}'.format(
         os.getpid(),
         datetime.now().strftime('%Y%m%d%H%M%S'),

@@ -33,9 +33,7 @@ class TestDataset(unittest.TestCase):
                 'data_type': 'image/jpeg',
                 'data_uri': 'datalake://1200123803688/20170815T044617-f20dde80-1e3b-4496-bc06-1b63b026b872',
                 'height': 500,
-                'width': 200
-            }
-        ]
+                'width': 200}]
         self.attributes = {
             'classification': {
                 'id': 1,
@@ -66,8 +64,14 @@ class TestDataset(unittest.TestCase):
         }
 
     def test_init(self):
-        dataset = Dataset(None, self.organization_id, self.dataset_id,
-                          name=self.name, type=self.type, props=self.props, total_count=self.total_count)
+        dataset = Dataset(
+            None,
+            self.organization_id,
+            self.dataset_id,
+            name=self.name,
+            type=self.type,
+            props=self.props,
+            total_count=self.total_count)
         self.assertEqual(dataset.organization_id, self.organization_id)
         self.assertEqual(dataset.dataset_id, self.dataset_id)
         self.assertEqual(dataset.name, self.name)
@@ -77,7 +81,8 @@ class TestDataset(unittest.TestCase):
         self.assertIsInstance(dataset.dataset_items, DatasetItems)
 
     def test_skip_unrecognized_arguments(self):
-        # make sure constructor can ignore unknown parameters because API response can change any time
+        # make sure constructor can ignore unknown parameters because API
+        # response can change any time
         dataset = Dataset(None, self.organization_id, self.dataset_id,
                           name=self.name, type=self.type, props=self.props,
                           total_count=self.total_count,
@@ -117,8 +122,7 @@ class TestDatasets(unittest.TestCase):
             'data_type': 'image/jpeg',
             'data_uri': 'datalake://1200123803688/20170815T044617-f20dde80-1e3b-4496-bc06-1b63b026b872',
             'height': 500,
-            'width': 200
-        }
+            'width': 200}
         self.attributes = {
             'classification': {
                 'id': 1,

@@ -74,9 +74,12 @@ class APIClient(BaseAPIClient):
             - Unauthorized: Authentication failed
             - InternalServerError
         """
-        params = None if filter_archived is None else get_filter_archived_applied_params({}, filter_archived)
-        path = '/organizations/{}/training/definitions/{}/models'.format(organization_id, job_definition_name)
-        return self._connection.api_request(method='GET', path=path, params=params)
+        params = None if filter_archived is None else get_filter_archived_applied_params(
+            {}, filter_archived)
+        path = '/organizations/{}/training/definitions/{}/models'.format(
+            organization_id, job_definition_name)
+        return self._connection.api_request(
+            method='GET', path=path, params=params)
 
     def create_training_model(
             self, organization_id: str, job_definition_name: str,
@@ -133,18 +136,33 @@ class APIClient(BaseAPIClient):
         """
         if model_data is None:
             error_message = "model_data is necessary"
-            raise BadRequest(error=error_message, error_description=error_message, status_code=400)
+            raise BadRequest(
+                error=error_message,
+                error_description=error_message,
+                status_code=400)
         if parameters is None:
             parameters = {}
         model_data = convert_to_zipfile_object(model_data)
         files = {
-            'model_data': ('model_data.zip', model_data, 'application/zip'),
-            'parameters': ('params.json', BytesIO(json.dumps(parameters).encode()), 'application/json')
-        }
-        path = '/organizations/{}/training/definitions/{}/models'.format(organization_id, job_definition_name)
-        return self._connection.api_request(method='POST', path=path, files=files)
+            'model_data': (
+                'model_data.zip',
+                model_data,
+                'application/zip'),
+            'parameters': (
+                'params.json',
+                BytesIO(
+                    json.dumps(parameters).encode()),
+                'application/json')}
+        path = '/organizations/{}/training/definitions/{}/models'.format(
+            organization_id, job_definition_name)
+        return self._connection.api_request(
+            method='POST', path=path, files=files)
 
-    def get_training_model(self, organization_id: str, job_definition_name: str, model_id: str) -> dict:
+    def get_training_model(
+            self,
+            organization_id: str,
+            job_definition_name: str,
+            model_id: str) -> dict:
         """get a training model
 
         API reference: GET /organizations/<organization_id>/training/definitions/<job_definition_name>/models/<model_id>
@@ -199,7 +217,11 @@ class APIClient(BaseAPIClient):
         return self._connection.api_request(method='GET', path=path)
 
     def patch_training_model(
-            self, organization_id: str, job_definition_name: str, model_id: str, description: str) -> dict:
+            self,
+            organization_id: str,
+            job_definition_name: str,
+            model_id: str,
+            description: str) -> dict:
         """patch a training model
 
         API reference: PATCH /organizations/<organization_id>/training/definitions/<job_definition_name>/models/<model_id>
@@ -255,9 +277,14 @@ class APIClient(BaseAPIClient):
         }
         path = '/organizations/{}/training/definitions/{}/models/{}'.format(
             organization_id, job_definition_name, model_id)
-        return self._connection.api_request(method='PATCH', path=path, json=params)
+        return self._connection.api_request(
+            method='PATCH', path=path, json=params)
 
-    def download_training_model(self, organization_id: str, job_definition_name: str, model_id: str) -> dict:
+    def download_training_model(
+            self,
+            organization_id: str,
+            job_definition_name: str,
+            model_id: str) -> dict:
         """download a training model
 
         API reference: GET /organizations/<organization_id>/training/definitions/<job_definition_name>/models/<model_id>/download
@@ -296,7 +323,11 @@ class APIClient(BaseAPIClient):
             organization_id, job_definition_name, model_id)
         return self._connection.api_request(method='GET', path=path)
 
-    def archive_training_model(self, organization_id: str, job_definition_name: str, model_id: str) -> dict:
+    def archive_training_model(
+            self,
+            organization_id: str,
+            job_definition_name: str,
+            model_id: str) -> dict:
         """archive a training model
 
         API reference: POST /organizations/<organization_id>/training/definitions/<job_definition_name>/models/<model_id>/archive
@@ -335,7 +366,11 @@ class APIClient(BaseAPIClient):
             organization_id, job_definition_name, model_id)
         return self._connection.api_request(method='POST', path=path)
 
-    def unarchive_training_model(self, organization_id: str, job_definition_name: str, model_id: str) -> dict:
+    def unarchive_training_model(
+            self,
+            organization_id: str,
+            job_definition_name: str,
+            model_id: str) -> dict:
         """unarchive a training model
 
         API reference: POST /organizations/<organization_id>/training/definitions/<job_definition_name>/models/<model_id>/unarchive

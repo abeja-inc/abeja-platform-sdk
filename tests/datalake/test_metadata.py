@@ -13,7 +13,8 @@ class TestMetadata(TestCase):
         current_metadta = {
             'x-abeja-meta-filename': 'test.jpg'
         }
-        metadata = DatalakeMetadata(mock_api, CHANNEL_ID, FILE_ID, current_metadta)
+        metadata = DatalakeMetadata(
+            mock_api, CHANNEL_ID, FILE_ID, current_metadta)
         metadata['label'] = 'cat'
 
         self.assertEqual(len(metadata), 2)
@@ -53,7 +54,8 @@ class TestMetadata(TestCase):
         current_metadta = {
             'x-abeja-meta-filename': 'test.jpg'
         }
-        metadata = DatalakeMetadata(mock_api, CHANNEL_ID, FILE_ID, current_metadta)
+        metadata = DatalakeMetadata(
+            mock_api, CHANNEL_ID, FILE_ID, current_metadta)
         new_metadata = {
             'label': 'cat'
         }
@@ -69,7 +71,8 @@ class TestMetadata(TestCase):
         current_metadta = {
             'x-abeja-meta-filename': 'test.jpg'
         }
-        metadata = DatalakeMetadata(mock_api, CHANNEL_ID, FILE_ID, current_metadta)
+        metadata = DatalakeMetadata(
+            mock_api, CHANNEL_ID, FILE_ID, current_metadta)
         new_metadata = {
             'filename': 'sample.jpg'
         }

@@ -65,7 +65,9 @@ class JobDefinitionVersion():
     @property
     def job_definition(self) -> 'job_definition.JobDefinition':
         if self.__job_definition is None:
-            self.__job_definition = job_definition.JobDefinitions(api=self.__api, organization_id=self.organization_id).get(name=self.job_definition_id)
+            self.__job_definition = job_definition.JobDefinitions(
+                api=self.__api, organization_id=self.organization_id).get(
+                name=self.job_definition_id)
         return self.__job_definition
 
     @property
@@ -123,7 +125,10 @@ class JobDefinitionVersions():
     """The training job definition version adapter class.
     """
 
-    def __init__(self, api: APIClient, job_definition: 'job_definition.JobDefinition') -> None:
+    def __init__(
+            self,
+            api: APIClient,
+            job_definition: 'job_definition.JobDefinition') -> None:
         self.__api = api
         self.__job_definition = job_definition
 
@@ -168,7 +173,9 @@ class JobDefinitionVersions():
             response=res,
             job_definition=self.__job_definition)
 
-    def list(self, filter_archived: Optional[bool] = None) -> SizedIterable[JobDefinitionVersion]:
+    def list(
+            self,
+            filter_archived: Optional[bool] = None) -> SizedIterable[JobDefinitionVersion]:
         """Returns an iterator object that iterates training job definition versions
         under this object.
 
@@ -230,7 +237,8 @@ class JobDefinitionVersions():
 
         """
         if isinstance(source, io.IOBase):
-            parameters = {'handler': handler, 'image': str(image)}  # type: Dict[str, Any]
+            parameters = {'handler': handler,
+                          'image': str(image)}  # type: Dict[str, Any]
 
             if environment is not None:
                 parameters['environment'] = environment
@@ -263,7 +271,8 @@ class JobDefinitionVersions():
                 response=res,
                 job_definition=self.__job_definition)
 
-    def update(self, job_definition_version_id: int, description: str) -> JobDefinitionVersion:
+    def update(self, job_definition_version_id: int,
+               description: str) -> JobDefinitionVersion:
         """Update a training job definition version.
 
         Request Syntax:
