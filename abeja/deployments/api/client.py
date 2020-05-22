@@ -75,7 +75,10 @@ class APIClient(BaseAPIClient):
         """
         if not name:
             error_message = '"name" is necessary'
-            raise BadRequest(error=error_message, error_description=error_message, status_code=400)
+            raise BadRequest(
+                error=error_message,
+                error_description=error_message,
+                status_code=400)
 
         payload = {
             'name': name,
@@ -90,7 +93,8 @@ class APIClient(BaseAPIClient):
                 'default_environment': default_environment
             })
         path = '/organizations/{}/deployments'.format(organization_id)
-        return self._connection.api_request(method='POST', path=path, json=payload)
+        return self._connection.api_request(
+            method='POST', path=path, json=payload)
 
     def get_deployment(self, organization_id: str, deployment_id: str) -> dict:
         """get a deployment
@@ -139,7 +143,8 @@ class APIClient(BaseAPIClient):
           - InternalServerError
         """
 
-        path = '/organizations/{}/deployments/{}'.format(organization_id, deployment_id)
+        path = '/organizations/{}/deployments/{}'.format(
+            organization_id, deployment_id)
         return self._connection.api_request(method='GET', path=path)
 
     def get_deployments(self, organization_id: str) -> dict:
@@ -193,7 +198,10 @@ class APIClient(BaseAPIClient):
         path = '/organizations/{}/deployments'.format(organization_id)
         return self._connection.api_request(method='GET', path=path)
 
-    def delete_deployment(self, organization_id: str, deployment_id: str) -> dict:
+    def delete_deployment(
+            self,
+            organization_id: str,
+            deployment_id: str) -> dict:
         """delete a deployment
 
         API reference: DELETE /organizations/<organization_id>/deployments/<deployment_id>
@@ -223,7 +231,8 @@ class APIClient(BaseAPIClient):
           - Unauthorized: Authentication failed
           - InternalServerError
         """
-        path = '/organizations/{}/deployments/{}'.format(organization_id, deployment_id)
+        path = '/organizations/{}/deployments/{}'.format(
+            organization_id, deployment_id)
         return self._connection.api_request(method='DELETE', path=path)
 
     def patch_deployment(
@@ -279,11 +288,16 @@ class APIClient(BaseAPIClient):
             payload.update({
                 'default_environment': default_environment
             })
-        path = '/organizations/{}/deployments/{}'.format(organization_id, deployment_id)
-        return self._connection.api_request(method='PATCH', path=path, json=payload)
+        path = '/organizations/{}/deployments/{}'.format(
+            organization_id, deployment_id)
+        return self._connection.api_request(
+            method='PATCH', path=path, json=payload)
 
     # deployment code version
-    def get_deployment_versions(self, organization_id: str, deployment_id: str) -> dict:
+    def get_deployment_versions(
+            self,
+            organization_id: str,
+            deployment_id: str) -> dict:
         """get a deployment code versions
 
         API reference: GET /organizations/<organization_id>/deployments/<deployment_id>/versions
@@ -334,7 +348,8 @@ class APIClient(BaseAPIClient):
           - InternalServerError
         """
 
-        path = '/organizations/{}/deployments/{}/versions'.format(organization_id, deployment_id)
+        path = '/organizations/{}/deployments/{}/versions'.format(
+            organization_id, deployment_id)
         return self._connection.api_request(method='GET', path=path)
 
     def create_deployment_version(
@@ -408,12 +423,20 @@ class APIClient(BaseAPIClient):
             payload.update({
                 'user_parameters': user_parameters,
             })
-        path = '/organizations/{}/deployments/{}/versions'.format(organization_id, deployment_id)
-        return self._connection.api_request(method='POST', path=path, json=payload)
+        path = '/organizations/{}/deployments/{}/versions'.format(
+            organization_id, deployment_id)
+        return self._connection.api_request(
+            method='POST', path=path, json=payload)
 
-    def create_deployment_from_template(
-            self, organization_id: str, deployment_id: str, template_id: int, version: str, handler: str,
-            image: str, user_parameters: Optional[Dict[str, str]]=None) -> dict:
+    def create_deployment_from_template(self,
+                                        organization_id: str,
+                                        deployment_id: str,
+                                        template_id: int,
+                                        version: str,
+                                        handler: str,
+                                        image: str,
+                                        user_parameters: Optional[Dict[str,
+                                                                       str]]=None) -> dict:
         """create a deployment from template
 
         API reference: POST /organizations/<organization_id>/deployments/<deployment_id>/code_templates
@@ -484,10 +507,16 @@ class APIClient(BaseAPIClient):
             payload.update({
                 'user_parameters': user_parameters,
             })
-        path = '/organizations/{}/deployments/{}/code_templates'.format(organization_id, deployment_id)
-        return self._connection.api_request(method='POST', path=path, json=payload)
+        path = '/organizations/{}/deployments/{}/code_templates'.format(
+            organization_id, deployment_id)
+        return self._connection.api_request(
+            method='POST', path=path, json=payload)
 
-    def get_deployment_version(self, organization_id: str, deployment_id: str, version_id: str) -> dict:
+    def get_deployment_version(
+            self,
+            organization_id: str,
+            deployment_id: str,
+            version_id: str) -> dict:
         """get a version of a deployment
 
         API reference: GET /organizations/<organization_id>/deployments/<deployment_id>/versions/<version_id>
@@ -539,7 +568,11 @@ class APIClient(BaseAPIClient):
             organization_id, deployment_id, version_id)
         return self._connection.api_request(method='GET', path=path)
 
-    def delete_deployment_version(self, organization_id: str, deployment_id: str, version_id: str) -> None:
+    def delete_deployment_version(
+            self,
+            organization_id: str,
+            deployment_id: str,
+            version_id: str) -> None:
         """delete a version in a deployment
 
         API reference: DELETE /organizations/<organization_id>/deployments/<deployment_id>/versions/<version_id>
@@ -576,10 +609,15 @@ class APIClient(BaseAPIClient):
           - Unauthorized: Authentication failed
           - InternalServerError
         """
-        path = '/organizations/{}/deployments/{}/versions/{}'.format(organization_id, deployment_id, version_id)
+        path = '/organizations/{}/deployments/{}/versions/{}'.format(
+            organization_id, deployment_id, version_id)
         return self._connection.api_request(method='DELETE', path=path)
 
-    def download_deployment_version(self, organization_id: str, deployment_id: str, version_id: str) -> dict:
+    def download_deployment_version(
+            self,
+            organization_id: str,
+            deployment_id: str,
+            version_id: str) -> dict:
         """download a deployment code version
 
         API reference: GET /organizations/<organization_id>/deployments/<deployment_id>/versions/<version_id>/download

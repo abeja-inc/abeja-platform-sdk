@@ -17,7 +17,10 @@ class InstanceType(Enum):
             if elm.value == status:
                 return elm
         error_message = "'{}' is not supported as InstanceType".format(status)
-        raise BadRequest(error=error_message, error_description=error_message, status_code=400)
+        raise BadRequest(
+            error=error_message,
+            error_description=error_message,
+            status_code=400)
 
 
 class ImageType(Enum):
@@ -34,7 +37,10 @@ class ImageType(Enum):
             if elm.value == status:
                 return elm
         error_message = "'{}' is not supported as image".format(status)
-        raise BadRequest(error=error_message, error_description=error_message, status_code=400)
+        raise BadRequest(
+            error=error_message,
+            error_description=error_message,
+            status_code=400)
 
 
 class NotebookType(Enum):
@@ -47,4 +53,7 @@ class NotebookType(Enum):
             if elm.value == status:
                 return elm
         error_message = "'{}' is not supported as NotebookTyle".format(status)
-        raise BadRequest(error=error_message, error_description=error_message, status_code=400)
+        raise BadRequest(
+            error=error_message,
+            error_description=error_message,
+            status_code=400)

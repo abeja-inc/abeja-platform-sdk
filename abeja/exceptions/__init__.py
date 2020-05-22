@@ -6,7 +6,13 @@ class Error(Exception):
 
 class HttpError(Error):
 
-    def __init__(self, error, error_description, error_detail=None, status_code=None, url=None):
+    def __init__(
+            self,
+            error,
+            error_description,
+            error_detail=None,
+            status_code=None,
+            url=None):
         self.error = error
         self.error_description = error_description
         self.error_detail = error_detail
@@ -14,7 +20,8 @@ class HttpError(Error):
         self.url = url
 
     def __repr__(self):
-        s = '<%s "%s": %s' % (self.__class__.__name__, self.error, self.error_description)
+        s = '<%s "%s": %s' % (self.__class__.__name__,
+                              self.error, self.error_description)
         if self.status_code and self.url:
             s += ' (%s from %s)' % (self.status_code, self.url)
         if self.error_detail:

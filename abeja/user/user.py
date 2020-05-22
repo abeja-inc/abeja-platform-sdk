@@ -11,7 +11,8 @@ __ProfileIcon = NamedTuple('ProfileIcon', [
 class ProfileIcon(__ProfileIcon):
 
     @classmethod
-    def from_response(klass, response: Optional[Dict[str, Any]]) -> Optional['ProfileIcon']:
+    def from_response(
+            klass, response: Optional[Dict[str, Any]]) -> Optional['ProfileIcon']:
         if response is None:
             return None
 
@@ -35,7 +36,8 @@ __User = NamedTuple('User', [
 class User(__User):
 
     @classmethod
-    def from_response(klass, response: Optional[Dict[str, Any]]) -> Optional['User']:
+    def from_response(
+            klass, response: Optional[Dict[str, Any]]) -> Optional['User']:
         if response is None:
             return None
 

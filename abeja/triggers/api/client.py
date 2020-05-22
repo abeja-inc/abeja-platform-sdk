@@ -13,12 +13,19 @@ class APIClient(BaseAPIClient):
        api_client = APIClient()
     """
 
-    def create_trigger(
-            self, organization_id: str, deployment_id: str, version_id: str,
-            input_service_name: str, input_service_id: str,
-            output_service_name: Optional[str]=None, output_service_id: Optional[str]=None,
-            distribution: Optional[int]=None, retry_count: Optional[int]=None, environment: Optional[Dict[str, str]]=None,
-            model_id: Optional[str] = None):
+    def create_trigger(self,
+                       organization_id: str,
+                       deployment_id: str,
+                       version_id: str,
+                       input_service_name: str,
+                       input_service_id: str,
+                       output_service_name: Optional[str]=None,
+                       output_service_id: Optional[str]=None,
+                       distribution: Optional[int]=None,
+                       retry_count: Optional[int]=None,
+                       environment: Optional[Dict[str,
+                                                  str]]=None,
+                       model_id: Optional[str] = None):
         """create a trigger
 
         API reference: POST /organizations/<organization_id>/deployments/<deployment_id>/triggers
@@ -107,10 +114,16 @@ class APIClient(BaseAPIClient):
             params['retry_count'] = retry_count
         if distribution is not None:
             params['distribution'] = distribution
-        path = '/organizations/{}/deployments/{}/triggers'.format(organization_id, deployment_id)
-        return self._connection.api_request(method='POST', path=path, json=params)
+        path = '/organizations/{}/deployments/{}/triggers'.format(
+            organization_id, deployment_id)
+        return self._connection.api_request(
+            method='POST', path=path, json=params)
 
-    def get_trigger(self, organization_id: str, deployment_id: str, trigger_id: str) -> dict:
+    def get_trigger(
+            self,
+            organization_id: str,
+            deployment_id: str,
+            trigger_id: str) -> dict:
         """get a trigger
 
         API reference: GET /organizations/<organization_id>/deployments/<deployment_id>/triggers/<trigger_id>
@@ -242,7 +255,11 @@ class APIClient(BaseAPIClient):
             organization_id, deployment_id)
         return self._connection.api_request(method='GET', path=path)
 
-    def delete_trigger(self, organization_id: str, deployment_id: str, trigger_id: str) -> dict:
+    def delete_trigger(
+            self,
+            organization_id: str,
+            deployment_id: str,
+            trigger_id: str) -> dict:
         """delete trigger
 
         API reference: DELETE /organizations/<organization_id>/deployments/<deployment_id>/triggers/<trigger_id>
@@ -283,8 +300,12 @@ class APIClient(BaseAPIClient):
         return self._connection.api_request(method='DELETE', path=path)
 
     def get_trigger_runs(
-            self, organization_id: str, deployment_id: str, trigger_id: str,
-            next_page_token: Optional[str]=None, scan_forward: Optional[bool]=None) -> dict:
+            self,
+            organization_id: str,
+            deployment_id: str,
+            trigger_id: str,
+            next_page_token: Optional[str]=None,
+            scan_forward: Optional[bool]=None) -> dict:
         """get runs of a trigger
 
         API reference: GET /organizations/<organization_id>/deployments/<deployment_id>/triggers/<trigger_id>/runs
@@ -349,4 +370,5 @@ class APIClient(BaseAPIClient):
             params['next_page_token'] = next_page_token
         path = '/organizations/{}/deployments/{}/triggers/{}/runs'.format(
             organization_id, deployment_id, trigger_id)
-        return self._connection.api_request(method='GET', path=path, params=params)
+        return self._connection.api_request(
+            method='GET', path=path, params=params)

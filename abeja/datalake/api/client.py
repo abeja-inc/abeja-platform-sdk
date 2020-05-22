@@ -107,10 +107,15 @@ class APIClient(BaseAPIClient):
             'storage_type': storage_type
         }
         path = '/organizations/{}/channels'.format(organization_id)
-        return self._connection.api_request(method='POST', path=path, json=params)
+        return self._connection.api_request(
+            method='POST', path=path, json=params)
 
-    def list_channels(self, organization_id: str, limit: Optional[int]=None,
-                      offset: Optional[int]=None, filter_archived: Optional[bool] = None) -> dict:
+    def list_channels(
+            self,
+            organization_id: str,
+            limit: Optional[int]=None,
+            offset: Optional[int]=None,
+            filter_archived: Optional[bool] = None) -> dict:
         """get channels
 
         API reference: GET /organizations/<organization_id>/channels/
@@ -172,7 +177,8 @@ class APIClient(BaseAPIClient):
         params = get_filter_archived_applied_params(params, filter_archived)
 
         path = '/organizations/{}/channels'.format(organization_id)
-        return self._connection.api_request(method='GET', path=path, params=params)
+        return self._connection.api_request(
+            method='GET', path=path, params=params)
 
     def get_channel(self, organization_id: str, channel_id: str) -> dict:
         """get a channel
@@ -221,7 +227,8 @@ class APIClient(BaseAPIClient):
             - Forbidden
             - InternalServerError
         """
-        path = '/organizations/{}/channels/{}'.format(organization_id, channel_id)
+        path = '/organizations/{}/channels/{}'.format(
+            organization_id, channel_id)
         return self._connection.api_request(method='GET', path=path)
 
     def patch_channel(self, organization_id: str, channel_id: str,
@@ -281,8 +288,10 @@ class APIClient(BaseAPIClient):
             params['name'] = name
         if description:
             params['description'] = description
-        path = '/organizations/{}/channels/{}'.format(organization_id, channel_id)
-        return self._connection.api_request(method='PATCH', path=path, json=params)
+        path = '/organizations/{}/channels/{}'.format(
+            organization_id, channel_id)
+        return self._connection.api_request(
+            method='PATCH', path=path, json=params)
 
     def put_channel_datasource(self, organization_id: str, channel_id: str,
                                datasource_id: str) -> dict:
@@ -337,7 +346,10 @@ class APIClient(BaseAPIClient):
             organization_id, channel_id, datasource_id)
         return self._connection.api_request(method='PUT', path=path)
 
-    def list_channel_datasources(self, organization_id: str, channel_id: str) -> dict:
+    def list_channel_datasources(
+            self,
+            organization_id: str,
+            channel_id: str) -> dict:
         """get datasources of a channel
 
         API reference: GET /organizations/<organization_id>/channels/<channel_id>/datasources
@@ -601,11 +613,17 @@ class APIClient(BaseAPIClient):
         }
         encoded_metadata = encode_metadata(metadata)
         headers.update(encoded_metadata)
-        res = self._connection.api_request(method='POST', headers=headers, path=path)
+        res = self._connection.api_request(
+            method='POST', headers=headers, path=path)
         return decode_file_metadata_if_exist(res)
 
-    def post_channel_file_upload(self, channel_id: str, file_obj: IO, content_type: str,
-                                 metadata: dict=None, lifetime: str=None) -> dict:
+    def post_channel_file_upload(
+            self,
+            channel_id: str,
+            file_obj: IO,
+            content_type: str,
+            metadata: dict=None,
+            lifetime: str=None) -> dict:
         """upload a file to a channel.
 
         API reference: POST /channels/<channel_id>/upload
@@ -667,7 +685,11 @@ class APIClient(BaseAPIClient):
         if lifetime:
             params['lifetime'] = lifetime
         res = self._connection.api_request(
-            method='POST', headers=headers, path=path, params=params, data=file_obj)
+            method='POST',
+            headers=headers,
+            path=path,
+            params=params,
+            data=file_obj)
         return decode_file_metadata_if_exist(res)
 
     def list_channel_files(
@@ -746,10 +768,13 @@ class APIClient(BaseAPIClient):
         if next_page_token is not None:
             params['next_page_token'] = next_page_token
         if query is not None:
-            assert type(query) == str, 'Unexpected query type: {}'.format(type(query))
+            assert isinstance(
+                query, str), 'Unexpected query type: {}'.format(
+                type(query))
             params['q'] = query
         path = '/channels/{}'.format(channel_id)
-        res = self._connection.api_request(method='GET', path=path, params=params)
+        res = self._connection.api_request(
+            method='GET', path=path, params=params)
 
         if res.get('files'):
             res['files'] = [
@@ -840,7 +865,11 @@ class APIClient(BaseAPIClient):
         path = '/channels/{}/{}'.format(channel_id, file_id)
         return self._connection.api_request(method='DELETE', path=path)
 
-    def put_channel_file_metadata(self, channel_id: str, file_id: str, metadata: dict=None) -> dict:
+    def put_channel_file_metadata(
+            self,
+            channel_id: str,
+            file_id: str,
+            metadata: dict=None) -> dict:
         """update a file metadata in a channel.
 
         API reference: PUT /channels/<channel_id>/<file_id>/metadata
@@ -891,10 +920,15 @@ class APIClient(BaseAPIClient):
         if metadata is None:
             metadata = {}
         encoded_metadata = encode_metadata(metadata)
-        res = self._connection.api_request(method='PUT', path=path, json=encoded_metadata)
+        res = self._connection.api_request(
+            method='PUT', path=path, json=encoded_metadata)
         return decode_file_metadata_if_exist(res)
 
-    def put_channel_file_lifetime(self, channel_id: str, file_id: str, lifetime: str) -> dict:
+    def put_channel_file_lifetime(
+            self,
+            channel_id: str,
+            file_id: str,
+            lifetime: str) -> dict:
         """update a file lifetime in a channel.
 
         API reference: PUT /channels/<channel_id>/<file_id>/lifetime
@@ -937,9 +971,14 @@ class APIClient(BaseAPIClient):
             'lifetime': lifetime
         }
         path = '/channels/{}/{}/lifetime'.format(channel_id, file_id)
-        return self._connection.api_request(method='PUT', path=path, json=params)
+        return self._connection.api_request(
+            method='PUT', path=path, json=params)
 
-    def create_bucket(self, organization_id: str, name: str, description: str) -> dict:
+    def create_bucket(
+            self,
+            organization_id: str,
+            name: str,
+            description: str) -> dict:
         """create a bucket
 
         API reference: POST /organizations/<organization_id>/buckets
@@ -991,9 +1030,14 @@ class APIClient(BaseAPIClient):
             'description': description
         }
         path = '/organizations/{}/buckets'.format(organization_id)
-        return self._connection.api_request(method='POST', path=path, json=params)
+        return self._connection.api_request(
+            method='POST', path=path, json=params)
 
-    def list_buckets(self, organization_id: str, limit: int=None, offset: int=None) -> dict:
+    def list_buckets(
+            self,
+            organization_id: str,
+            limit: int=None,
+            offset: int=None) -> dict:
         """get buckets
 
         API reference: GET /organizations/<organization_id>/buckets/
@@ -1049,7 +1093,8 @@ class APIClient(BaseAPIClient):
         if offset is not None:
             params['offset'] = offset
         path = '/organizations/{}/buckets'.format(organization_id)
-        return self._connection.api_request(method='GET', path=path, params=params)
+        return self._connection.api_request(
+            method='GET', path=path, params=params)
 
     def get_bucket(self, organization_id: str, bucket_id: str) -> dict:
         """get a bucket
@@ -1096,10 +1141,16 @@ class APIClient(BaseAPIClient):
             - Forbidden
             - InternalServerError
         """
-        path = '/organizations/{}/buckets/{}'.format(organization_id, bucket_id)
+        path = '/organizations/{}/buckets/{}'.format(
+            organization_id, bucket_id)
         return self._connection.api_request(method='GET', path=path)
 
-    def patch_bucket(self, organization_id: str, bucket_id: str, name: str=None, description: str=None) -> dict:
+    def patch_bucket(
+            self,
+            organization_id: str,
+            bucket_id: str,
+            name: str=None,
+            description: str=None) -> dict:
         """edit a bucket
 
         API reference: PATCH /organizations/<organization_id>/buckets/<bucket_id>
@@ -1154,8 +1205,10 @@ class APIClient(BaseAPIClient):
             params['name'] = name
         if description:
             params['description'] = description
-        path = '/organizations/{}/buckets/{}'.format(organization_id, bucket_id)
-        return self._connection.api_request(method='PATCH', path=path, json=params)
+        path = '/organizations/{}/buckets/{}'.format(
+            organization_id, bucket_id)
+        return self._connection.api_request(
+            method='PATCH', path=path, json=params)
 
     def archive_bucket(self, organization_id: str, bucket_id: str):
         """archive a bucket
@@ -1323,7 +1376,10 @@ class APIClient(BaseAPIClient):
         if str(convert_to_valid_path(file_location)) != file_location:
             error_message = "'file_location' must not start with '/' and must not include " \
                             "a relative path of '..' and '.'. '{}'".format(file_location)
-            raise BadRequest(error=error_message, error_description=error_message, status_code=400)
+            raise BadRequest(
+                error=error_message,
+                error_description=error_message,
+                status_code=400)
 
         if not metadata:
             metadata = {}
@@ -1340,11 +1396,16 @@ class APIClient(BaseAPIClient):
             'file': (file_location, file_obj, content_type),
             'parameters': ('params.json', params, 'application/json')
         }
-        res = self._connection.api_request(method='POST', headers=headers, path=path, files=files)
+        res = self._connection.api_request(
+            method='POST', headers=headers, path=path, files=files)
         return decode_file_metadata_if_exist(res)
 
     def upload_bucket_files(
-            self, organization_id: str, bucket_id: str, target_dir: str, lifetime: str=None) -> dict:
+            self,
+            organization_id: str,
+            bucket_id: str,
+            target_dir: str,
+            lifetime: str=None) -> dict:
         """upload files on your specified directory to a bucket.
 
         API reference: POST /organizations/<organization_id>/buckets/<bucket_id>/files
@@ -1398,7 +1459,9 @@ class APIClient(BaseAPIClient):
                 if filename.startswith('.'):
                     continue
                 filepath = Path(root, filename)
-                file_location = str(filepath.absolute()).replace(target_dir_path, '', 1)
+                file_location = str(
+                    filepath.absolute()).replace(
+                    target_dir_path, '', 1)
                 content_type, _ = mimetypes.guess_type(str(filepath))
                 metadata = {
                     "x-abeja-meta-filename": file_location
@@ -1406,8 +1469,13 @@ class APIClient(BaseAPIClient):
                 with open(str(filepath), 'rb') as f:
                     try:
                         self.upload_bucket_file(
-                            organization_id, bucket_id, f, file_location, content_type,
-                            metadata=metadata, lifetime=lifetime)
+                            organization_id,
+                            bucket_id,
+                            f,
+                            file_location,
+                            content_type,
+                            metadata=metadata,
+                            lifetime=lifetime)
                     except (BadRequest, Unauthorized, NotFound, Forbidden, InternalServerError) as e:
                         messages.append({
                             "message": 'Upload failed file({}), {}: {}'.format(
@@ -1417,8 +1485,13 @@ class APIClient(BaseAPIClient):
         return response
 
     def list_bucket_files(
-            self, organization_id: str, bucket_id: str, target_dir: str="/",
-            items_per_page: int=None, last_file_id: str=None, query: str=None) -> dict:
+            self,
+            organization_id: str,
+            bucket_id: str,
+            target_dir: str="/",
+            items_per_page: int=None,
+            last_file_id: str=None,
+            query: str=None) -> dict:
         """get files in a bucket.
 
         API reference: GET /organizations/<organization_id>/buckets/<bucket_id>/files
@@ -1482,11 +1555,14 @@ class APIClient(BaseAPIClient):
         if last_file_id is not None:
             params['last_file_id'] = last_file_id
         if query is not None:
-            assert type(query) == str, 'Unexpected query type: {}'.format(type(query))
+            assert isinstance(
+                query, str), 'Unexpected query type: {}'.format(
+                type(query))
             params['q'] = query
         path = '/organizations/{}/buckets/{}/files'.format(
             organization_id, bucket_id)
-        res = self._connection.api_request(method='GET', path=path, params=params)
+        res = self._connection.api_request(
+            method='GET', path=path, params=params)
 
         if res.get('files'):
             res['files'] = [
@@ -1495,7 +1571,11 @@ class APIClient(BaseAPIClient):
             ]
         return res
 
-    def get_bucket_file(self, organization_id: str, bucket_id: str, file_id: str) -> dict:
+    def get_bucket_file(
+            self,
+            organization_id: str,
+            bucket_id: str,
+            file_id: str) -> dict:
         """get a file in a bucket.
 
         API reference: GET /organizations/<organization_id>/buckets/<bucket_id>/files/<file_id>

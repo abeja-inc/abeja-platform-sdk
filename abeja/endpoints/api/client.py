@@ -55,10 +55,16 @@ class APIClient(BaseAPIClient):
             'service_id': service_id,
             'custom_alias': custom_alias,
         }
-        path = '/organizations/{}/deployments/{}/endpoints'.format(organization_id, deployment_id)
-        return self._connection.api_request(method='POST', path=path, json=payload)
+        path = '/organizations/{}/deployments/{}/endpoints'.format(
+            organization_id, deployment_id)
+        return self._connection.api_request(
+            method='POST', path=path, json=payload)
 
-    def get_endpoint(self, organization_id: str, deployment_id: str, endpoint: str) -> dict:
+    def get_endpoint(
+            self,
+            organization_id: str,
+            deployment_id: str,
+            endpoint: str) -> dict:
         """get a endpoint
 
         API reference: GET /organizations/<organization_id>/deployments/<deployment_id>/endpoints/<endpoint>
@@ -93,7 +99,8 @@ class APIClient(BaseAPIClient):
           - InternalServerError
         """
 
-        path = '/organizations/{}/deployments/{}/endpoints/{}'.format(organization_id, deployment_id, endpoint)
+        path = '/organizations/{}/deployments/{}/endpoints/{}'.format(
+            organization_id, deployment_id, endpoint)
         return self._connection.api_request(method='GET', path=path)
 
     def get_endpoints(self, organization_id: str, deployment_id: str) -> dict:
@@ -131,11 +138,16 @@ class APIClient(BaseAPIClient):
             - Unauthorized: Authentication failed
             - InternalServerError
         """
-        path = '/organizations/{}/deployments/{}/endpoints'.format(organization_id, deployment_id)
+        path = '/organizations/{}/deployments/{}/endpoints'.format(
+            organization_id, deployment_id)
         return self._connection.api_request(method='GET', path=path)
 
     def update_endpoint(
-            self, organization_id: str, deployment_id: str, endpoint: str, service_id: str) -> dict:
+            self,
+            organization_id: str,
+            deployment_id: str,
+            endpoint: str,
+            service_id: str) -> dict:
         """update a endpoint
 
         API reference: PATCH /organizations/<organization_id>/deployments/<deployment_id>/endpoints/<endpoint>
@@ -170,13 +182,19 @@ class APIClient(BaseAPIClient):
           - Unauthorized: Authentication failed
           - InternalServerError
         """
-        path = '/organizations/{}/deployments/{}/endpoints/{}'.format(organization_id, deployment_id, endpoint)
+        path = '/organizations/{}/deployments/{}/endpoints/{}'.format(
+            organization_id, deployment_id, endpoint)
         payload = {
             'service_id': service_id
         }
-        return self._connection.api_request(method='PATCH', path=path, json=payload)
+        return self._connection.api_request(
+            method='PATCH', path=path, json=payload)
 
-    def delete_endpoint(self, organization_id: str, deployment_id: str, endpoint: str) -> dict:
+    def delete_endpoint(
+            self,
+            organization_id: str,
+            deployment_id: str,
+            endpoint: str) -> dict:
         """delete a endpoint
 
         API reference: DELETE /organizations/<organization_id>/deployments/<deployment_id>/endpoints/<endpoint>
@@ -208,5 +226,6 @@ class APIClient(BaseAPIClient):
           - Unauthorized: Authentication failed
           - InternalServerError
         """
-        path = '/organizations/{}/deployments/{}/endpoints/{}'.format(organization_id, deployment_id, endpoint)
+        path = '/organizations/{}/deployments/{}/endpoints/{}'.format(
+            organization_id, deployment_id, endpoint)
         return self._connection.api_request(method='DELETE', path=path)

@@ -51,7 +51,9 @@ def test_str(expected: InstanceType, instance_type: str) -> None:
                          (GPU_B4, InstanceType.parse('gpu:b-4')),
                          (GPU_B8, InstanceType.parse('gpu:b-8')),
                          ])
-def test_constants(instance_type: InstanceType, expected: InstanceType) -> None:
+def test_constants(
+        instance_type: InstanceType,
+        expected: InstanceType) -> None:
     assert instance_type == expected
 
 

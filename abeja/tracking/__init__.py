@@ -12,7 +12,8 @@ from tensorboardX import SummaryWriter
 class Tracking:
     def __init__(self, total_steps: Optional[int] = None):
         self._organization_id = os.environ.get('ABEJA_ORGANIZATION_ID')
-        self._job_definition_name = os.environ.get('TRAINING_JOB_DEFINITION_NAME')
+        self._job_definition_name = os.environ.get(
+            'TRAINING_JOB_DEFINITION_NAME')
         self._training_job_id = os.environ.get('TRAINING_JOB_ID')
         self._is_valid_job = \
             self._organization_id and self._job_definition_name and self._training_job_id
@@ -26,7 +27,8 @@ class Tracking:
         self._total_steps = total_steps
         self._need_flush = False
 
-        ABEJA_TRAINING_RESULT_DIR = os.environ.get('ABEJA_TRAINING_RESULT_DIR', '.')
+        ABEJA_TRAINING_RESULT_DIR = os.environ.get(
+            'ABEJA_TRAINING_RESULT_DIR', '.')
         log_path = os.path.join(ABEJA_TRAINING_RESULT_DIR, 'logs')
         self._summary_writer = SummaryWriter(log_dir=log_path)
 
@@ -92,7 +94,8 @@ class Tracking:
 
     def log_metric(self, key: str, value: float) -> None:
         if isinstance(key, str) and isinstance(value, float):
-            if self._step is not None and key in ['main/loss', 'main/acc', 'test/loss', 'test/acc']:
+            if self._step is not None and key in [
+                    'main/loss', 'main/acc', 'test/loss', 'test/acc']:
                 self._summary_writer.add_scalar(key, value, self._step)
             if '/' in key:
                 key = key.replace('/', '_')
@@ -104,7 +107,10 @@ class Tracking:
         for key, value in metrics.items():
             self.log_metric(key, value)
 
-    def log_artifact(self, filepath: str, delete_flag: Optional[bool] = False) -> None:
+    def log_artifact(
+            self,
+            filepath: str,
+            delete_flag: Optional[bool] = False) -> None:
         if Path(filepath).is_file():
             self._need_flush = True
             self._filepath = Path(filepath)
@@ -125,7 +131,8 @@ class Tracking:
 
         self._summary_writer.flush()
         if self._is_valid_job and self._total_steps is not None and self._step is not None:
-            statistics = ABEJAStatistics(num_epochs=self._total_steps, epoch=self._step)
+            statistics = ABEJAStatistics(
+                num_epochs=self._total_steps, epoch=self._step)
             kwargs = {**self._params, **self._metrics}
             kwargs.pop('main_acc', None)
             kwargs.pop('main_loss', None)
@@ -135,16 +142,26 @@ class Tracking:
             train_acc = self._metrics.get('main_acc')
             train_loss = self._metrics.get('main_loss')
             if train_acc is not None or train_loss is not None:
-                statistics.add_stage(ABEJAStatistics.STAGE_TRAIN, train_acc, train_loss, **kwargs)
+                statistics.add_stage(
+                    ABEJAStatistics.STAGE_TRAIN,
+                    train_acc,
+                    train_loss,
+                    **kwargs)
             val_acc = self._metrics.get('test_acc')
             val_loss = self._metrics.get('test_loss')
             if val_acc is not None or val_loss is not None:
-                statistics.add_stage(ABEJAStatistics.STAGE_VALIDATION, val_acc, val_loss, **kwargs)
+                statistics.add_stage(
+                    ABEJAStatistics.STAGE_VALIDATION,
+                    val_acc,
+                    val_loss,
+                    **kwargs)
             if statistics.get_statistics():
                 try:
                     res = TrainingClient().update_statistics(
-                        organization_id=self._organization_id, job_definition_name=self._job_definition_name,
-                        training_job_id=self._training_job_id, statistics=statistics.get_statistics())
+                        organization_id=self._organization_id,
+                        job_definition_name=self._job_definition_name,
+                        training_job_id=self._training_job_id,
+                        statistics=statistics.get_statistics())
                     print(res)     # noqa: T001
                 except Exception as e:
                     print(e)     # noqa: T001

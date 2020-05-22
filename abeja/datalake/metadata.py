@@ -5,15 +5,19 @@ from abeja.datalake.api.client import APIClient
 
 
 class DatalakeMetadata(Mapping):
-    def __init__(self, api: APIClient, channel_id: str, file_id: str, metadata: typing.Optional[typing.Dict[str, str]]=None):
+    def __init__(self, api: APIClient, channel_id: str, file_id: str,
+                 metadata: typing.Optional[typing.Dict[str, str]]=None):
         self.channel_id = channel_id
         self.file_id = file_id
         self.__api = api
         if metadata is None:
             self.__dict = {}
         else:
-            self.__dict = {k.replace('x-abeja-meta-', ''): v for k, v in metadata.items()
-                           if k.startswith('x-abeja-meta-')}
+            self.__dict = {
+                k.replace(
+                    'x-abeja-meta-',
+                    ''): v for k,
+                v in metadata.items() if k.startswith('x-abeja-meta-')}
 
     def __len__(self):
         return len(self.__dict)
@@ -42,6 +46,10 @@ class DatalakeMetadata(Mapping):
     def update(self, *args, **kwargs):
         metadata = dict(*args, **kwargs)
         # Construct metadata.
-        metadata = {k: str(v) for k, v in metadata.items() if k.lower() not in {'content_type', 'content-type'}}
+        metadata = {
+            k: str(v) for k,
+            v in metadata.items() if k.lower() not in {
+                'content_type',
+                'content-type'}}
         # Update local variable.
         self.__dict.update(metadata)

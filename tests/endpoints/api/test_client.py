@@ -25,11 +25,16 @@ class TestAPIClient(unittest.TestCase):
 
     @requests_mock.Mocker()
     def test_create_endpoint(self, m):
-        path = '/organizations/{}/deployments/{}/endpoints'.format(ORGANIZATION_ID, DEPLOYMENT_ID)
+        path = '/organizations/{}/deployments/{}/endpoints'.format(
+            ORGANIZATION_ID, DEPLOYMENT_ID)
         m.post(path, json=ENDPOINT_RES)
 
         client = APIClient()
-        ret = client.create_endpoint(ORGANIZATION_ID, DEPLOYMENT_ID, SERVICE_ID, CUSTOM_ALIAS)
+        ret = client.create_endpoint(
+            ORGANIZATION_ID,
+            DEPLOYMENT_ID,
+            SERVICE_ID,
+            CUSTOM_ALIAS)
 
         expected_payload = {
             'service_id': SERVICE_ID,
@@ -40,7 +45,8 @@ class TestAPIClient(unittest.TestCase):
 
     @requests_mock.Mocker()
     def test_get_endpoint(self, m):
-        path = '/organizations/{}/deployments/{}/endpoints/{}'.format(ORGANIZATION_ID, DEPLOYMENT_ID, ENDPOINT_ID)
+        path = '/organizations/{}/deployments/{}/endpoints/{}'.format(
+            ORGANIZATION_ID, DEPLOYMENT_ID, ENDPOINT_ID)
         m.get(path, json=ENDPOINT_RES)
 
         client = APIClient()
@@ -49,7 +55,8 @@ class TestAPIClient(unittest.TestCase):
 
     @requests_mock.Mocker()
     def test_get_endpoints(self, m):
-        path = '/organizations/{}/deployments/{}/endpoints'.format(ORGANIZATION_ID, DEPLOYMENT_ID)
+        path = '/organizations/{}/deployments/{}/endpoints'.format(
+            ORGANIZATION_ID, DEPLOYMENT_ID)
         m.get(path, json=ENDPOINT_LIST_RES)
 
         client = APIClient()
@@ -58,24 +65,31 @@ class TestAPIClient(unittest.TestCase):
 
     @requests_mock.Mocker()
     def test_update_endpoint(self, m):
-        path = '/organizations/{}/deployments/{}/endpoints/{}'.format(ORGANIZATION_ID, DEPLOYMENT_ID, ENDPOINT_ID)
+        path = '/organizations/{}/deployments/{}/endpoints/{}'.format(
+            ORGANIZATION_ID, DEPLOYMENT_ID, ENDPOINT_ID)
         expected_res = {
             "message": "{} updated".format(ENDPOINT_ID)
         }
         m.patch(path, json=expected_res)
 
         client = APIClient()
-        ret = client.update_endpoint(ORGANIZATION_ID, DEPLOYMENT_ID, ENDPOINT_ID, UPDATED_SERVICE_ID)
+        ret = client.update_endpoint(
+            ORGANIZATION_ID,
+            DEPLOYMENT_ID,
+            ENDPOINT_ID,
+            UPDATED_SERVICE_ID)
         self.assertDictEqual(ret, expected_res)
 
     @requests_mock.Mocker()
     def test_delete_endpoint(self, m):
-        path = '/organizations/{}/deployments/{}/endpoints/{}'.format(ORGANIZATION_ID, DEPLOYMENT_ID, ENDPOINT_ID)
+        path = '/organizations/{}/deployments/{}/endpoints/{}'.format(
+            ORGANIZATION_ID, DEPLOYMENT_ID, ENDPOINT_ID)
         message_res = {
             "message": "{} deleted".format(ENDPOINT_ID)
         }
         m.delete(path, json=message_res)
 
         client = APIClient()
-        ret = client.delete_endpoint(ORGANIZATION_ID, DEPLOYMENT_ID, ENDPOINT_ID)
+        ret = client.delete_endpoint(
+            ORGANIZATION_ID, DEPLOYMENT_ID, ENDPOINT_ID)
         self.assertDictEqual(ret, message_res)

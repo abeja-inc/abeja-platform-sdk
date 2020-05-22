@@ -77,7 +77,8 @@ RUN_RECENT_LOG_RES = {
 class APIClientTest(unittest.TestCase):
     @requests_mock.Mocker()
     def test_create_run(self, m):
-        path = '/organizations/{}/deployments/{}/runs'.format(ORGANIZATION_ID, DEPLOYMENT_ID)
+        path = '/organizations/{}/deployments/{}/runs'.format(
+            ORGANIZATION_ID, DEPLOYMENT_ID)
         m.post(path, json=RUN_RES)
 
         client = APIClient()
@@ -106,7 +107,8 @@ class APIClientTest(unittest.TestCase):
 
     @requests_mock.Mocker()
     def test_create_run_without_inputdata(self, m):
-        path = '/organizations/{}/deployments/{}/runs'.format(ORGANIZATION_ID, DEPLOYMENT_ID)
+        path = '/organizations/{}/deployments/{}/runs'.format(
+            ORGANIZATION_ID, DEPLOYMENT_ID)
         m.post(path, json=RUN_RES)
 
         client = APIClient()
@@ -132,7 +134,8 @@ class APIClientTest(unittest.TestCase):
 
     @requests_mock.Mocker()
     def test_create_run_no_retry_count(self, m):
-        path = '/organizations/{}/deployments/{}/runs'.format(ORGANIZATION_ID, DEPLOYMENT_ID)
+        path = '/organizations/{}/deployments/{}/runs'.format(
+            ORGANIZATION_ID, DEPLOYMENT_ID)
         m.post(path, json=RUN_RES)
 
         client = APIClient()
@@ -159,7 +162,8 @@ class APIClientTest(unittest.TestCase):
 
     @requests_mock.Mocker()
     def test_create_run_no_distribution(self, m):
-        path = '/organizations/{}/deployments/{}/runs'.format(ORGANIZATION_ID, DEPLOYMENT_ID)
+        path = '/organizations/{}/deployments/{}/runs'.format(
+            ORGANIZATION_ID, DEPLOYMENT_ID)
         m.post(path, json=RUN_RES)
 
         client = APIClient()
@@ -267,7 +271,8 @@ class APIClientTest(unittest.TestCase):
         ({"next_backward_token": "..."}, {"next_backward_token": "..."})
     ])
     @patch('requests.Session.request')
-    def test_get_run_recent_logs_with_options(self, option, expected_params, m):
+    def test_get_run_recent_logs_with_options(
+            self, option, expected_params, m):
         client = APIClient()
         params = {
             "organization_id": ORGANIZATION_ID,

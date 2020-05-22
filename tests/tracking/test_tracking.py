@@ -83,7 +83,8 @@ class TestTracking(unittest.TestCase):
             self.assertIsNone(body['data'])
             self.assertIsNone(body['json'])
             self.assertIsNone(body['params'])
-            self.assertDictEqual({'User-Agent': 'abeja-platform-sdk/{}'.format(SDK_VERSION)}, body['headers'])
+            self.assertDictEqual(
+                {'User-Agent': 'abeja-platform-sdk/{}'.format(SDK_VERSION)}, body['headers'])
             self.assertEqual(30, body['timeout'])
             self.assertIn('model_data', body['files'])
             self.assertIn('parameters', body['files'])
@@ -127,7 +128,8 @@ class TestTracking(unittest.TestCase):
             self.assertIsNone(body['data'])
             self.assertIsNone(body['json'])
             self.assertIsNone(body['params'])
-            self.assertDictEqual({'User-Agent': 'abeja-platform-sdk/{}'.format(SDK_VERSION)}, body['headers'])
+            self.assertDictEqual(
+                {'User-Agent': 'abeja-platform-sdk/{}'.format(SDK_VERSION)}, body['headers'])
             self.assertEqual(30, body['timeout'])
             self.assertIn('model_data', body['files'])
             self.assertIn('parameters', body['files'])
@@ -174,7 +176,8 @@ class TestTracking(unittest.TestCase):
         tracking.log_description(description=DESCRIPTION)
         tracking.log_step(step=1)
         tracking.flush()
-        mock_print.assert_any_call('No output. Need to add "artifact" by "log_artifact()".')
+        mock_print.assert_any_call(
+            'No output. Need to add "artifact" by "log_artifact()".')
 
     @mock.patch('builtins.print')
     def test_tracking_without_org_jobdef_job(self, mock_print):
@@ -184,18 +187,29 @@ class TestTracking(unittest.TestCase):
             'Please specify "ABEJA_ORGANIZATION_ID", "TRAINING_JOB_DEFINITION_NAME" '
             'and "TRAINING_JOB_ID" for uploading.')
 
-    @mock.patch('abeja.training.api.client.APIClient.get_training_job',
-                side_effect=BadRequest('foo', 'bar', 400, 'https://api.abeja.io/'))
+    @mock.patch(
+        'abeja.training.api.client.APIClient.get_training_job',
+        side_effect=BadRequest(
+            'foo',
+            'bar',
+            400,
+            'https://api.abeja.io/'))
     @mock.patch.dict('os.environ', PATCHED_ENVIRON)
     def test_tracking_error_on_get_training_job(self, m_get_training_job):
         with self.assertRaises(BadRequest):
             Tracking()
 
     @mock.patch('abeja.training.api.client.APIClient.get_training_job')
-    @mock.patch('abeja.models.api.client.APIClient.create_training_model',
-                side_effect=BadRequest('foo', 'bar', 400, 'https://api.abeja.io/'))
+    @mock.patch(
+        'abeja.models.api.client.APIClient.create_training_model',
+        side_effect=BadRequest(
+            'foo',
+            'bar',
+            400,
+            'https://api.abeja.io/'))
     @mock.patch.dict('os.environ', PATCHED_ENVIRON)
-    def test_tracking_error_on_create_training_model(self, m_create_training_model, m_get_training_job):
+    def test_tracking_error_on_create_training_model(
+            self, m_create_training_model, m_get_training_job):
         m_get_training_job.return_value = {}
 
         with self.assertRaises(BadRequest):
@@ -206,11 +220,19 @@ class TestTracking(unittest.TestCase):
 
     @mock.patch('abeja.training.api.client.APIClient.get_training_job')
     @mock.patch('abeja.models.api.client.APIClient.create_training_model')
-    @mock.patch('abeja.training.api.client.APIClient.update_statistics',
-                side_effect=BadRequest('foo', 'bar', 400, 'https://api.abeja.io/'))
+    @mock.patch(
+        'abeja.training.api.client.APIClient.update_statistics',
+        side_effect=BadRequest(
+            'foo',
+            'bar',
+            400,
+            'https://api.abeja.io/'))
     @mock.patch.dict('os.environ', PATCHED_ENVIRON)
     def test_tracking_error_on_update_statistics(
-            self, m_update_statistics, m_create_training_model, m_get_training_job):
+            self,
+            m_update_statistics,
+            m_create_training_model,
+            m_get_training_job):
         m_get_training_job.return_value = {}
         tracking = Tracking(total_steps=10)
         tracking.log_step(1)
@@ -233,7 +255,11 @@ class TestTracking(unittest.TestCase):
     @mock.patch('abeja.models.api.client.APIClient.create_training_model')
     @mock.patch('abeja.training.api.client.APIClient.update_statistics')
     @mock.patch.dict('os.environ', PATCHED_ENVIRON)
-    def test_tracking_statistics(self, m_update_statistics, m_create_training_model, m_get_training_job):
+    def test_tracking_statistics(
+            self,
+            m_update_statistics,
+            m_create_training_model,
+            m_get_training_job):
         for i in range(2):
             with Tracking(total_steps=10) as tk:
                 tk.log_step(i + 1)
@@ -248,8 +274,10 @@ class TestTracking(unittest.TestCase):
             'accuracy': 0.5,
             'loss': 0.5
         }
-        self.assertDictEqual(expect, m_update_statistics.call_args[1]['statistics']['stages']['train'])
-        self.assertDictEqual(expect, m_update_statistics.call_args[1]['statistics']['stages']['validation'])
+        self.assertDictEqual(
+            expect, m_update_statistics.call_args[1]['statistics']['stages']['train'])
+        self.assertDictEqual(
+            expect, m_update_statistics.call_args[1]['statistics']['stages']['validation'])
 
     @mock.patch('abeja.training.api.client.APIClient.update_statistics')
     def test_tracking_statistics_not_work(self, m_update_statistics):

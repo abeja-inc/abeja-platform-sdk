@@ -14,11 +14,19 @@ class APIClient(BaseAPIClient):
        api_client = APIClient()
     """
 
-    def create_run(
-            self, organization_id: str, deployment_id: str, version_id: str,
-            input_data: Optional[Dict[str, str]] = None, output_template: Optional[Dict[str, str]]=None,
-            distribution: Optional[int]=None, retry_count: Optional[int]=None, environment: Optional[Dict[str, str]]=None,
-            model_id: Optional[str] = None) -> dict:
+    def create_run(self,
+                   organization_id: str,
+                   deployment_id: str,
+                   version_id: str,
+                   input_data: Optional[Dict[str,
+                                             str]] = None,
+                   output_template: Optional[Dict[str,
+                                                  str]]=None,
+                   distribution: Optional[int]=None,
+                   retry_count: Optional[int]=None,
+                   environment: Optional[Dict[str,
+                                              str]]=None,
+                   model_id: Optional[str] = None) -> dict:
         """submit a run
 
         API reference: POST /organizations/<organization_id>/deployments/<deployment_id>/runs
@@ -117,10 +125,16 @@ class APIClient(BaseAPIClient):
             params['retry_count'] = retry_count
         if distribution is not None:
             params['distribution'] = distribution
-        path = '/organizations/{}/deployments/{}/runs'.format(organization_id, deployment_id)
-        return self._connection.api_request(method='POST', path=path, json=params)
+        path = '/organizations/{}/deployments/{}/runs'.format(
+            organization_id, deployment_id)
+        return self._connection.api_request(
+            method='POST', path=path, json=params)
 
-    def get_run(self, organization_id: str, deployment_id: str, run_id: str) -> dict:
+    def get_run(
+            self,
+            organization_id: str,
+            deployment_id: str,
+            run_id: str) -> dict:
         """get a run
 
         API reference: GET /organizations/<organization_id>/deployments/<deployment_id>/runs/<run_id>
@@ -194,8 +208,11 @@ class APIClient(BaseAPIClient):
         return self._connection.api_request(method='GET', path=path)
 
     def get_runs(
-            self, organization_id: str, deployment_id: str,
-            next_page_token: Optional[str]=None, scan_forward: Optional[bool]=None) -> dict:
+            self,
+            organization_id: str,
+            deployment_id: str,
+            next_page_token: Optional[str]=None,
+            scan_forward: Optional[bool]=None) -> dict:
         """get runs
 
         API reference: GET /organizations/<organization_id>/deployments/<deployment_id>/runs/
@@ -260,11 +277,16 @@ class APIClient(BaseAPIClient):
             params['next_page_token'] = next_page_token
         path = '/organizations/{}/deployments/{}/runs'.format(
             organization_id, deployment_id)
-        return self._connection.api_request(method='GET', path=path, params=params)
+        return self._connection.api_request(
+            method='GET', path=path, params=params)
 
     def get_run_logs(
-            self, organization_id: str, deployment_id: str, run_id: str,
-            next_token: Optional[str]=None, start_time: Optional[datetime]=None,
+            self,
+            organization_id: str,
+            deployment_id: str,
+            run_id: str,
+            next_token: Optional[str]=None,
+            start_time: Optional[datetime]=None,
             end_time: Optional[datetime]=None) -> dict:
         """get logs of the run
 
@@ -324,12 +346,18 @@ class APIClient(BaseAPIClient):
             params['end_time'] = end_time.strftime("%Y-%m-%dT%H:%M:%S")
         path = '/organizations/{}/deployments/{}/runs/{}/logs'.format(
             organization_id, deployment_id, run_id)
-        return self._connection.api_request(method='GET', path=path, params=params)
+        return self._connection.api_request(
+            method='GET', path=path, params=params)
 
     def get_run_recent_logs(
-            self, organization_id: str, deployment_id: str, run_id: str,
-            next_forward_token: Optional[str]=None, next_backward_token: Optional[str]=None,
-            start_time: Optional[datetime]=None, end_time: Optional[datetime]=None) -> dict:
+            self,
+            organization_id: str,
+            deployment_id: str,
+            run_id: str,
+            next_forward_token: Optional[str]=None,
+            next_backward_token: Optional[str]=None,
+            start_time: Optional[datetime]=None,
+            end_time: Optional[datetime]=None) -> dict:
         """get recent logs of the run
 
         API reference: GET /organizations/<organization_id>/deployments/<deployment_id>/runs/<run_id>/recentlogs
@@ -393,4 +421,5 @@ class APIClient(BaseAPIClient):
             params['end_time'] = end_time.strftime("%Y-%m-%dT%H:%M:%S")
         path = '/organizations/{}/deployments/{}/runs/{}/recentlogs'.format(
             organization_id, deployment_id, run_id)
-        return self._connection.api_request(method='GET', path=path, params=params)
+        return self._connection.api_request(
+            method='GET', path=path, params=params)

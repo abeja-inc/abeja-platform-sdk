@@ -9,7 +9,12 @@ class Statistics:
     STAGE_TRAIN = 'train'
     STAGE_VALIDATION = 'validation'
 
-    def __init__(self, num_epochs: int=None, epoch: int=None, progress_percentage: float=None, **kwargs) -> None:
+    def __init__(
+            self,
+            num_epochs: int=None,
+            epoch: int=None,
+            progress_percentage: float=None,
+            **kwargs) -> None:
         """
         :param num_epochs: number of total epoch.
         :param epoch: epoch.
@@ -22,7 +27,8 @@ class Statistics:
         self.stages = {}  # type: STAGES
 
     @classmethod
-    def from_response(klass, response: Optional[Dict[str, Any]]) -> Optional['Statistics']:
+    def from_response(
+            klass, response: Optional[Dict[str, Any]]) -> Optional['Statistics']:
         if response is None:
             return None
 
@@ -35,7 +41,12 @@ class Statistics:
             statistics.add_stage(name=name, **values)
         return statistics
 
-    def add_stage(self, name: str, accuracy: float=None, loss: float=None, **kwargs) -> None:
+    def add_stage(
+            self,
+            name: str,
+            accuracy: float=None,
+            loss: float=None,
+            **kwargs) -> None:
         """ add stage information
 
         Params:

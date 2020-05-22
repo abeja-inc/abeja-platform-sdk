@@ -181,10 +181,16 @@ def channel_response():
 
 @pytest.fixture
 def file_response():
-    def response(organization_id, channel_id, filename, content_type='application/octet-stream', metadata={}):
+    def response(
+            organization_id,
+            channel_id,
+            filename,
+            content_type='application/octet-stream',
+            metadata={}):
         uploaded_at = fake_iso8601()
         file_id = fake_file_id()
-        download_uri = "https://abeja-datalake-test.s3.example.com/{}".format(file_id)
+        download_uri = "https://abeja-datalake-test.s3.example.com/{}".format(
+            file_id)
         return {
             "url_expires_on": fake_iso8601(),
             "uploaded_at": uploaded_at,
@@ -205,7 +211,10 @@ def file_response():
 
 @pytest.fixture
 def training_job_definition_response():
-    def _training_job_definition_response(organization_id, training_job_definition_id, **extra):
+    def _training_job_definition_response(
+            organization_id,
+            training_job_definition_id,
+            **extra):
         return {
             "organization_id": organization_id,
             "job_definition_id": training_job_definition_id,
@@ -227,7 +236,11 @@ def training_job_definition_response():
 
 @pytest.fixture
 def training_job_definition_version_response():
-    def _training_job_definition_version_response(_organization_id, job_definition_id, job_definition_version=None, **extra):
+    def _training_job_definition_version_response(
+            _organization_id,
+            job_definition_id,
+            job_definition_version=None,
+            **extra):
         if job_definition_version is None:
             job_definition_version = random.randint(0, 100)
 
@@ -252,7 +265,11 @@ def training_job_definition_version_response():
 
 @pytest.fixture
 def job_response():
-    def _job_response(_organization_id, training_job_definition_id, training_job_id=None, **extra):
+    def _job_response(
+            _organization_id,
+            training_job_definition_id,
+            training_job_id=None,
+            **extra):
         user_id = fake_platform_id()
         if training_job_id is None:
             training_job_id = fake_platform_id()
@@ -310,7 +327,11 @@ def job_response():
 
 @pytest.fixture
 def job_result_response():
-    def _job_result_response(organization_id, training_job_definition_id, training_job_id, **extra):
+    def _job_result_response(
+            organization_id,
+            training_job_definition_id,
+            training_job_id,
+            **extra):
         return {
             "artifacts": {
                 "complete": {

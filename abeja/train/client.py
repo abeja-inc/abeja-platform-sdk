@@ -33,13 +33,20 @@ class Client(BaseClient):
                  timeout: Optional[int] = None,
                  max_retry_count: Optional[int] = None) -> None:
         super().__init__(organization_id, credential)
-        self.api = APIClient(credential=credential, timeout=timeout, max_retry_count=max_retry_count)
+        self.api = APIClient(
+            credential=credential,
+            timeout=timeout,
+            max_retry_count=max_retry_count)
         self.logger = getLogger('train-api')
         self.job_definition_name = job_definition_name or os.environ.get(
             'TRAINING_JOB_DEFINITION_NAME')
-        self.training_job_id = training_job_id or os.environ.get('TRAINING_JOB_ID')
+        self.training_job_id = training_job_id or os.environ.get(
+            'TRAINING_JOB_ID')
 
-    def download_training_result(self, training_job_id: str = None, path: str = None) -> None:
+    def download_training_result(
+            self,
+            training_job_id: str = None,
+            path: str = None) -> None:
         """download training artifact that includes model file or logs.
         Training artifact itself is a zip file, this function extracts it.
 
@@ -67,13 +74,15 @@ class Client(BaseClient):
             - IOError
         """
         # To keep backward compatibility with the older SDK (<= 1.0.10),
-        # we have to allow a case which either job definition or job id is `None`.
+        # we have to allow a case which either job definition or job id is
+        # `None`.
         training_job_id = training_job_id or self.training_job_id or 'None'
         job_definition_name = self.job_definition_name or 'None'
 
-        response = self.api.get_training_result(organization_id=self.organization_id,
-                                                job_definition_name=job_definition_name,
-                                                training_job_id=training_job_id)
+        response = self.api.get_training_result(
+            organization_id=self.organization_id,
+            job_definition_name=job_definition_name,
+            training_job_id=training_job_id)
         try:
             artifact_uri = response['artifacts']['complete']['uri']
         except KeyError:
@@ -124,7 +133,8 @@ class Client(BaseClient):
             None
         """
         # To keep backward compatibility with the older SDK (<= 1.0.10),
-        # we have to allow a case which either job definition or job id is `None`.
+        # we have to allow a case which either job definition or job id is
+        # `None`.
         training_job_id = self.training_job_id or 'None'
         job_definition_name = self.job_definition_name or 'None'
 
@@ -133,12 +143,16 @@ class Client(BaseClient):
             return
 
         try:
-            response = self.api.update_statistics(organization_id=self.organization_id,
-                                                  job_definition_name=job_definition_name,
-                                                  training_job_id=training_job_id,
-                                                  statistics=statistics.get_statistics())
+            response = self.api.update_statistics(
+                organization_id=self.organization_id,
+                job_definition_name=job_definition_name,
+                training_job_id=training_job_id,
+                statistics=statistics.get_statistics())
             self.logger.info('update_statistics result: %s', response)
         except (BadRequest, Unauthorized, Forbidden, NotFound, MethodNotAllowed) as e:
-            self.logger.warning('update_statistics result was {}.'.format(str(e)))
+            self.logger.warning(
+                'update_statistics result was {}.'.format(
+                    str(e)))
         except Exception:
-            self.logger.exception('update_statistics result was unexpected error:')
+            self.logger.exception(
+                'update_statistics result was unexpected error:')

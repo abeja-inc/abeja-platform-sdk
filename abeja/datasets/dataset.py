@@ -21,10 +21,17 @@ class Dataset(DatasetBase):
     """
 
     def __init__(
-            self, api: APIClient, organization_id: str, dataset_id: str,
-            name: Optional[str]=None, type: Optional[str]=None, props: Optional[dict]=None,
+            self,
+            api: APIClient,
+            organization_id: str,
+            dataset_id: str,
+            name: Optional[str]=None,
+            type: Optional[str]=None,
+            props: Optional[dict]=None,
             total_count: Optional[int]=None,
-            created_at: Optional[str]=None, updated_at: Optional[str]=None, **kwargs) -> None:
+            created_at: Optional[str]=None,
+            updated_at: Optional[str]=None,
+            **kwargs) -> None:
         self._api = api
         self.organization_id = organization_id
         self.dataset_id = dataset_id

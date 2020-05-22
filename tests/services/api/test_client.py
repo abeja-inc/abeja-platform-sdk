@@ -59,15 +59,22 @@ class TestAPIClient(unittest.TestCase):
 
     @requests_mock.Mocker()
     def test_create_service(self, m):
-        path = '/organizations/{}/deployments/{}/services'.format(ORGANIZATION_ID, DEPLOYMENT_ID)
+        path = '/organizations/{}/deployments/{}/services'.format(
+            ORGANIZATION_ID, DEPLOYMENT_ID)
         m.post(path, json=SERVICE_RES)
 
         client = APIClient()
-        ret = client.create_service(ORGANIZATION_ID, DEPLOYMENT_ID, VERSION_ID,
-                                    instance_number=SERVICE_INSTANCE_NUMBER, min_instance_number=1,
-                                    max_instance_number=SERVICE_INSTANCE_NUMBER * 2, enable_autoscale=True,
-                                    instance_type=SERVICE_INSTANCE_TYPE, environment=ENV_VARS,
-                                    model_id=TRAINING_MODEL_ID)
+        ret = client.create_service(
+            ORGANIZATION_ID,
+            DEPLOYMENT_ID,
+            VERSION_ID,
+            instance_number=SERVICE_INSTANCE_NUMBER,
+            min_instance_number=1,
+            max_instance_number=SERVICE_INSTANCE_NUMBER * 2,
+            enable_autoscale=True,
+            instance_type=SERVICE_INSTANCE_TYPE,
+            environment=ENV_VARS,
+            model_id=TRAINING_MODEL_ID)
         expected_payload = {
             'version_id': VERSION_ID,
             'instance_type': SERVICE_INSTANCE_TYPE,
@@ -85,7 +92,8 @@ class TestAPIClient(unittest.TestCase):
 
     @requests_mock.Mocker()
     def test_get_service(self, m):
-        path = '/organizations/{}/deployments/{}/services/{}'.format(ORGANIZATION_ID, DEPLOYMENT_ID, SERVICE_ID)
+        path = '/organizations/{}/deployments/{}/services/{}'.format(
+            ORGANIZATION_ID, DEPLOYMENT_ID, SERVICE_ID)
         m.get(path, json=SERVICE_RES)
 
         client = APIClient()
@@ -94,7 +102,8 @@ class TestAPIClient(unittest.TestCase):
 
     @requests_mock.Mocker()
     def test_get_services(self, m):
-        path = '/organizations/{}/deployments/{}/services'.format(ORGANIZATION_ID, DEPLOYMENT_ID)
+        path = '/organizations/{}/deployments/{}/services'.format(
+            ORGANIZATION_ID, DEPLOYMENT_ID)
         m.get(path, json=SERVICE_LIST_RES)
 
         client = APIClient()
@@ -103,7 +112,8 @@ class TestAPIClient(unittest.TestCase):
 
     @requests_mock.Mocker()
     def test_update_service(self, m):
-        path = '/organizations/{}/deployments/{}/services/{}'.format(ORGANIZATION_ID, DEPLOYMENT_ID, SERVICE_ID)
+        path = '/organizations/{}/deployments/{}/services/{}'.format(
+            ORGANIZATION_ID, DEPLOYMENT_ID, SERVICE_ID)
         m.patch(path, json=SERVICE_PAYLOAD)
 
         client = APIClient()
@@ -112,7 +122,8 @@ class TestAPIClient(unittest.TestCase):
 
     @requests_mock.Mocker()
     def test_delete_service(self, m):
-        path = '/organizations/{}/deployments/{}/services/{}'.format(ORGANIZATION_ID, DEPLOYMENT_ID, SERVICE_ID)
+        path = '/organizations/{}/deployments/{}/services/{}'.format(
+            ORGANIZATION_ID, DEPLOYMENT_ID, SERVICE_ID)
         message_res = {
             "message": "ser-abc1111111111111 deleted"
         }
@@ -124,7 +135,8 @@ class TestAPIClient(unittest.TestCase):
 
     @requests_mock.Mocker()
     def test_stop_service(self, m):
-        path = '/organizations/{}/deployments/{}/services/{}/stop'.format(ORGANIZATION_ID, DEPLOYMENT_ID, SERVICE_ID)
+        path = '/organizations/{}/deployments/{}/services/{}/stop'.format(
+            ORGANIZATION_ID, DEPLOYMENT_ID, SERVICE_ID)
         message_res = {
             "message": "ser-abc1111111111111 stopped"
         }
@@ -136,7 +148,8 @@ class TestAPIClient(unittest.TestCase):
 
     @requests_mock.Mocker()
     def test_start_service(self, m):
-        path = '/organizations/{}/deployments/{}/services/{}/start'.format(ORGANIZATION_ID, DEPLOYMENT_ID, SERVICE_ID)
+        path = '/organizations/{}/deployments/{}/services/{}/start'.format(
+            ORGANIZATION_ID, DEPLOYMENT_ID, SERVICE_ID)
         message_res = {
             "message": "ser-abc1111111111111 started"
         }

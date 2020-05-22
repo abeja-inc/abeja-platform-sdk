@@ -22,38 +22,20 @@ class TestChannel(TestCase):
 
     def test_files(self):
         mock_api = Mock()
-        mock_api.list_channel_files.side_effect = [
-            {
-                'next_page_token': 'dummy',
-                'files': [
-                    {
-                        'url_expires_on': '2018-06-04T05:04:46+00:00',
-                        'uploaded_at': '2018-06-01T05:22:44+00:00',
-                        'metadata': {
-                            'x-abeja-meta-filename': 'DcZzLGkV4AA8FQc.jpg'
-                        },
-                        'file_id': '20180601T052244-250482c0-d361-4c5b-a0f9-e796af1a5f0d',
-                        'download_uri': 'http://example/dummy/donwload_url',
-                        'content_type': 'image/jpeg'
-                    }
-                ]
-            },
-            {
-                'next_page_token': None,
-                'files': [
-                    {
-                        'url_expires_on': '2018-06-04T05:04:46+00:00',
-                        'uploaded_at': '2018-06-01T05:22:44+00:00',
-                        'metadata': {
-                            'x-abeja-meta-filename': 'DcZzLGkV4AA8FQc.jpg'
-                        },
-                        'file_id': '20180601T052244-250482c0-d361-4c5b-a0f9-e796af1a5f0d',
-                        'download_uri': 'http://example/dummy/donwload_url',
-                        'content_type': 'image/jpeg'
-                    }
-                ]
-            }
-        ]
+        mock_api.list_channel_files.side_effect = [{'next_page_token': 'dummy',
+                                                    'files': [{'url_expires_on': '2018-06-04T05:04:46+00:00',
+                                                               'uploaded_at': '2018-06-01T05:22:44+00:00',
+                                                               'metadata': {'x-abeja-meta-filename': 'DcZzLGkV4AA8FQc.jpg'},
+                                                               'file_id': '20180601T052244-250482c0-d361-4c5b-a0f9-e796af1a5f0d',
+                                                               'download_uri': 'http://example/dummy/donwload_url',
+                                                               'content_type': 'image/jpeg'}]},
+                                                   {'next_page_token': None,
+                                                    'files': [{'url_expires_on': '2018-06-04T05:04:46+00:00',
+                                                               'uploaded_at': '2018-06-01T05:22:44+00:00',
+                                                               'metadata': {'x-abeja-meta-filename': 'DcZzLGkV4AA8FQc.jpg'},
+                                                               'file_id': '20180601T052244-250482c0-d361-4c5b-a0f9-e796af1a5f0d',
+                                                               'download_uri': 'http://example/dummy/donwload_url',
+                                                               'content_type': 'image/jpeg'}]}]
         channel = Channel(mock_api, ORGANIZATION_ID, CHANNEL_ID)
         self.assertIsInstance(channel, Channel)
         files = list(channel.list_files())
@@ -82,58 +64,37 @@ class TestChannel(TestCase):
                         'url_expires_on': '2018-06-04T05:04:46+00:00',
                         'uploaded_at': '2018-06-01T05:22:44+00:00',
                         'metadata': {
-                            'x-abeja-meta-filename': 'DcZzLGkV4AA8FQc.jpg'
-                        },
+                            'x-abeja-meta-filename': 'DcZzLGkV4AA8FQc.jpg'},
                         'file_id': '20180601T052244-250482c0-d361-4c5b-a0f9-e796af1a5f0d',
                         'download_uri': 'http://example/dummy/donwload_url',
-                        'content_type': 'image/jpeg'
-                    }
-                ]
-            }
-        ]
+                        'content_type': 'image/jpeg'}]}]
         channel = Channel(mock_api, ORGANIZATION_ID, CHANNEL_ID)
         self.assertIsInstance(channel, Channel)
         files = list(channel.list_files())
         for file in files:
             self.assertIsInstance(file, DatalakeFile)
         self.assertEqual(mock_api.list_channel_files.call_count, 1)
-        self.assertEqual(mock_api.list_channel_files.call_args[0][0], CHANNEL_ID)
+        self.assertEqual(
+            mock_api.list_channel_files.call_args[0][0],
+            CHANNEL_ID)
         self.assertEqual(len(files), 1)
 
     def test_files_with_both_items_per_page_and_next_page_token(self):
         mock_api = Mock()
-        mock_api.list_channel_files.side_effect = [
-            {
-                'next_page_token': 'dummy',
-                'files': [
-                    {
-                        'url_expires_on': '2018-06-04T05:04:46+00:00',
-                        'uploaded_at': '2018-06-01T05:22:44+00:00',
-                        'metadata': {
-                            'x-abeja-meta-filename': 'DcZzLGkV4AA8FQc.jpg'
-                        },
-                        'file_id': '20180601T052244-250482c0-d361-4c5b-a0f9-e796af1a5f0d',
-                        'download_uri': 'http://example/dummy/donwload_url',
-                        'content_type': 'image/jpeg'
-                    }
-                ]
-            },
-            {
-                'next_page_token': None,
-                'files': [
-                    {
-                        'url_expires_on': '2018-06-04T05:04:46+00:00',
-                        'uploaded_at': '2018-06-01T05:22:44+00:00',
-                        'metadata': {
-                            'x-abeja-meta-filename': 'DcZzLGkV4AA8FQc.jpg'
-                        },
-                        'file_id': '20180601T052244-250482c0-d361-4c5b-a0f9-e796af1a5f0d',
-                        'download_uri': 'http://example/dummy/donwload_url',
-                        'content_type': 'image/jpeg'
-                    }
-                ]
-            }
-        ]
+        mock_api.list_channel_files.side_effect = [{'next_page_token': 'dummy',
+                                                    'files': [{'url_expires_on': '2018-06-04T05:04:46+00:00',
+                                                               'uploaded_at': '2018-06-01T05:22:44+00:00',
+                                                               'metadata': {'x-abeja-meta-filename': 'DcZzLGkV4AA8FQc.jpg'},
+                                                               'file_id': '20180601T052244-250482c0-d361-4c5b-a0f9-e796af1a5f0d',
+                                                               'download_uri': 'http://example/dummy/donwload_url',
+                                                               'content_type': 'image/jpeg'}]},
+                                                   {'next_page_token': None,
+                                                    'files': [{'url_expires_on': '2018-06-04T05:04:46+00:00',
+                                                               'uploaded_at': '2018-06-01T05:22:44+00:00',
+                                                               'metadata': {'x-abeja-meta-filename': 'DcZzLGkV4AA8FQc.jpg'},
+                                                               'file_id': '20180601T052244-250482c0-d361-4c5b-a0f9-e796af1a5f0d',
+                                                               'download_uri': 'http://example/dummy/donwload_url',
+                                                               'content_type': 'image/jpeg'}]}]
         channel = Channel(mock_api, ORGANIZATION_ID, CHANNEL_ID)
         self.assertIsInstance(channel, Channel)
         files = list(channel.list_files(limit=1))
@@ -204,7 +165,10 @@ class TestChannel(TestCase):
         metadata = {'label': 'dummy label'}
         dummy_file_data = json.dumps({'data': 'dummy'}).encode('utf-8')
         dummy_file = BytesIO(dummy_file_data)
-        file = channel.upload(dummy_file, content_type=content_type, metadata=metadata)
+        file = channel.upload(
+            dummy_file,
+            content_type=content_type,
+            metadata=metadata)
         self.assertIsInstance(file, DatalakeFile)
 
         expected_metadata = {
@@ -231,7 +195,8 @@ class TestChannel(TestCase):
         with tempfile.NamedTemporaryFile() as tmp:
             tmp.write(dummy_file_data)
             tmp.seek(0)
-            file = channel.upload_file(tmp.name, metadata=metadata, content_type=content_type)
+            file = channel.upload_file(
+                tmp.name, metadata=metadata, content_type=content_type)
             self.assertIsInstance(file, DatalakeFile)
 
         expected_metadata = {
@@ -331,8 +296,11 @@ class TestChannel(TestCase):
             tmp.seek(0)
             base_dir = '/'.join(tmp.name.split('/')[:-1])
             with self.assertRaises(IsADirectoryError):
-                channel.upload_file(base_dir, metadata={'x-abeja-meta-filename': 'dummy'},
-                                    content_type='application/json')
+                channel.upload_file(
+                    base_dir,
+                    metadata={
+                        'x-abeja-meta-filename': 'dummy'},
+                    content_type='application/json')
 
     @patch('abeja.datalake.channel.generate_path_iter')
     def test_upload_dir(self, mock_generate_path_iter):
@@ -364,7 +332,10 @@ class TestChannel(TestCase):
                 channel = Channel(mock_api, ORGANIZATION_ID, CHANNEL_ID)
                 dummy_metadata = {'dummy': 'data'}
                 content_type = 'image/jpeg'
-                files = channel.upload_dir('dummy_path', metadata=dummy_metadata, content_type=content_type)
+                files = channel.upload_dir(
+                    'dummy_path',
+                    metadata=dummy_metadata,
+                    content_type=content_type)
                 files = list(files)
 
         file = files[0]
@@ -373,7 +344,8 @@ class TestChannel(TestCase):
 
     @patch('abeja.datalake.channel.logger')
     @patch('abeja.datalake.channel.generate_path_iter')
-    def test_upload_dir_with_exception(self, mock_generate_path_iter, mock_logger):
+    def test_upload_dir_with_exception(
+            self, mock_generate_path_iter, mock_logger):
         mock_api = Mock()
         dummy_exception = Exception('dummy exception')
         mock_api.post_channel_file_upload.side_effect = [
@@ -383,10 +355,8 @@ class TestChannel(TestCase):
                 "uploaded_at": None,
                 "metadata": {},
                 "content_type": "image/jpeg",
-                "file_id": "20180515T180605-f4acc798-9afa-40a1-b500-ebce42a4fa3f"
-            },
-            dummy_exception
-        ]
+                "file_id": "20180515T180605-f4acc798-9afa-40a1-b500-ebce42a4fa3f"},
+            dummy_exception]
         with tempfile.NamedTemporaryFile() as tmp1:
             tmp1.write(b'dummy1')
             tmp1.seek(0)
@@ -398,7 +368,10 @@ class TestChannel(TestCase):
                 channel = Channel(mock_api, ORGANIZATION_ID, CHANNEL_ID)
                 dummy_metadata = {'dummy': 'data'}
                 content_type = 'image/jpeg'
-                files = channel.upload_dir('dummy_path', metadata=dummy_metadata, content_type=content_type)
+                files = channel.upload_dir(
+                    'dummy_path',
+                    metadata=dummy_metadata,
+                    content_type=content_type)
                 files = list(files)
 
         self.assertEqual(len(files), 1)
@@ -521,11 +494,13 @@ class TestChannels(TestCase):
                 }
             ]
         }
-        channel_collection = Channels(api=mock_api, organization_id=ORGANIZATION_ID)
+        channel_collection = Channels(
+            api=mock_api, organization_id=ORGANIZATION_ID)
         channels = channel_collection.list()
         channel = list(channels)[0]
 
-        mock_api.list_channels.assert_called_once_with(ORGANIZATION_ID, limit=None, offset=None)
+        mock_api.list_channels.assert_called_once_with(
+            ORGANIZATION_ID, limit=None, offset=None)
 
         self.assertIsInstance(channel, Channel)
         self.assertEqual(channel.organization_id, ORGANIZATION_ID)
@@ -557,7 +532,8 @@ class TestChannels(TestCase):
         channels = Channels(api=mock_api, organization_id=ORGANIZATION_ID)
         channel = channels.get(channel_id=CHANNEL_ID)
 
-        mock_api.get_channel.assert_called_once_with(ORGANIZATION_ID, CHANNEL_ID)
+        mock_api.get_channel.assert_called_once_with(
+            ORGANIZATION_ID, CHANNEL_ID)
 
         self.assertIsInstance(channel, Channel)
         self.assertEqual(channel.organization_id, ORGANIZATION_ID)
@@ -590,7 +566,9 @@ class TestChannels(TestCase):
         }
         channels = Channels(api=mock_api, organization_id=ORGANIZATION_ID)
         channel = channels.patch(
-            channel_id=CHANNEL_ID, name=updated_name, description=updated_description)
+            channel_id=CHANNEL_ID,
+            name=updated_name,
+            description=updated_description)
 
         mock_api.patch_channel.assert_called_once_with(
             ORGANIZATION_ID, CHANNEL_ID, updated_name, updated_description)

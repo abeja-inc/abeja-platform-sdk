@@ -17,7 +17,10 @@ class Statistics(Callback):
     def on_epoch_end(self, epoch, logs=None):
         epochs = self.params['epochs']
         statistics = ABEJAStatistics(num_epochs=epochs, epoch=epoch + 1)
-        statistics.add_stage(ABEJAStatistics.STAGE_TRAIN, logs['acc'], logs['loss'])
+        statistics.add_stage(
+            ABEJAStatistics.STAGE_TRAIN,
+            logs['acc'],
+            logs['loss'])
         statistics.add_stage(ABEJAStatistics.STAGE_VALIDATION,
                              logs['val_acc'], logs['val_loss'])
         try:

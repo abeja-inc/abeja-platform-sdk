@@ -50,7 +50,8 @@ class TestAPIClient(unittest.TestCase):
 
     @requests_mock.Mocker()
     def test_get_ip_address(self, m):
-        path = '/organizations/{}/security/cidrs/{}'.format(ORGANIZATION_ID, CIDR_ID)
+        path = '/organizations/{}/security/cidrs/{}'.format(
+            ORGANIZATION_ID, CIDR_ID)
         m.get(path, json=SECURITY_RES)
 
         client = APIClient()
@@ -68,17 +69,20 @@ class TestAPIClient(unittest.TestCase):
 
     @requests_mock.Mocker()
     def test_update_ip_address(self, m):
-        path = '/organizations/{}/security/cidrs/{}'.format(ORGANIZATION_ID, CIDR_ID)
+        path = '/organizations/{}/security/cidrs/{}'.format(
+            ORGANIZATION_ID, CIDR_ID)
         m.patch(path, json=SECURITY_RES)
 
         client = APIClient()
-        ret = client.update_ip_address(ORGANIZATION_ID, CIDR_ID, SECURITY_PAYLOAD)
+        ret = client.update_ip_address(
+            ORGANIZATION_ID, CIDR_ID, SECURITY_PAYLOAD)
         self.assertDictEqual(m.request_history[0].json(), SECURITY_PAYLOAD)
         self.assertDictEqual(ret, SECURITY_RES)
 
     @requests_mock.Mocker()
     def test_delete_ip_address(self, m):
-        path = '/organizations/{}/security/cidrs/{}'.format(ORGANIZATION_ID, CIDR_ID)
+        path = '/organizations/{}/security/cidrs/{}'.format(
+            ORGANIZATION_ID, CIDR_ID)
         message_res = {
             "message": "ser-abc1111111111111 deleted"
         }

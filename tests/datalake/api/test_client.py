@@ -78,54 +78,88 @@ class TestApiClient(TestCase):
     def test_create_channel(self, m):
         self.api_client.create_channel(
             ORGANIZATION_ID, CHANNEL_NAME, CHANNEL_DESCRIPTION, STORAGE_TYPE)
-        url = '{}/organizations/{}/channels'.format(API_BASE_URL, ORGANIZATION_ID)
+        url = '{}/organizations/{}/channels'.format(
+            API_BASE_URL, ORGANIZATION_ID)
         params = {
             'name': CHANNEL_NAME,
             'description': CHANNEL_DESCRIPTION,
             'storage_type': STORAGE_TYPE
         }
-        m.assert_called_once_with('POST', url, params=None,
-                                  headers={'User-Agent': 'abeja-platform-sdk/{}'.format(VERSION)},
-                                  timeout=30, data=None, json=params)
+        m.assert_called_once_with(
+            'POST',
+            url,
+            params=None,
+            headers={
+                'User-Agent': 'abeja-platform-sdk/{}'.format(VERSION)},
+            timeout=30,
+            data=None,
+            json=params)
 
     @patch('requests.Session.request')
     def test_list_channels(self, m):
         self.api_client.list_channels(ORGANIZATION_ID)
-        url = '{}/organizations/{}/channels'.format(API_BASE_URL, ORGANIZATION_ID)
-        m.assert_called_once_with('GET', url, params={},
-                                  headers={'User-Agent': 'abeja-platform-sdk/{}'.format(VERSION)},
-                                  timeout=30, data=None, json=None)
+        url = '{}/organizations/{}/channels'.format(
+            API_BASE_URL, ORGANIZATION_ID)
+        m.assert_called_once_with(
+            'GET',
+            url,
+            params={},
+            headers={
+                'User-Agent': 'abeja-platform-sdk/{}'.format(VERSION)},
+            timeout=30,
+            data=None,
+            json=None)
 
     @patch('requests.Session.request')
     def test_list_channels_filter_archived_true(self, m):
         self.api_client.list_channels(ORGANIZATION_ID, filter_archived=True)
-        url = '{}/organizations/{}/channels'.format(API_BASE_URL, ORGANIZATION_ID)
+        url = '{}/organizations/{}/channels'.format(
+            API_BASE_URL, ORGANIZATION_ID)
         expected_params = {
             'filter_archived': 'exclude_archived'
         }
-        m.assert_called_once_with('GET', url, params=expected_params,
-                                  headers={'User-Agent': 'abeja-platform-sdk/{}'.format(VERSION)},
-                                  timeout=30, data=None, json=None)
+        m.assert_called_once_with(
+            'GET',
+            url,
+            params=expected_params,
+            headers={
+                'User-Agent': 'abeja-platform-sdk/{}'.format(VERSION)},
+            timeout=30,
+            data=None,
+            json=None)
 
     @patch('requests.Session.request')
     def test_list_channels_filter_archived_false(self, m):
         self.api_client.list_channels(ORGANIZATION_ID, filter_archived=False)
-        url = '{}/organizations/{}/channels'.format(API_BASE_URL, ORGANIZATION_ID)
+        url = '{}/organizations/{}/channels'.format(
+            API_BASE_URL, ORGANIZATION_ID)
         expected_params = {
             'filter_archived': 'include_archived'
         }
-        m.assert_called_once_with('GET', url, params=expected_params,
-                                  headers={'User-Agent': 'abeja-platform-sdk/{}'.format(VERSION)},
-                                  timeout=30, data=None, json=None)
+        m.assert_called_once_with(
+            'GET',
+            url,
+            params=expected_params,
+            headers={
+                'User-Agent': 'abeja-platform-sdk/{}'.format(VERSION)},
+            timeout=30,
+            data=None,
+            json=None)
 
     @patch('requests.Session.request')
     def test_get_channel(self, m):
         self.api_client.get_channel(ORGANIZATION_ID, CHANNEL_ID)
         url = '{}/organizations/{}/channels/{}'.format(
             API_BASE_URL, ORGANIZATION_ID, CHANNEL_ID)
-        m.assert_called_once_with('GET', url, params=None,
-                                  headers={'User-Agent': 'abeja-platform-sdk/{}'.format(VERSION)},
-                                  timeout=30, data=None, json=None)
+        m.assert_called_once_with(
+            'GET',
+            url,
+            params=None,
+            headers={
+                'User-Agent': 'abeja-platform-sdk/{}'.format(VERSION)},
+            timeout=30,
+            data=None,
+            json=None)
 
     @patch('requests.Session.request')
     def test_patch_channel(self, m):
@@ -137,9 +171,15 @@ class TestApiClient(TestCase):
             'name': CHANNEL_NAME,
             'description': CHANNEL_DESCRIPTION
         }
-        m.assert_called_once_with('PATCH', url, params=None,
-                                  headers={'User-Agent': 'abeja-platform-sdk/{}'.format(VERSION)},
-                                  timeout=30, data=None, json=params)
+        m.assert_called_once_with(
+            'PATCH',
+            url,
+            params=None,
+            headers={
+                'User-Agent': 'abeja-platform-sdk/{}'.format(VERSION)},
+            timeout=30,
+            data=None,
+            json=params)
 
     @patch('requests.Session.request')
     def test_put_channel_datasource(self, m):
@@ -147,18 +187,30 @@ class TestApiClient(TestCase):
             ORGANIZATION_ID, CHANNEL_ID, DATASOURCE_ID)
         url = '{}/organizations/{}/channels/{}/datasources/{}'.format(
             API_BASE_URL, ORGANIZATION_ID, CHANNEL_ID, DATASOURCE_ID)
-        m.assert_called_once_with('PUT', url, params=None,
-                                  headers={'User-Agent': 'abeja-platform-sdk/{}'.format(VERSION)},
-                                  timeout=30, data=None, json=None)
+        m.assert_called_once_with(
+            'PUT',
+            url,
+            params=None,
+            headers={
+                'User-Agent': 'abeja-platform-sdk/{}'.format(VERSION)},
+            timeout=30,
+            data=None,
+            json=None)
 
     @patch('requests.Session.request')
     def test_list_channel_datasources(self, m):
         self.api_client.list_channel_datasources(ORGANIZATION_ID, CHANNEL_ID)
         url = '{}/organizations/{}/channels/{}/datasources'.format(
             API_BASE_URL, ORGANIZATION_ID, CHANNEL_ID)
-        m.assert_called_once_with('GET', url, params=None,
-                                  headers={'User-Agent': 'abeja-platform-sdk/{}'.format(VERSION)},
-                                  timeout=30, data=None, json=None)
+        m.assert_called_once_with(
+            'GET',
+            url,
+            params=None,
+            headers={
+                'User-Agent': 'abeja-platform-sdk/{}'.format(VERSION)},
+            timeout=30,
+            data=None,
+            json=None)
 
     @patch('requests.Session.request')
     def test_delete_channel_datasource(self, m):
@@ -166,9 +218,15 @@ class TestApiClient(TestCase):
             ORGANIZATION_ID, CHANNEL_ID, DATASOURCE_ID)
         url = '{}/organizations/{}/channels/{}/datasources/{}'.format(
             API_BASE_URL, ORGANIZATION_ID, CHANNEL_ID, DATASOURCE_ID)
-        m.assert_called_once_with('DELETE', url, params=None,
-                                  headers={'User-Agent': 'abeja-platform-sdk/{}'.format(VERSION)},
-                                  timeout=30, data=None, json=None)
+        m.assert_called_once_with(
+            'DELETE',
+            url,
+            params=None,
+            headers={
+                'User-Agent': 'abeja-platform-sdk/{}'.format(VERSION)},
+            timeout=30,
+            data=None,
+            json=None)
 
     @requests_mock.Mocker()
     def test_get_channel_file_upload(self, m):
@@ -184,7 +242,8 @@ class TestApiClient(TestCase):
         })
 
         api_client = APIClient()
-        res = api_client.get_channel_file_upload(CHANNEL_ID, CONTENT_TYPE, METADATA)
+        res = api_client.get_channel_file_upload(
+            CHANNEL_ID, CONTENT_TYPE, METADATA)
 
         req = m.request_history[0]
         assert req.method == 'POST'
@@ -199,15 +258,15 @@ class TestApiClient(TestCase):
             'x-abeja-meta-filename': '日本語',
             'x-abeja-meta-テスト': 'テスト１'
         }
-        self.api_client.get_channel_file_upload(CHANNEL_ID, CONTENT_TYPE, metadata)
+        self.api_client.get_channel_file_upload(
+            CHANNEL_ID, CONTENT_TYPE, metadata)
         url = '{}/channels/{}'.format(
             API_BASE_URL, CHANNEL_ID)
         expected_headers = {
             'Content-Type': CONTENT_TYPE,
             'User-Agent': 'abeja-platform-sdk/{}'.format(VERSION),
             'x-abeja-meta-filename': '%E6%97%A5%E6%9C%AC%E8%AA%9E',
-            'x-abeja-meta-%E3%83%86%E3%82%B9%E3%83%88': '%E3%83%86%E3%82%B9%E3%83%88%EF%BC%91'
-        }
+            'x-abeja-meta-%E3%83%86%E3%82%B9%E3%83%88': '%E3%83%86%E3%82%B9%E3%83%88%EF%BC%91'}
         m.assert_called_once_with('POST', url, params=None,
                                   headers=expected_headers,
                                   timeout=30, data=None, json=None)
@@ -271,8 +330,15 @@ class TestApiClient(TestCase):
         self.api_client.list_channel_files(CHANNEL_ID, sort='-uploaded_at')
         url = '{}/channels/{}'.format(API_BASE_URL, CHANNEL_ID)
         m.assert_called_once_with(
-            'GET', url, headers={'User-Agent': 'abeja-platform-sdk/{}'.format(VERSION)}, timeout=30, data=None,
-            json=None, params={'sort': '-uploaded_at'})
+            'GET',
+            url,
+            headers={
+                'User-Agent': 'abeja-platform-sdk/{}'.format(VERSION)},
+            timeout=30,
+            data=None,
+            json=None,
+            params={
+                'sort': '-uploaded_at'})
 
     @requests_mock.Mocker()
     def test_get_channel_file_download(self, m):
@@ -301,9 +367,15 @@ class TestApiClient(TestCase):
     def test_delete_channel_file(self, m):
         self.api_client.delete_channel_file(CHANNEL_ID, FILE_ID)
         url = '{}/channels/{}/{}'.format(API_BASE_URL, CHANNEL_ID, FILE_ID)
-        m.assert_called_once_with('DELETE', url, params=None,
-                                  headers={'User-Agent': 'abeja-platform-sdk/{}'.format(VERSION)},
-                                  timeout=30, data=None, json=None)
+        m.assert_called_once_with(
+            'DELETE',
+            url,
+            params=None,
+            headers={
+                'User-Agent': 'abeja-platform-sdk/{}'.format(VERSION)},
+            timeout=30,
+            data=None,
+            json=None)
 
     @requests_mock.Mocker()
     def test_put_channel_file_metadata(self, m):
@@ -319,7 +391,8 @@ class TestApiClient(TestCase):
         })
 
         api_client = APIClient()
-        res = api_client.put_channel_file_metadata(CHANNEL_ID, FILE_ID, METADATA)
+        res = api_client.put_channel_file_metadata(
+            CHANNEL_ID, FILE_ID, METADATA)
 
         req = m.request_history[0]
         assert req.method == 'PUT'
@@ -329,42 +402,70 @@ class TestApiClient(TestCase):
 
     @patch('requests.Session.request')
     def test_put_channel_file_lifetime(self, m):
-        self.api_client.put_channel_file_lifetime(CHANNEL_ID, FILE_ID, LIFETIME)
-        url = '{}/channels/{}/{}/lifetime'.format(API_BASE_URL, CHANNEL_ID, FILE_ID)
+        self.api_client.put_channel_file_lifetime(
+            CHANNEL_ID, FILE_ID, LIFETIME)
+        url = '{}/channels/{}/{}/lifetime'.format(
+            API_BASE_URL, CHANNEL_ID, FILE_ID)
         expected_json = {'lifetime': LIFETIME}
-        m.assert_called_once_with('PUT', url, params=None,
-                                  headers={'User-Agent': 'abeja-platform-sdk/{}'.format(VERSION)},
-                                  timeout=30, data=None, json=expected_json)
+        m.assert_called_once_with(
+            'PUT',
+            url,
+            params=None,
+            headers={
+                'User-Agent': 'abeja-platform-sdk/{}'.format(VERSION)},
+            timeout=30,
+            data=None,
+            json=expected_json)
 
     @patch('requests.Session.request')
     def test_create_bucket(self, m):
         self.api_client.create_bucket(
             ORGANIZATION_ID, BUCKET_NAME, BUCKET_DESCRIPTION)
-        url = '{}/organizations/{}/buckets'.format(API_BASE_URL, ORGANIZATION_ID)
+        url = '{}/organizations/{}/buckets'.format(
+            API_BASE_URL, ORGANIZATION_ID)
         params = {
             'name': BUCKET_NAME,
             'description': BUCKET_DESCRIPTION
         }
-        m.assert_called_once_with('POST', url, params=None,
-                                  headers={'User-Agent': 'abeja-platform-sdk/{}'.format(VERSION)},
-                                  timeout=30, data=None, json=params)
+        m.assert_called_once_with(
+            'POST',
+            url,
+            params=None,
+            headers={
+                'User-Agent': 'abeja-platform-sdk/{}'.format(VERSION)},
+            timeout=30,
+            data=None,
+            json=params)
 
     @patch('requests.Session.request')
     def test_list_buckets(self, m):
         self.api_client.list_buckets(ORGANIZATION_ID)
-        url = '{}/organizations/{}/buckets'.format(API_BASE_URL, ORGANIZATION_ID)
-        m.assert_called_once_with('GET', url, params={},
-                                  headers={'User-Agent': 'abeja-platform-sdk/{}'.format(VERSION)},
-                                  timeout=30, data=None, json=None)
+        url = '{}/organizations/{}/buckets'.format(
+            API_BASE_URL, ORGANIZATION_ID)
+        m.assert_called_once_with(
+            'GET',
+            url,
+            params={},
+            headers={
+                'User-Agent': 'abeja-platform-sdk/{}'.format(VERSION)},
+            timeout=30,
+            data=None,
+            json=None)
 
     @patch('requests.Session.request')
     def test_get_bucket(self, m):
         self.api_client.get_bucket(ORGANIZATION_ID, BUCKET_ID)
         url = '{}/organizations/{}/buckets/{}'.format(
             API_BASE_URL, ORGANIZATION_ID, BUCKET_ID)
-        m.assert_called_once_with('GET', url, params=None,
-                                  headers={'User-Agent': 'abeja-platform-sdk/{}'.format(VERSION)},
-                                  timeout=30, data=None, json=None)
+        m.assert_called_once_with(
+            'GET',
+            url,
+            params=None,
+            headers={
+                'User-Agent': 'abeja-platform-sdk/{}'.format(VERSION)},
+            timeout=30,
+            data=None,
+            json=None)
 
     @patch('requests.Session.request')
     def test_patch_bucket(self, m):
@@ -376,9 +477,15 @@ class TestApiClient(TestCase):
             'name': BUCKET_NAME,
             'description': BUCKET_DESCRIPTION
         }
-        m.assert_called_once_with('PATCH', url, params=None,
-                                  headers={'User-Agent': 'abeja-platform-sdk/{}'.format(VERSION)},
-                                  timeout=30, data=None, json=params)
+        m.assert_called_once_with(
+            'PATCH',
+            url,
+            params=None,
+            headers={
+                'User-Agent': 'abeja-platform-sdk/{}'.format(VERSION)},
+            timeout=30,
+            data=None,
+            json=params)
 
     @requests_mock.Mocker()
     def test_upload_bucket_file(self, m):
@@ -411,13 +518,23 @@ class TestApiClient(TestCase):
 
         with pytest.raises(BadRequest):
             api_client.upload_bucket_file(
-                ORGANIZATION_ID, BUCKET_ID, open(filepath), '/dummy', CONTENT_TYPE,
-                metadata=METADATA, lifetime=LIFETIME)
+                ORGANIZATION_ID,
+                BUCKET_ID,
+                open(filepath),
+                '/dummy',
+                CONTENT_TYPE,
+                metadata=METADATA,
+                lifetime=LIFETIME)
 
         with pytest.raises(BadRequest):
             api_client.upload_bucket_file(
-                ORGANIZATION_ID, BUCKET_ID, open(filepath), 'dummy/../hoge.data', CONTENT_TYPE,
-                metadata=METADATA, lifetime=LIFETIME)
+                ORGANIZATION_ID,
+                BUCKET_ID,
+                open(filepath),
+                'dummy/../hoge.data',
+                CONTENT_TYPE,
+                metadata=METADATA,
+                lifetime=LIFETIME)
 
     @requests_mock.Mocker()
     def test_upload_bucket_files(self, m):
@@ -495,7 +612,8 @@ class TestApiClient(TestCase):
         })
 
         api_client = APIClient()
-        res = api_client.get_bucket_file(ORGANIZATION_ID, BUCKET_ID, BUCKET_FILE_ID)
+        res = api_client.get_bucket_file(
+            ORGANIZATION_ID, BUCKET_ID, BUCKET_FILE_ID)
 
         req = m.request_history[0]
         assert req.method == 'GET'
