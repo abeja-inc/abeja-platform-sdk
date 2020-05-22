@@ -24,9 +24,9 @@ def test_get_job_definition(
         organization_id,
         job_definition_id,
         job_definition_name,
-        training_job_definition_response,
-        training_job_definition_version_response):
-    res = training_job_definition_response(
+        job_definition_response,
+        job_definition_version_response):
+    res = job_definition_response(
         organization_id,
         job_definition_id,
         name=job_definition_name,
@@ -35,7 +35,7 @@ def test_get_job_definition(
         model_count=3,
         version_count=4,
         versions=[
-            training_job_definition_version_response(
+            job_definition_version_response(
                 organization_id,
                 job_definition_id,
                 1
@@ -76,13 +76,13 @@ def test_create_job_definition(
         organization_id,
         job_definition_id,
         job_definition_name,
-        training_job_definition_response,
-        training_job_definition_version_response):
+        job_definition_response,
+        job_definition_version_response):
     adapter = JobDefinitions(
         api=training_api_client,
         organization_id=organization_id)
 
-    res = training_job_definition_response(
+    res = job_definition_response(
         organization_id,
         job_definition_id,
         name=job_definition_name,
@@ -185,14 +185,14 @@ def test_list_job_definitions(
         organization_id,
         job_definition_id,
         job_definition_name,
-        training_job_definition_response) -> None:
+        job_definition_response) -> None:
     adapter = JobDefinitions(
         api=training_api_client,
         organization_id=organization_id)
 
-    definition1 = training_job_definition_response(
+    definition1 = job_definition_response(
         organization_id, job_definition_id)
-    definition2 = training_job_definition_response(
+    definition2 = job_definition_response(
         organization_id, job_definition_id)
     requests_mock.get(
         '{}/organizations/{}/training/definitions/'.format(
@@ -220,12 +220,12 @@ def test_list_job_definitions_filter_archived(
         organization_id,
         job_definition_id,
         job_definition_name,
-        training_job_definition_response) -> None:
+        job_definition_response) -> None:
     adapter = JobDefinitions(
         api=training_api_client,
         organization_id=organization_id)
 
-    definition1 = training_job_definition_response(
+    definition1 = job_definition_response(
         organization_id, job_definition_id)
     requests_mock.get(
         '{}/organizations/{}/training/definitions/?filter_archived=exclude_archived'.format(
@@ -252,16 +252,16 @@ def test_list_job_definitions_paging(
         organization_id,
         job_definition_id,
         job_definition_name,
-        training_job_definition_response) -> None:
+        job_definition_response) -> None:
     adapter = JobDefinitions(
         api=training_api_client,
         organization_id=organization_id)
 
-    definition1 = training_job_definition_response(
+    definition1 = job_definition_response(
         organization_id, job_definition_id)
-    definition2 = training_job_definition_response(
+    definition2 = job_definition_response(
         organization_id, job_definition_id)
-    definition3 = training_job_definition_response(
+    definition3 = job_definition_response(
         organization_id, job_definition_id)
 
     requests_mock.get(
@@ -299,10 +299,10 @@ def test_job_definition_version(
         requests_mock,
         api_base_url,
         job_definition_version_factory,
-        training_job_definition_response) -> None:
+        job_definition_response) -> None:
     version = job_definition_version_factory()  # type: JobDefinitionVersion
 
-    res = training_job_definition_response(
+    res = job_definition_response(
         version.organization_id, version.job_definition_id)
     requests_mock.get(
         '{}/organizations/{}/training/definitions/{}?include_jobs=false'.format(
@@ -328,11 +328,11 @@ def test_get_job_definition_version(
         requests_mock,
         api_base_url,
         job_definition_factory,
-        training_job_definition_version_response) -> None:
+        job_definition_version_response) -> None:
     definition = job_definition_factory()  # type: JobDefinition
     adapter = definition.job_definition_versions()
 
-    res = training_job_definition_version_response(
+    res = job_definition_version_response(
         adapter.organization_id,
         adapter.job_definition_id,
         environment=None
@@ -365,16 +365,16 @@ def test_get_job_definition_versions(
         requests_mock,
         api_base_url,
         job_definition_factory,
-        training_job_definition_version_response) -> None:
+        job_definition_version_response) -> None:
     definition = job_definition_factory()  # type: JobDefinition
     adapter = definition.job_definition_versions()
 
-    res1 = training_job_definition_version_response(
+    res1 = job_definition_version_response(
         adapter.organization_id,
         adapter.job_definition_id,
         environment=None
     )
-    res2 = training_job_definition_version_response(
+    res2 = job_definition_version_response(
         adapter.organization_id,
         adapter.job_definition_id,
         environment={'foo': '1'}
@@ -412,11 +412,11 @@ def test_get_job_definition_versions_filter_archived(
         requests_mock,
         api_base_url,
         job_definition_factory,
-        training_job_definition_version_response) -> None:
+        job_definition_version_response) -> None:
     definition = job_definition_factory()  # type: JobDefinition
     adapter = definition.job_definition_versions()
 
-    res1 = training_job_definition_version_response(
+    res1 = job_definition_version_response(
         adapter.organization_id,
         adapter.job_definition_id,
         environment=None
@@ -438,11 +438,11 @@ def test_create_job_definition_version_zip(
         api_base_url,
         make_zip_content,
         job_definition_factory,
-        training_job_definition_version_response) -> None:
+        job_definition_version_response) -> None:
     definition = job_definition_factory()  # type: JobDefinition
     adapter = definition.job_definition_versions()
 
-    res = training_job_definition_version_response(
+    res = job_definition_version_response(
         adapter.organization_id, adapter.job_definition_id)
     requests_mock.post(
         '{}/organizations/{}/training/definitions/{}/versions'.format(
@@ -487,7 +487,7 @@ def test_create_job_definition_version_files(
         tmpdir,
         make_zip_content,
         job_definition_factory,
-        training_job_definition_version_response) -> None:
+        job_definition_version_response) -> None:
     definition = job_definition_factory()  # type: JobDefinition
     adapter = definition.job_definition_versions()
 
@@ -504,7 +504,7 @@ def test_create_job_definition_version_files(
         path.write_bytes(b'def handler(): pass')
         files.append(str(path))
 
-        res = training_job_definition_version_response(
+        res = job_definition_version_response(
             adapter.organization_id, adapter.job_definition_id)
         requests_mock.post(
             '{}/organizations/{}/training/definitions/{}/versions'.format(
@@ -545,11 +545,11 @@ def test_update_job_definition_version(
         requests_mock,
         api_base_url,
         job_definition_factory,
-        training_job_definition_version_response) -> None:
+        job_definition_version_response) -> None:
     definition = job_definition_factory()  # type: JobDefinition
     adapter = definition.job_definition_versions()
 
-    res = training_job_definition_version_response(
+    res = job_definition_version_response(
         adapter.organization_id, adapter.job_definition_id)
     version_id = res['job_definition_version']
     requests_mock.patch(

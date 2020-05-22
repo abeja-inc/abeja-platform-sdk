@@ -13,12 +13,12 @@ def job_definition_factory(
         training_api_client,
         organization_id,
         job_definition_id,
-        training_job_definition_response):
+        job_definition_response):
     def factory(
             organization_id=organization_id,
             job_definition_id=job_definition_id,
             **kwargs):
-        response = training_job_definition_response(
+        response = job_definition_response(
             organization_id, job_definition_id, **kwargs)
         return JobDefinition.from_response(
             api=training_api_client,
@@ -32,12 +32,12 @@ def job_definition_version_factory(
         training_api_client,
         organization_id,
         job_definition_id,
-        training_job_definition_version_response):
+        job_definition_version_response):
     def factory(
             organization_id=organization_id,
             job_definition_id=job_definition_id,
             **kwargs):
-        response = training_job_definition_version_response(
+        response = job_definition_version_response(
             organization_id, job_definition_id, **kwargs)
         return JobDefinitionVersion.from_response(
             api=training_api_client,
