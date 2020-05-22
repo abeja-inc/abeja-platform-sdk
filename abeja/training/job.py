@@ -362,6 +362,38 @@ class Jobs():
             job_definition_name=self.job_definition_name,
             training_job_id=job_id)
 
+    def archive(self, job_id: str) -> None:
+        """Archive a training job.
+
+        Request Syntax:
+            .. code-block:: python
+
+                job = jobs.archive(job_id)
+
+        Params:
+            - **job_id** (str): Job ID
+        """
+        self.__api.archive_training_job(
+            organization_id=self.organization_id,
+            job_definition_name=self.job_definition_name,
+            training_job_id=job_id)
+
+    def unarchive(self, job_id: str) -> None:
+        """Unarchive a training job.
+
+        Request Syntax:
+            .. code-block:: python
+
+                job = jobs.archive(job_id)
+
+        Params:
+            - **job_id** (str): Job ID
+        """
+        self.__api.unarchive_training_job(
+            organization_id=self.organization_id,
+            job_definition_name=self.job_definition_name,
+            training_job_id=job_id)
+
     def get_artifacts(self, job_id: str) -> 'JobArtifacts':
         """Get artifacts object of this job.
 
