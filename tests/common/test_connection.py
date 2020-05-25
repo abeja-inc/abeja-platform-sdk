@@ -71,11 +71,14 @@ class TestConnection(unittest.TestCase):
         path = '/dummy'
         connection.api_request(method, path, headers=None)
 
-        connection.request.assert_called_with(method,
-                                              'http://localhost:8080{}'.format(path),
-                                              data=None,
-                                              headers={'User-Agent': 'abeja-platform-sdk/{}'.format(VERSION)},
-                                              json=None, params=None)
+        connection.request.assert_called_with(
+            method,
+            'http://localhost:8080{}'.format(path),
+            data=None,
+            headers={
+                'User-Agent': 'abeja-platform-sdk/{}'.format(VERSION)},
+            json=None,
+            params=None)
 
     def test_api_request_with_bad_request(self):
         connection = Connection()
@@ -85,7 +88,9 @@ class TestConnection(unittest.TestCase):
         res = requests.models.Response()
         res.url = 'https://xxxxxxxx.com'
         res.status_code = 400
-        api_response = {'error': 'test', 'error_description': 'test error description'}
+        api_response = {
+            'error': 'test',
+            'error_description': 'test error description'}
         res._content = json.dumps(api_response).encode('utf-8')
         error.response = res
 
@@ -95,8 +100,9 @@ class TestConnection(unittest.TestCase):
         path = '/dummy'
         with self.assertRaises(BadRequest) as e:
             connection.api_request(method, path, headers=None)
-        self.assertEqual(str(e.exception), '<BadRequest "test": test error description'
-                                           ' (400 from https://xxxxxxxx.com)>')
+        self.assertEqual(str(e.exception),
+                         '<BadRequest "test": test error description'
+                         ' (400 from https://xxxxxxxx.com)>')
 
     def test_api_request_with_bad_request_with_error_detail(self):
         connection = Connection()
@@ -142,7 +148,8 @@ class TestConnection(unittest.TestCase):
         path = '/dummy'
         with self.assertRaises(InternalServerError) as e:
             connection.api_request(method, path, headers=None)
-        self.assertEqual(str(e.exception), '<InternalServerError "Internal Server Error": raw text>')
+        self.assertEqual(str(e.exception),
+                         '<InternalServerError "Internal Server Error": raw text>')
 
     def test_api_request_error_with_undefined_error_code(self):
         connection = Connection()
@@ -161,12 +168,15 @@ class TestConnection(unittest.TestCase):
         path = '/dummy'
         with self.assertRaises(HttpError) as e:
             connection.api_request(method, path, headers=None)
-        self.assertEqual(str(e.exception), '<HttpError "Not Implemented": test error description>')
+        self.assertEqual(str(e.exception),
+                         '<HttpError "Not Implemented": test error description>')
 
     def test_set_user_agent(self):
         connection = Connection()
         header = connection._set_user_agent()
-        self.assertDictEqual(header, {'User-Agent': 'abeja-platform-sdk/{}'.format(VERSION)})
+        self.assertDictEqual(
+            header, {
+                'User-Agent': 'abeja-platform-sdk/{}'.format(VERSION)})
 
     def test_get_auth_header_with_auth_token(self):
         auth_token = 'test_token'
@@ -175,7 +185,9 @@ class TestConnection(unittest.TestCase):
         }
         connection = Connection(credential=credential)
         header = connection._get_auth_header()
-        self.assertDictEqual(header, {'Authorization': 'Bearer {}'.format(auth_token)})
+        self.assertDictEqual(
+            header, {
+                'Authorization': 'Bearer {}'.format(auth_token)})
 
     def test_get_auth_header_with_user_id_and_personal_access_token(self):
         user_id = TEST_USER_ID
@@ -228,12 +240,16 @@ class TestConnection(unittest.TestCase):
     def test_http_request_parameters_with_env_vars(self):
         connection = Connection()
         self.assertEqual(connection.timeout, TEST_ABEJA_SDK_CONNECTION_TIMEOUT)
-        self.assertEqual(connection.max_retry_count, TEST_ABEJA_SDK_MAX_RETRY_COUNT)
+        self.assertEqual(
+            connection.max_retry_count,
+            TEST_ABEJA_SDK_MAX_RETRY_COUNT)
 
     def test_http_request_parameters_with_args(self):
         test_timeout = 80
         test_max_retry_count = 11
-        connection = Connection(timeout=test_timeout, max_retry_count=test_max_retry_count)
+        connection = Connection(
+            timeout=test_timeout,
+            max_retry_count=test_max_retry_count)
         self.assertEqual(connection.timeout, test_timeout)
         self.assertEqual(connection.max_retry_count, test_max_retry_count)
 

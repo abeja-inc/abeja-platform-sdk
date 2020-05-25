@@ -36,7 +36,8 @@ class TestAPIClient(unittest.TestCase):
 
     @requests_mock.Mocker()
     def test_get_training_models(self, m):
-        path = '/organizations/{}/training/definitions/{}/models'.format(ORGANIZATION_ID, JOB_DEFINITION_NAME)
+        path = '/organizations/{}/training/definitions/{}/models'.format(
+            ORGANIZATION_ID, JOB_DEFINITION_NAME)
         m.get(path, json=TRAINING_MODEL_LIST_RES)
 
         client = APIClient()
@@ -53,10 +54,19 @@ class TestAPIClient(unittest.TestCase):
         }
         Connection.BASE_URL = ABEJA_API_URL
         client = APIClient()
-        client.get_training_models(ORGANIZATION_ID, JOB_DEFINITION_NAME, filter_archived=True)
-        m.assert_called_once_with('GET', url, params=expected_params,
-                                  headers={'User-Agent': 'abeja-platform-sdk/{}'.format(SDK_VERSION)},
-                                  timeout=30, data=None, json=None)
+        client.get_training_models(
+            ORGANIZATION_ID,
+            JOB_DEFINITION_NAME,
+            filter_archived=True)
+        m.assert_called_once_with(
+            'GET',
+            url,
+            params=expected_params,
+            headers={
+                'User-Agent': 'abeja-platform-sdk/{}'.format(SDK_VERSION)},
+            timeout=30,
+            data=None,
+            json=None)
 
     @patch('requests.Session.request')
     def test_get_training_models_filter_archived_false(self, m):
@@ -68,10 +78,19 @@ class TestAPIClient(unittest.TestCase):
         }
         Connection.BASE_URL = ABEJA_API_URL
         client = APIClient()
-        client.get_training_models(ORGANIZATION_ID, JOB_DEFINITION_NAME, filter_archived=False)
-        m.assert_called_once_with('GET', url, params=expected_params,
-                                  headers={'User-Agent': 'abeja-platform-sdk/{}'.format(SDK_VERSION)},
-                                  timeout=30, data=None, json=None)
+        client.get_training_models(
+            ORGANIZATION_ID,
+            JOB_DEFINITION_NAME,
+            filter_archived=False)
+        m.assert_called_once_with(
+            'GET',
+            url,
+            params=expected_params,
+            headers={
+                'User-Agent': 'abeja-platform-sdk/{}'.format(SDK_VERSION)},
+            timeout=30,
+            data=None,
+            json=None)
 
     @requests_mock.Mocker()
     def test_create_training_model(self, m):
@@ -80,17 +99,24 @@ class TestAPIClient(unittest.TestCase):
             "description": "description",
             "user_parameters": {}
         }
-        path = '/organizations/{}/training/definitions/{}/models'.format(ORGANIZATION_ID, JOB_DEFINITION_NAME)
+        path = '/organizations/{}/training/definitions/{}/models'.format(
+            ORGANIZATION_ID, JOB_DEFINITION_NAME)
         m.post(path, json=TRAINING_MODEL_RES)
 
         client = APIClient()
         ret = client.create_training_model(
-            ORGANIZATION_ID, JOB_DEFINITION_NAME, model_data=model_data, parameters=parameters)
+            ORGANIZATION_ID,
+            JOB_DEFINITION_NAME,
+            model_data=model_data,
+            parameters=parameters)
         self.assertDictEqual(ret, TRAINING_MODEL_RES)
 
         with self.assertRaises(BadRequest) as e:
-            client.create_training_model(ORGANIZATION_ID, JOB_DEFINITION_NAME, None)
-        self.assertEqual(e.exception.error_description, 'model_data is necessary')
+            client.create_training_model(
+                ORGANIZATION_ID, JOB_DEFINITION_NAME, None)
+        self.assertEqual(
+            e.exception.error_description,
+            'model_data is necessary')
 
     @requests_mock.Mocker()
     def test_get_training_model(self, m):
@@ -99,7 +125,10 @@ class TestAPIClient(unittest.TestCase):
         m.get(path, json=TRAINING_MODEL_RES)
 
         client = APIClient()
-        ret = client.get_training_model(ORGANIZATION_ID, JOB_DEFINITION_NAME, TRAINING_MODEL_ID)
+        ret = client.get_training_model(
+            ORGANIZATION_ID,
+            JOB_DEFINITION_NAME,
+            TRAINING_MODEL_ID)
         self.assertDictEqual(ret, TRAINING_MODEL_RES)
 
     @requests_mock.Mocker()
@@ -110,7 +139,11 @@ class TestAPIClient(unittest.TestCase):
         m.patch(path, json=TRAINING_MODEL_RES)
 
         client = APIClient()
-        ret = client.patch_training_model(ORGANIZATION_ID, JOB_DEFINITION_NAME, TRAINING_MODEL_ID, description)
+        ret = client.patch_training_model(
+            ORGANIZATION_ID,
+            JOB_DEFINITION_NAME,
+            TRAINING_MODEL_ID,
+            description)
         self.assertDictEqual(ret, TRAINING_MODEL_RES)
 
     @requests_mock.Mocker()
@@ -123,7 +156,8 @@ class TestAPIClient(unittest.TestCase):
         m.get(path, json=res)
 
         client = APIClient()
-        ret = client.download_training_model(ORGANIZATION_ID, JOB_DEFINITION_NAME, TRAINING_MODEL_ID)
+        ret = client.download_training_model(
+            ORGANIZATION_ID, JOB_DEFINITION_NAME, TRAINING_MODEL_ID)
         self.assertDictEqual(ret, res)
 
     @requests_mock.Mocker()
@@ -136,7 +170,8 @@ class TestAPIClient(unittest.TestCase):
         m.post(path, json=res)
 
         client = APIClient()
-        ret = client.archive_training_model(ORGANIZATION_ID, JOB_DEFINITION_NAME, TRAINING_MODEL_ID)
+        ret = client.archive_training_model(
+            ORGANIZATION_ID, JOB_DEFINITION_NAME, TRAINING_MODEL_ID)
         self.assertDictEqual(ret, res)
 
     @requests_mock.Mocker()
@@ -149,5 +184,6 @@ class TestAPIClient(unittest.TestCase):
         m.post(path, json=res)
 
         client = APIClient()
-        ret = client.unarchive_training_model(ORGANIZATION_ID, JOB_DEFINITION_NAME, TRAINING_MODEL_ID)
+        ret = client.unarchive_training_model(
+            ORGANIZATION_ID, JOB_DEFINITION_NAME, TRAINING_MODEL_ID)
         self.assertDictEqual(ret, res)

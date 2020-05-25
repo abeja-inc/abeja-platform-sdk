@@ -32,7 +32,11 @@ class DockerImageName(__DockerImageName):
         custom/1234567890123/my-image:version1.0
     """
     @classmethod
-    def custom_image(klass, organization_id: str, repository: str, tag: Optional[str]):
+    def custom_image(
+            klass,
+            organization_id: str,
+            repository: str,
+            tag: Optional[str]):
         return klass(organization_id, repository, tag, 'custom')
 
     @classmethod
@@ -53,7 +57,8 @@ class DockerImageName(__DockerImageName):
 
         # validations
         if not re.fullmatch('\S+', repository):
-            raise ValueError('invalid format: repository={}'.format(repository))
+            raise ValueError(
+                'invalid format: repository={}'.format(repository))
 
         if not re.fullmatch('\S+', name):
             raise ValueError('invalid format: name={}'.format(name))
@@ -74,8 +79,12 @@ class DockerImageName(__DockerImageName):
         return self.repository
 
     def __str__(self) -> str:
-        name = '{}/{}'.format(self.host, self.repository) if self.host else self.repository
-        return '{}/{}:{}'.format(name, self.name, self.tag) if self.tag else '{}/{}'.format(name, self.name)
+        name = '{}/{}'.format(self.host,
+                              self.repository) if self.host else self.repository
+        return '{}/{}:{}'.format(name,
+                                 self.name,
+                                 self.tag) if self.tag else '{}/{}'.format(name,
+                                                                           self.name)
 
 
 # Define pre-defined instance types

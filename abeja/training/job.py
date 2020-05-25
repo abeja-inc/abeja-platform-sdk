@@ -191,11 +191,14 @@ class Job():
     def job_definition(self) -> 'job_definition.JobDefinition':
         """Get the job definition of this job."""
         if self.__job_definition is None:
-            self.__job_definition = job_definition.JobDefinitions(api=self.__api, organization_id=self.organization_id).get(name=self.job_definition_id)
+            self.__job_definition = job_definition.JobDefinitions(
+                api=self.__api, organization_id=self.organization_id).get(
+                name=self.job_definition_id)
         return self.__job_definition
 
     @property
-    def job_definition_version(self) -> 'job_definition_version.JobDefinitionVersion':
+    def job_definition_version(
+            self) -> 'job_definition_version.JobDefinitionVersion':
         """Get the job definition version of this job."""
         if self.__job_definition_version is None:
             self.__job_definition_version = job_definition_version.JobDefinitionVersions(
@@ -228,7 +231,10 @@ class Jobs():
     """The training jobs adapter class.
     """
 
-    def __init__(self, api: APIClient, job_definition: 'job_definition.JobDefinition') -> None:
+    def __init__(
+            self,
+            api: APIClient,
+            job_definition: 'job_definition.JobDefinition') -> None:
         self.__api = api
         self.__job_definition = job_definition
         self.__logger = getLogger('train-api')
@@ -356,6 +362,38 @@ class Jobs():
             job_definition_name=self.job_definition_name,
             training_job_id=job_id)
 
+    def archive(self, job_id: str) -> None:
+        """Archive a training job.
+
+        Request Syntax:
+            .. code-block:: python
+
+                job = jobs.archive(job_id)
+
+        Params:
+            - **job_id** (str): Job ID
+        """
+        self.__api.archive_training_job(
+            organization_id=self.organization_id,
+            job_definition_name=self.job_definition_name,
+            training_job_id=job_id)
+
+    def unarchive(self, job_id: str) -> None:
+        """Unarchive a training job.
+
+        Request Syntax:
+            .. code-block:: python
+
+                job = jobs.archive(job_id)
+
+        Params:
+            - **job_id** (str): Job ID
+        """
+        self.__api.unarchive_training_job(
+            organization_id=self.organization_id,
+            job_definition_name=self.job_definition_name,
+            training_job_id=job_id)
+
     def get_artifacts(self, job_id: str) -> 'JobArtifacts':
         """Get artifacts object of this job.
 
@@ -373,7 +411,10 @@ class Jobs():
             training_job_id=job_id)
         return JobArtifacts.from_response(res)
 
-    def update_statistics(self, job_id: str, statistics: Optional[Statistics]) -> Optional[Job]:
+    def update_statistics(
+            self,
+            job_id: str,
+            statistics: Optional[Statistics]) -> Optional[Job]:
         """ Notify a job statistics for ABEJA Platform.
 
         Request Syntax:
@@ -404,20 +445,24 @@ class Jobs():
             return None
 
         try:
-            res = self.__api.update_statistics(organization_id=self.organization_id,
-                                               job_definition_name=self.job_definition_name,
-                                               training_job_id=job_id,
-                                               statistics=raw_statistics)
+            res = self.__api.update_statistics(
+                organization_id=self.organization_id,
+                job_definition_name=self.job_definition_name,
+                training_job_id=job_id,
+                statistics=raw_statistics)
             return Job.from_response(
                 api=self.__api,
                 organization_id=self.organization_id,
                 response=res,
                 job_definition=self.__job_definition)
         except abeja.exceptions.HttpError as e:
-            self.__logger.warning('update_statistics result was {}.'.format(str(e)))
+            self.__logger.warning(
+                'update_statistics result was {}.'.format(
+                    str(e)))
             return None
         except Exception:
-            self.__logger.exception('update_statistics result was unexpected error:')
+            self.__logger.exception(
+                'update_statistics result was unexpected error:')
             return None
 
 # Iterator class
@@ -447,4 +492,8 @@ class JobIterator(AbstractSizedIterator[Job]):
             limit=self.limit)
 
     def build_entry(self, api: APIClient, entry: Dict[str, Any]) -> Job:
-        return Job.from_response(api, self.organization_id, job_definition=self.__job_definition, response=entry)
+        return Job.from_response(
+            api,
+            self.organization_id,
+            job_definition=self.__job_definition,
+            response=entry)

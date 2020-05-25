@@ -32,9 +32,7 @@ class TestDatasetItem(unittest.TestCase):
                 'data_type': 'image/jpeg',
                 'data_uri': 'datalake://1200123803688/20170815T044617-f20dde80-1e3b-4496-bc06-1b63b026b872',
                 'height': 500,
-                'width': 200
-            }
-        ]
+                'width': 200}]
         self.created_at = "2017-01-01T00:00:00Z"
         self.updated_at = "2017-01-01T00:00:00Z"
 
@@ -54,20 +52,14 @@ class TestDatasetItem(unittest.TestCase):
         self.assertEqual(item.updated_at, self.updated_at)
 
     def test_init_with_two_source_data(self):
-        source_data = [
-            {
-                'data_type': 'image/jpeg',
-                'data_uri': 'datalake://1200123803688/20170815T044617-f20dde80-1e3b-4496-bc06-1b63b026b872',
-                'height': 500,
-                'width': 200
-            },
-            {
-                'data_type': 'image/jpeg',
-                'data_uri': 'datalake://1200123803688/20170815T044617-f20dde80-1e3b-4496-bc06-1b63b026b872',
-                'height': 500,
-                'width': 200
-            }
-        ]
+        source_data = [{'data_type': 'image/jpeg',
+                        'data_uri': 'datalake://1200123803688/20170815T044617-f20dde80-1e3b-4496-bc06-1b63b026b872',
+                        'height': 500,
+                        'width': 200},
+                       {'data_type': 'image/jpeg',
+                        'data_uri': 'datalake://1200123803688/20170815T044617-f20dde80-1e3b-4496-bc06-1b63b026b872',
+                        'height': 500,
+                        'width': 200}]
         item = DatasetItem(None, self.organization_id,
                            self.dataset_id, self.item_id,
                            attributes=self.attributes,
@@ -131,9 +123,7 @@ class TestDatasetItemIterator(unittest.TestCase):
                 'data_type': 'image/jpeg',
                 'data_uri': 'datalake://1200123803688/20170815T044617-f20dde80-1e3b-4496-bc06-1b63b026b872',
                 'height': 500,
-                'width': 200
-            }
-        ]
+                'width': 200}]
         self.created_at = "2017-01-01T00:00:00Z"
         self.updated_at = "2017-01-01T00:00:00Z"
 
@@ -170,7 +160,9 @@ class TestDatasetItemIterator(unittest.TestCase):
             }
         ]
         iterator = DatasetItemIterator(
-            mock_api, organization_id=self.organization_id, dataset_id=self.dataset_id)
+            mock_api,
+            organization_id=self.organization_id,
+            dataset_id=self.dataset_id)
         item_1 = next(iterator)
         self.assertEqual(item_1.dataset_item_id, 'item_id_1')
         item_2 = next(iterator)
@@ -201,7 +193,9 @@ class TestDatasetItemIterator(unittest.TestCase):
             }
         ]
         iterator = DatasetItemIterator(
-            mock_api, organization_id=self.organization_id, dataset_id=self.dataset_id)
+            mock_api,
+            organization_id=self.organization_id,
+            dataset_id=self.dataset_id)
         for i in range(5):
             next(iterator)
         with self.assertRaises(StopIteration):
@@ -232,7 +226,9 @@ class TestDatasetItemIterator(unittest.TestCase):
             }
         ]
         iterator = DatasetItemIterator(
-            mock_api, organization_id=self.organization_id, dataset_id=self.dataset_id)
+            mock_api,
+            organization_id=self.organization_id,
+            dataset_id=self.dataset_id)
         item_1 = next(iterator)
         self.assertEqual(item_1.dataset_item_id, 'item_id_1')
         item_2 = next(iterator)
@@ -274,7 +270,9 @@ class TestDatasetItemIterator(unittest.TestCase):
             }
         ]
         iterator = DatasetItemIterator(
-            mock_api, organization_id=self.organization_id, dataset_id=self.dataset_id)
+            mock_api,
+            organization_id=self.organization_id,
+            dataset_id=self.dataset_id)
         item_1 = next(iterator)
         self.assertEqual(item_1.dataset_item_id, 'item_id_1')
         item_2 = next(iterator)
@@ -285,7 +283,8 @@ class TestDatasetItemIterator(unittest.TestCase):
         self.assertEqual(len(list(iterator)), 2)
         self.assertEqual(mock_api.list_dataset_items.call_count, 3)
         mock_api.list_dataset_items.assert_called_with(
-            self.organization_id, self.dataset_id, params={'next_page_token': 'dummy2'})
+            self.organization_id, self.dataset_id, params={
+                'next_page_token': 'dummy2'})
 
     def test__page_iter(self):
         mock_api = MagicMock()
@@ -293,7 +292,8 @@ class TestDatasetItemIterator(unittest.TestCase):
             self._build_dataset_items_response(),
             self._build_empty_dataset_items_response()
         ]
-        iterator = DatasetItemIterator(mock_api, self.organization_id, self.dataset_id)
+        iterator = DatasetItemIterator(
+            mock_api, self.organization_id, self.dataset_id)
         page_iterator = iterator._page_iter()
         for page in page_iterator:
             self.assertIsInstance(page, list)
@@ -306,7 +306,8 @@ class TestDatasetItemIterator(unittest.TestCase):
             self._build_dataset_items_response(),
             self._build_empty_dataset_items_response()
         ]
-        iterator = DatasetItemIterator(mock_api, self.organization_id, self.dataset_id)
+        iterator = DatasetItemIterator(
+            mock_api, self.organization_id, self.dataset_id)
         with patch('abeja.datalake.file.DatalakeFile.get_content') as m:
             for item in iterator:
                 self.assertIsInstance(item, DatasetItem)
@@ -318,7 +319,11 @@ class TestDatasetItemIterator(unittest.TestCase):
             self._build_dataset_items_response(),
             self._build_empty_dataset_items_response()
         ]
-        iterator = DatasetItemIterator(mock_api, self.organization_id, self.dataset_id, prefetch=True)
+        iterator = DatasetItemIterator(
+            mock_api,
+            self.organization_id,
+            self.dataset_id,
+            prefetch=True)
         with patch('abeja.datalake.file.DatalakeFile.get_content') as m:
             for item in iterator:
                 self.assertIsInstance(item, DatasetItem)
@@ -327,7 +332,8 @@ class TestDatasetItemIterator(unittest.TestCase):
     def test__page(self):
         mock_api = MagicMock()
         mock_api.list_dataset_items.return_value = self._build_dataset_items_response()
-        iterator = DatasetItemIterator(mock_api, self.organization_id, self.dataset_id)
+        iterator = DatasetItemIterator(
+            mock_api, self.organization_id, self.dataset_id)
         page = iterator._page()
         self.assertIsInstance(page, list)
         item = page[0]
@@ -405,9 +411,7 @@ class TestDatasetItems(unittest.TestCase):
                 'data_type': 'image/jpeg',
                 'data_uri': 'datalake://1200123803688/20170815T044617-f20dde80-1e3b-4496-bc06-1b63b026b872',
                 'height': 500,
-                'width': 200
-            }
-        ]
+                'width': 200}]
         self.created_at = "2017-01-01T00:00:00Z"
         self.updated_at = "2017-01-01T00:00:00Z"
 
@@ -437,7 +441,8 @@ class TestDatasetItems(unittest.TestCase):
     def test_create(self):
         mock_api = MagicMock()
         mock_api.create_dataset_item.return_value = self._build_dataset_item_response()
-        dataset_items = DatasetItems(mock_api, self.organization_id, self.dataset_id)
+        dataset_items = DatasetItems(
+            mock_api, self.organization_id, self.dataset_id)
         item = dataset_items.create(self.source_data, self.attributes)
         self.assertIsInstance(item, DatasetItem)
         self.assertEqual(item.dataset_item_id, self.item_id)
@@ -450,7 +455,8 @@ class TestDatasetItems(unittest.TestCase):
     def test_get(self):
         mock_api = MagicMock()
         mock_api.get_dataset_item.return_value = self._build_dataset_item_response()
-        dataset_items = DatasetItems(mock_api, self.organization_id, self.dataset_id)
+        dataset_items = DatasetItems(
+            mock_api, self.organization_id, self.dataset_id)
         item = dataset_items.get(self.item_id)
         self.assertIsInstance(item, DatasetItem)
         self.assertEqual(item.dataset_item_id, self.item_id)
@@ -466,14 +472,16 @@ class TestDatasetItems(unittest.TestCase):
             self._build_dataset_items_response(),
             self._build_empty_dataset_items_response()
         ]
-        dataset_items = DatasetItems(mock_api, self.organization_id, self.dataset_id)
+        dataset_items = DatasetItems(
+            mock_api, self.organization_id, self.dataset_id)
         for item in dataset_items.list():
             self.assertIsInstance(item, DatasetItem)
 
     def test_update(self):
         mock_api = MagicMock()
         mock_api.update_dataset_item.return_value = self._build_dataset_item_response()
-        dataset_items = DatasetItems(mock_api, self.organization_id, self.dataset_id)
+        dataset_items = DatasetItems(
+            mock_api, self.organization_id, self.dataset_id)
         item = dataset_items.update(self.item_id, self.attributes)
         self.assertIsInstance(item, DatasetItem)
         self.assertEqual(item.dataset_item_id, self.item_id)
@@ -486,7 +494,8 @@ class TestDatasetItems(unittest.TestCase):
     def test_bulk_update(self):
         mock_api = MagicMock()
         mock_api.update_dataset_item.return_value = self._build_dataset_item_response()
-        dataset_items = DatasetItems(mock_api, self.organization_id, self.dataset_id)
+        dataset_items = DatasetItems(
+            mock_api, self.organization_id, self.dataset_id)
         item = dataset_items.bulk_update(self.bulk_attributes)
         for item in item:
             self.assertIsInstance(item, DatasetItem)
@@ -501,7 +510,8 @@ class TestDatasetItems(unittest.TestCase):
     def test_delete(self):
         mock_api = MagicMock()
         mock_api.delete_dataset_item.return_value = self._build_dataset_item_response()
-        dataset_items = DatasetItems(mock_api, self.organization_id, self.dataset_id)
+        dataset_items = DatasetItems(
+            mock_api, self.organization_id, self.dataset_id)
         item = dataset_items.delete(self.item_id)
         self.assertIsInstance(item, DatasetItem)
         self.assertEqual(item.dataset_item_id, self.item_id)

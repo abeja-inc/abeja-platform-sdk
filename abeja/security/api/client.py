@@ -55,7 +55,8 @@ class APIClient(BaseAPIClient):
             - InternalServerError
         """
         path = '/organizations/{}/security/cidrs'.format(organization_id)
-        return self._connection.api_request(method='POST', path=path, json=payload)
+        return self._connection.api_request(
+            method='POST', path=path, json=payload)
 
     def get_ip_address(self, organization_id: str, cidr_id: str) -> dict:
         """get a ip address
@@ -91,7 +92,8 @@ class APIClient(BaseAPIClient):
           - Unauthorized: Authentication failed
           - InternalServerError
         """
-        path = '/organizations/{}/security/cidrs/{}'.format(organization_id, cidr_id)
+        path = '/organizations/{}/security/cidrs/{}'.format(
+            organization_id, cidr_id)
         return self._connection.api_request(method='GET', path=path)
 
     def get_ip_addresses(self, organization_id: str) -> dict:
@@ -177,8 +179,10 @@ class APIClient(BaseAPIClient):
           - Unauthorized: Authentication failed
           - InternalServerError
         """
-        path = '/organizations/{}/security/cidrs/{}'.format(organization_id, cidr_id)
-        return self._connection.api_request(method='PATCH', path=path, json=payload)
+        path = '/organizations/{}/security/cidrs/{}'.format(
+            organization_id, cidr_id)
+        return self._connection.api_request(
+            method='PATCH', path=path, json=payload)
 
     def delete_ip_address(self, organization_id: str, cidr_id: str) -> dict:
         """delete a ip address
@@ -215,7 +219,8 @@ class APIClient(BaseAPIClient):
           - Unauthorized: Authentication failed
           - InternalServerError
         """
-        path = '/organizations/{}/security/cidrs/{}'.format(organization_id, cidr_id)
+        path = '/organizations/{}/security/cidrs/{}'.format(
+            organization_id, cidr_id)
         return self._connection.api_request(method='DELETE', path=path)
 
     def check_ip_address(self, organization_id: str,
@@ -255,4 +260,5 @@ class APIClient(BaseAPIClient):
             - InternalServerError
         """
         path = '/organizations/{}/security/cidrs/check'.format(organization_id)
-        return self._connection.api_request(method='POST', path=path, json=payload)
+        return self._connection.api_request(
+            method='POST', path=path, json=payload)

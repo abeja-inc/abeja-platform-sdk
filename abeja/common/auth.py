@@ -29,7 +29,8 @@ def get_basic_auth_from_environment():
     }
     """
     user_id = os.environ.get('ABEJA_PLATFORM_USER_ID')
-    personal_access_token = os.environ.get('ABEJA_PLATFORM_PERSONAL_ACCESS_TOKEN')
+    personal_access_token = os.environ.get(
+        'ABEJA_PLATFORM_PERSONAL_ACCESS_TOKEN')
     if not user_id or not personal_access_token:
         return None
     return {

@@ -14,7 +14,11 @@ class APIClient(BaseAPIClient):
     """
 
     def create_dataset(
-            self, organization_id: str, name: str, type: str, props: dict) -> dict:
+            self,
+            organization_id: str,
+            name: str,
+            type: str,
+            props: dict) -> dict:
         """create a dataset
 
         API reference: POST /organizations/<organization_id>/datasets/
@@ -111,7 +115,8 @@ class APIClient(BaseAPIClient):
             'props': props
         }
         path = '/organizations/{}/datasets'.format(organization_id)
-        return self._connection.api_request(method='POST', path=path, json=params)
+        return self._connection.api_request(
+            method='POST', path=path, json=params)
 
     def get_dataset(self, organization_id: str, dataset_id: str) -> dict:
         """get a dataset
@@ -171,7 +176,8 @@ class APIClient(BaseAPIClient):
           - InternalServerError
         """
 
-        path = '/organizations/{}/datasets/{}'.format(organization_id, dataset_id)
+        path = '/organizations/{}/datasets/{}'.format(
+            organization_id, dataset_id)
         return self._connection.api_request(method='GET', path=path)
 
     def list_datasets(
@@ -247,7 +253,8 @@ class APIClient(BaseAPIClient):
         if next_token:
             params['next_token'] = next_token
         path = '/organizations/{}/datasets'.format(organization_id)
-        return self._connection.api_request(method='GET', path=path, params=params)
+        return self._connection.api_request(
+            method='GET', path=path, params=params)
 
     def delete_dataset(self, organization_id: str, dataset_id: str) -> dict:
         """delete a dataset
@@ -306,7 +313,8 @@ class APIClient(BaseAPIClient):
           - Unauthorized: Authentication failed
           - InternalServerError
         """
-        path = '/organizations/{}/datasets/{}'.format(organization_id, dataset_id)
+        path = '/organizations/{}/datasets/{}'.format(
+            organization_id, dataset_id)
         return self._connection.api_request(method='DELETE', path=path)
 
     # dataset_item
@@ -450,7 +458,11 @@ class APIClient(BaseAPIClient):
                                             path=path,
                                             json=params)
 
-    def get_dataset_item(self, organization_id: str, dataset_id: str, dataset_item_id: str) -> dict:
+    def get_dataset_item(
+            self,
+            organization_id: str,
+            dataset_id: str,
+            dataset_item_id: str) -> dict:
         """get a item in a dataset
 
         API reference: GET /organizations/<organization_id>/datasets/<dataset_id>/items/<dataset_item_id>
@@ -611,7 +623,8 @@ class APIClient(BaseAPIClient):
                                                             dataset_id)
         if not params:
             params = {}
-        return self._connection.api_request(method='GET', path=path, params=params)
+        return self._connection.api_request(
+            method='GET', path=path, params=params)
 
     def update_dataset_item(
             self, organization_id: str, dataset_id: str, dataset_item_id: str,
@@ -734,7 +747,8 @@ class APIClient(BaseAPIClient):
         path = '/organizations/{}/datasets/{}/items/{}'.format(organization_id,
                                                                dataset_id,
                                                                dataset_item_id)
-        return self._connection.api_request(method='PUT', path=path, json=params)
+        return self._connection.api_request(
+            method='PUT', path=path, json=params)
 
     def bulk_update_dataset_item(
             self, organization_id: str, dataset_id: str,
@@ -849,9 +863,14 @@ class APIClient(BaseAPIClient):
         params = bulk_attributes
         path = '/organizations/{}/datasets/{}/items'.format(organization_id,
                                                             dataset_id)
-        return self._connection.api_request(method='PUT', path=path, json=params)
+        return self._connection.api_request(
+            method='PUT', path=path, json=params)
 
-    def delete_dataset_item(self, organization_id: str, dataset_id: str, dataset_item_id: str) -> dict:
+    def delete_dataset_item(
+            self,
+            organization_id: str,
+            dataset_id: str,
+            dataset_item_id: str) -> dict:
         """delete a item in a dataset
 
         API reference: DELETE /organizations/<organization_id>/datasets/<dataset_id>/items/<dataset_item_id>

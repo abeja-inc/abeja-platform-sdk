@@ -50,7 +50,8 @@ class DatasetItem(DatasetBase):
 
         for item in source_data:
             data_uri, data_type, _source_data = self._parse_source_data(item)
-            source_file = file_factory(api, data_uri, data_type, **_source_data)
+            source_file = file_factory(
+                api, data_uri, data_type, **_source_data)
             self.source_data.append(source_file)
 
     def __repr__(self):
@@ -129,16 +130,16 @@ class DatasetItemIterator(Iterator):
         with ThreadPoolExecutor(max_workers=FETCH_WORKER_COUNT) as executor:
             futures = []
             while page:
-                futures += [
-                    executor.submit(_download_item_content, item) for item in page
-                ]
+                futures += [executor.submit(_download_item_content, item)
+                            for item in page]
                 page = self._page()
             for f in as_completed(futures):
                 download_item = f.result()
                 yield download_item
 
     def __next__(self):
-        if self._current_page is None or self._current_page_file_idx >= len(self._current_page):
+        if self._current_page is None or self._current_page_file_idx >= len(
+                self._current_page):
             self._current_page_file_idx = 0
             self._current_page = self._page()
 
@@ -167,9 +168,14 @@ class DatasetItemIterator(Iterator):
             params['next_page_token'] = self.next_page_token
         if self.limit:
             params['limit'] = self.limit
-        res = self._api.list_dataset_items(self.organization_id, self.dataset_id, params=params)
+        res = self._api.list_dataset_items(
+            self.organization_id, self.dataset_id, params=params)
         self.next_page_token = res.get('next_page_token')
-        return [DatasetItem(self._api, self.organization_id, **_item) for _item in res['items']]
+        return [
+            DatasetItem(
+                self._api,
+                self.organization_id,
+                **_item) for _item in res['items']]
 
 
 class DatasetItems:
@@ -185,7 +191,11 @@ class DatasetItems:
 
     """
 
-    def __init__(self, api: APIClient, organization_id: str, dataset_id: str) -> None:
+    def __init__(
+            self,
+            api: APIClient,
+            organization_id: str,
+            dataset_id: str) -> None:
         self._api = api
         self.organization_id = organization_id
         self.dataset_id = dataset_id
@@ -241,7 +251,8 @@ class DatasetItems:
             :class:`DatasetItem <abeja.datasets.dataset_item.DatasetItem>` object
 
         """
-        res = self._api.create_dataset_item(self.organization_id, self.dataset_id, source_data, attributes)
+        res = self._api.create_dataset_item(
+            self.organization_id, self.dataset_id, source_data, attributes)
         return DatasetItem(self._api, self.organization_id, **res)
 
     def get(self, dataset_item_id: str) -> DatasetItem:
@@ -258,11 +269,14 @@ class DatasetItems:
         Return type:
             :class:`DatasetItem <abeja.datasets.dataset_item.DatasetItem>` object
         """
-        res = self._api.get_dataset_item(self.organization_id, self.dataset_id, dataset_item_id)
+        res = self._api.get_dataset_item(
+            self.organization_id, self.dataset_id, dataset_item_id)
         return DatasetItem(self._api, self.organization_id, **res)
 
     def list(
-            self, next_page_token: Optional[str]=None, limit: Optional[int]=None,
+            self,
+            next_page_token: Optional[str]=None,
+            limit: Optional[int]=None,
             prefetch: bool=False) -> DatasetItemIterator:
         """generate all dataset_items in a dataset
 
@@ -289,8 +303,13 @@ class DatasetItems:
             :class:`DatasetItemIterator <abeja.datasets.dataset_item.DatasetItemIterator>` object
 
         """
-        return DatasetItemIterator(self._api, self.organization_id, self.dataset_id,
-                                   next_page_token, limit, prefetch)
+        return DatasetItemIterator(
+            self._api,
+            self.organization_id,
+            self.dataset_id,
+            next_page_token,
+            limit,
+            prefetch)
 
     def update(self, dataset_item_id: str, attributes: dict) -> DatasetItem:
         """Update a datset item.
@@ -334,7 +353,11 @@ class DatasetItems:
             return the updated dataset item
             :class:`DatasetItem <abeja.datasets.dataset_item.DatasetItem>` object
         """
-        res = self._api.update_dataset_item(self.organization_id, self.dataset_id, dataset_item_id, attributes)
+        res = self._api.update_dataset_item(
+            self.organization_id,
+            self.dataset_id,
+            dataset_item_id,
+            attributes)
         return DatasetItem(self._api, self.organization_id, **res)
 
     def bulk_update(self, bulk_attributes: dict) -> DatasetItem:
@@ -381,8 +404,13 @@ class DatasetItems:
             return the updated dataset item list
             :class:`DatasetItem <abeja.datasets.dataset_item.DatasetItem>` object
         """
-        res = self._api.bulk_update_dataset_item(self.organization_id, self.dataset_id, bulk_attributes)
-        return [DatasetItem(self._api, self.organization_id, **_item) for _item in res]
+        res = self._api.bulk_update_dataset_item(
+            self.organization_id, self.dataset_id, bulk_attributes)
+        return [
+            DatasetItem(
+                self._api,
+                self.organization_id,
+                **_item) for _item in res]
 
     def delete(self, dataset_item_id: str) -> DatasetItem:
         """Delete a datset item.
@@ -399,5 +427,6 @@ class DatasetItems:
             return the deleted dataset item
             :class:`DatasetItem <abeja.datasets.dataset_item.DatasetItem>` object
         """
-        res = self._api.delete_dataset_item(self.organization_id, self.dataset_id, dataset_item_id)
+        res = self._api.delete_dataset_item(
+            self.organization_id, self.dataset_id, dataset_item_id)
         return DatasetItem(self._api, self.organization_id, **res)

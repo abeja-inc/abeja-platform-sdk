@@ -76,7 +76,8 @@ TRIGGER_RUN_LIST_RES = {
 class APIClientTest(unittest.TestCase):
     @requests_mock.Mocker()
     def test_create_trigger(self, m):
-        path = '/organizations/{}/deployments/{}/triggers'.format(ORGANIZATION_ID, DEPLOYMENT_ID)
+        path = '/organizations/{}/deployments/{}/triggers'.format(
+            ORGANIZATION_ID, DEPLOYMENT_ID)
         m.post(path, json=TRIGGER_RES)
 
         client = APIClient()
@@ -107,7 +108,8 @@ class APIClientTest(unittest.TestCase):
 
     @requests_mock.Mocker()
     def test_create_trigger_no_retry_count(self, m):
-        path = '/organizations/{}/deployments/{}/triggers'.format(ORGANIZATION_ID, DEPLOYMENT_ID)
+        path = '/organizations/{}/deployments/{}/triggers'.format(
+            ORGANIZATION_ID, DEPLOYMENT_ID)
         m.post(path, json=TRIGGER_RES)
 
         client = APIClient()
@@ -136,7 +138,8 @@ class APIClientTest(unittest.TestCase):
 
     @requests_mock.Mocker()
     def test_create_trigger_no_distribution(self, m):
-        path = '/organizations/{}/deployments/{}/triggers'.format(ORGANIZATION_ID, DEPLOYMENT_ID)
+        path = '/organizations/{}/deployments/{}/triggers'.format(
+            ORGANIZATION_ID, DEPLOYMENT_ID)
         m.post(path, json=TRIGGER_RES)
 
         client = APIClient()

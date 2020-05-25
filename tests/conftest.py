@@ -1,15 +1,46 @@
 # pytest: sharing fixture functions
-import datetime
 import pytest
+import datetime
 import random
 import string
+import uuid
 from gzip import compress as compress_gzip
 import requests_mock as requests_mock_module
 from collections import namedtuple
 from pathlib import Path
 import shutil
 from abeja.common.connection import Connection
-from tests.utils import random_hex, fake_platform_id, fake_iso8601, fake_file_id
+
+
+def random_hex(n):
+    return '%030x' % random.randrange((n * 2)**30)
+
+
+def fake_platform_id():
+    """Generates pseudo ABEJA Platform ID (e.g. "1335799549456")"""
+    return '1' + ''.join([str(random.randint(0, 9)) for x in range(0, 12)])
+
+
+def fake_iso8601():
+    return '{}-{:02}-{:02}T{:02}:{:02}:{:02}+00:00'.format(
+        random.randint(1996, 2020),
+        random.randint(1, 12),
+        random.randint(1, 30),
+        random.randint(0, 23),
+        random.randint(0, 59),
+        random.randint(0, 59))
+
+
+def fake_file_id():
+    return '{}{:02}{:02}T{:02}{:02}{:02}-{}'.format(
+        random.randint(1996, 2020),
+        random.randint(1, 12),
+        random.randint(1, 30),
+        random.randint(0, 23),
+        random.randint(0, 59),
+        random.randint(0, 59),
+        uuid.uuid4()
+    )
 
 
 @pytest.fixture
@@ -180,36 +211,59 @@ def channel_response():
 
 
 @pytest.fixture
-def file_response():
-    def response(organization_id, channel_id, filename, content_type='application/octet-stream', metadata={}):
+def file_response(organization_id):
+    def response(
+            channel_id,
+            file_id=None,
+            metadata={},
+            **extra):
         uploaded_at = fake_iso8601()
-        file_id = fake_file_id()
-        download_uri = "https://abeja-datalake-test.s3.example.com/{}".format(file_id)
+        if not file_id:
+            file_id = fake_file_id()
+        download_uri = "https://abeja-datalake-test.s3.example.com/{}".format(
+            file_id)
         return {
             "url_expires_on": fake_iso8601(),
             "uploaded_at": uploaded_at,
             "metadata": {
                 "x-abeja-sys-meta-organizationid": organization_id,
                 "x-abeja-meta-timestamp": uploaded_at,
-                "x-abeja-meta-filename": filename,
                 **metadata
             },
             "file_id": file_id,
             "download_url": download_uri,
             "download_uri": download_uri,
-            "content_type": "application/gzip",
-            "channel_id": channel_id
+            "content_type": "application/octet-stream",
+            "channel_id": channel_id,
+            **extra
         }
     return response
 
 
 @pytest.fixture
-def training_job_definition_response():
-    def _training_job_definition_response(organization_id, training_job_definition_id, **extra):
+def delete_file_response():
+    def _datalake_delete_file_response(channel_id, file_id, **extra):
+        return {
+            'message': 'deleted file ({})'.format(file_id),
+            **extra
+        }
+
+    return _datalake_delete_file_response
+
+
+@pytest.fixture
+def job_definition_response(organization_id, job_definition_id):
+    def _training_job_definition_response(
+            organization_id=organization_id,
+            training_job_definition_id=job_definition_id,
+            name=None,
+            **extra):
+        if name is None:
+            name = "test-{}".format(random.randint(1, 1000))
         return {
             "organization_id": organization_id,
             "job_definition_id": training_job_definition_id,
-            "name": "test-{}".format(random.randint(1, 1000)),
+            "name": name,
             "archived": False,
             "versions": [],
             "jobs": None,
@@ -226,8 +280,12 @@ def training_job_definition_response():
 
 
 @pytest.fixture
-def training_job_definition_version_response():
-    def _training_job_definition_version_response(_organization_id, job_definition_id, job_definition_version=None, **extra):
+def job_definition_version_response():
+    def _training_job_definition_version_response(
+            _organization_id,
+            job_definition_id,
+            job_definition_version=None,
+            **extra):
         if job_definition_version is None:
             job_definition_version = random.randint(0, 100)
 
@@ -251,11 +309,13 @@ def training_job_definition_version_response():
 
 
 @pytest.fixture
-def job_response():
-    def _job_response(_organization_id, training_job_definition_id, training_job_id=None, **extra):
+def job_response(organization_id, job_definition_id, job_id):
+    def _job_response(
+            _organization_id=organization_id,
+            training_job_definition_id=job_definition_id,
+            training_job_id=job_id,
+            **extra):
         user_id = fake_platform_id()
-        if training_job_id is None:
-            training_job_id = fake_platform_id()
 
         return {
             "job_definition_id": training_job_definition_id,
@@ -309,14 +369,30 @@ def job_response():
 
 
 @pytest.fixture
+def list_jobs_response():
+    def _response(jobs, offset=0, limit=50, total=None):
+        return {
+            'entries': jobs,
+            'offset': offset,
+            'limit': limit,
+            'total': len(jobs) if total is None else total
+        }
+    return _response
+
+
+@pytest.fixture
 def job_result_response():
-    def _job_result_response(organization_id, training_job_definition_id, training_job_id, **extra):
+    def _job_result_response(
+            organization_id,
+            training_job_definition_id,
+            training_job_id,
+            **extra):
         return {
             "artifacts": {
                 "complete": {
                     "uri": 'https://download.example.com/organizations/{}/training/definitions/'
-                           '{}/jobs/{}'.format(organization_id, training_job_definition_id, training_job_id)
-                    ** extra
+                           '{}/jobs/{}'.format(organization_id, training_job_definition_id, training_job_id),
+                    **extra
                 }
             }
         }

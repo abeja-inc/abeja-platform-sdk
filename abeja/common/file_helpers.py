@@ -47,7 +47,10 @@ def convert_to_zipfile_object(fileobj: IO):
         named_fileobj.seek(0)
     tmp_file = tempfile.NamedTemporaryFile(suffix='.zip')
     with zipfile.ZipFile(tmp_file.name, 'w', compression=zipfile.ZIP_DEFLATED) as new_zip:
-        new_zip.write(named_fileobj.name, arcname=Path(named_fileobj.name).name)
+        new_zip.write(
+            named_fileobj.name,
+            arcname=Path(
+                named_fileobj.name).name)
     tmp_file.seek(0)
     named_fileobj.close()
     return tmp_file
@@ -59,5 +62,6 @@ def convert_to_valid_path(filepath: str) -> Path:
     :param filepath:
     :return:
     """
-    valid_factors = [factor for factor in filepath.split("/") if factor and factor != ".."]
+    valid_factors = [factor for factor in filepath.split(
+        "/") if factor and factor != ".."]
     return Path(*valid_factors)

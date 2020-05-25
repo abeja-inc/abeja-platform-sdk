@@ -65,7 +65,10 @@ class TestFileIterator(unittest.TestCase):
                 ]
             }
         ]
-        iterator = FileIterator(mock_api, organization_id=ORGANIZATION_ID, channel_id=CHANNEL_ID)
+        iterator = FileIterator(
+            mock_api,
+            organization_id=ORGANIZATION_ID,
+            channel_id=CHANNEL_ID)
         file_1 = next(iterator)
         self.assertEqual(file_1.file_id, 'file_id_1')
         file_2 = next(iterator)
@@ -91,7 +94,10 @@ class TestFileIterator(unittest.TestCase):
                 ]
             }
         ]
-        iterator = FileIterator(mock_api, organization_id=ORGANIZATION_ID, channel_id=CHANNEL_ID)
+        iterator = FileIterator(
+            mock_api,
+            organization_id=ORGANIZATION_ID,
+            channel_id=CHANNEL_ID)
         for i in range(5):
             next(iterator)
         with self.assertRaises(StopIteration):
@@ -117,7 +123,10 @@ class TestFileIterator(unittest.TestCase):
                 ]
             }
         ]
-        iterator = FileIterator(mock_api, organization_id=ORGANIZATION_ID, channel_id=CHANNEL_ID)
+        iterator = FileIterator(
+            mock_api,
+            organization_id=ORGANIZATION_ID,
+            channel_id=CHANNEL_ID)
         file_1 = next(iterator)
         self.assertEqual(file_1.file_id, 'file_id_1')
         file_2 = next(iterator)
@@ -129,7 +138,8 @@ class TestFileIterator(unittest.TestCase):
         file_4 = next(iterator)
         self.assertEqual(file_4.file_id, 'file_id_4')
         self.assertEqual(len(list(iterator)), 1)
-        mock_api.list_channel_files.assert_called_with(CHANNEL_ID, next_page_token='dummy')
+        mock_api.list_channel_files.assert_called_with(
+            CHANNEL_ID, next_page_token='dummy')
         self.assertEqual(mock_api.list_channel_files.call_count, 2)
 
     def test_next_up_to_next_page_and_iter_2(self):
@@ -151,7 +161,10 @@ class TestFileIterator(unittest.TestCase):
                 ]
             }
         ]
-        iterator = FileIterator(mock_api, organization_id=ORGANIZATION_ID, channel_id=CHANNEL_ID)
+        iterator = FileIterator(
+            mock_api,
+            organization_id=ORGANIZATION_ID,
+            channel_id=CHANNEL_ID)
         file_1 = next(iterator)
         self.assertEqual(file_1.file_id, 'file_id_1')
         file_2 = next(iterator)
@@ -162,7 +175,8 @@ class TestFileIterator(unittest.TestCase):
 
         self.assertEqual(len(list(iterator)), 2)
         self.assertEqual(mock_api.list_channel_files.call_count, 2)
-        mock_api.list_channel_files.assert_called_with(CHANNEL_ID, next_page_token='dummy')
+        mock_api.list_channel_files.assert_called_with(
+            CHANNEL_ID, next_page_token='dummy')
 
     def test_next_file_item_contains_channel_id(self):
         mock_api = MagicMock()
@@ -174,7 +188,10 @@ class TestFileIterator(unittest.TestCase):
                 ]
             }
         ]
-        iterator = FileIterator(mock_api, organization_id=ORGANIZATION_ID, channel_id=CHANNEL_ID)
+        iterator = FileIterator(
+            mock_api,
+            organization_id=ORGANIZATION_ID,
+            channel_id=CHANNEL_ID)
         file_1 = next(iterator)
         self.assertEqual(file_1.file_id, 'file_id_1')
 
@@ -187,15 +204,14 @@ class TestFileIterator(unittest.TestCase):
                     'url_expires_on': '2018-06-04T05:04:46+00:00',
                     'uploaded_at': '2018-06-01T05:22:44+00:00',
                     'metadata': {
-                        'x-abeja-meta-filename': 'DcZzLGkV4AA8FQc.jpg'
-                    },
+                        'x-abeja-meta-filename': 'DcZzLGkV4AA8FQc.jpg'},
                     'file_id': '20180601T052244-250482c0-d361-4c5b-a0f9-e796af1a5f0d',
                     'download_uri': 'https://example.com/dummy_download_uri',
-                    'content_type': 'image/jpeg'
-                }
-            ]
-        }
-        iterator = FileIterator(mock_api, organization_id=ORGANIZATION_ID, channel_id=CHANNEL_ID)
+                    'content_type': 'image/jpeg'}]}
+        iterator = FileIterator(
+            mock_api,
+            organization_id=ORGANIZATION_ID,
+            channel_id=CHANNEL_ID)
         files = iterator._page()
 
         mock_api.list_channel_files.assert_called_once_with(CHANNEL_ID)
@@ -204,43 +220,26 @@ class TestFileIterator(unittest.TestCase):
 
     def test_page_iter(self):
         mock_api = MagicMock()
-        mock_api.list_channel_files.side_effect = [
-            {
-                'next_page_token': 'dummy',
-                'files': [
-                    {
-                        'url_expires_on': '2018-06-04T05:04:46+00:00',
-                        'uploaded_at': '2018-06-01T05:22:44+00:00',
-                        'metadata': {
-                            'x-abeja-meta-filename': 'DcZzLGkV4AA8FQc.jpg'
-                        },
-                        'file_id': '20180601T052244-250482c0-d361-4c5b-a0f9-e796af1a5f0d',
-                        'download_uri': 'http://example/dummy/donwload_url',
-                        'content_type': 'image/jpeg'
-                    }
-                ]
-            },
-            {
-                'next_page_token': None,
-                'files': [
-                    {
-                        'url_expires_on': '2018-06-04T05:04:46+00:00',
-                        'uploaded_at': '2018-06-01T05:22:44+00:00',
-                        'metadata': {
-                            'x-abeja-meta-filename': 'DcZzLGkV4AA8FQc.jpg'
-                        },
-                        'file_id': '20180601T052244-250482c0-d361-4c5b-a0f9-e796af1a5f0d',
-                        'download_uri': 'http://example/dummy/donwload_url',
-                        'content_type': 'image/jpeg'
-                    }
-                ]
-            },
-            {
-                'next_page_token': None,
-                'files': []
-            }
-        ]
-        iterator = FileIterator(mock_api, organization_id=ORGANIZATION_ID, channel_id=CHANNEL_ID)
+        mock_api.list_channel_files.side_effect = [{'next_page_token': 'dummy',
+                                                    'files': [{'url_expires_on': '2018-06-04T05:04:46+00:00',
+                                                               'uploaded_at': '2018-06-01T05:22:44+00:00',
+                                                               'metadata': {'x-abeja-meta-filename': 'DcZzLGkV4AA8FQc.jpg'},
+                                                               'file_id': '20180601T052244-250482c0-d361-4c5b-a0f9-e796af1a5f0d',
+                                                               'download_uri': 'http://example/dummy/donwload_url',
+                                                               'content_type': 'image/jpeg'}]},
+                                                   {'next_page_token': None,
+                                                    'files': [{'url_expires_on': '2018-06-04T05:04:46+00:00',
+                                                               'uploaded_at': '2018-06-01T05:22:44+00:00',
+                                                               'metadata': {'x-abeja-meta-filename': 'DcZzLGkV4AA8FQc.jpg'},
+                                                               'file_id': '20180601T052244-250482c0-d361-4c5b-a0f9-e796af1a5f0d',
+                                                               'download_uri': 'http://example/dummy/donwload_url',
+                                                               'content_type': 'image/jpeg'}]},
+                                                   {'next_page_token': None,
+                                                    'files': []}]
+        iterator = FileIterator(
+            mock_api,
+            organization_id=ORGANIZATION_ID,
+            channel_id=CHANNEL_ID)
         file_pages = [file for file in iterator._page_iter()]
 
         self.assertEqual(mock_api.list_channel_files.call_count, 2)
@@ -257,7 +256,10 @@ class TestFileIterator(unittest.TestCase):
                 {'file_id': 'file_id_2'}
             ]
         }
-        iterator = FileIterator(mock_api, organization_id=ORGANIZATION_ID, channel_id=CHANNEL_ID)
+        iterator = FileIterator(
+            mock_api,
+            organization_id=ORGANIZATION_ID,
+            channel_id=CHANNEL_ID)
         file = next(iterator)
         self.assertEqual(file.file_id, 'file_id_1')
         page = iterator._page()
@@ -392,7 +394,8 @@ class TestDatalakeFile(unittest.TestCase):
             DatalakeFile(None, uri=self.uri, type=type, lifetime='invalid')
 
     def test_lifetime_cannot_update_with_none(self):
-        datalake_file = DatalakeFile(None, uri=self.uri, type=type, lifetime='1day')
+        datalake_file = DatalakeFile(
+            None, uri=self.uri, type=type, lifetime='1day')
         with self.assertRaises(RuntimeError):
             datalake_file.lifetime = None
 
@@ -545,7 +548,8 @@ class TestDatalakeFile(unittest.TestCase):
 
         self.assertEqual(data, self.text_data)
         datalake_file._get_download_uri.assert_called_once()
-        datalake_file._api._connection.request.assert_called_with('GET', dummy_url, stream=False)
+        datalake_file._api._connection.request.assert_called_with(
+            'GET', dummy_url, stream=False)
 
     def test_do_download_error_handling(self):
         mock_api = MagicMock()

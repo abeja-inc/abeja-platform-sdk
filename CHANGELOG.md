@@ -1,3 +1,9 @@
+# 1.1.3
+- Archive/Unarchive job (#30)
+- Update conftest (#29)
+- Make autopep8 aggressive (#28)    
+- fix doc (#27)    
+
 # 1.1.2
 - add py.typed (#26)
 

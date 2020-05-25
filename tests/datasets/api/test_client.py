@@ -19,9 +19,7 @@ class TestAPIClient(unittest.TestCase):
                 'data_type': 'image/jpeg',
                 'data_uri': 'datalake://1200123803688/20170815T044617-f20dde80-1e3b-4496-bc06-1b63b026b872',
                 'height': 500,
-                'width': 200
-            }
-        ]
+                'width': 200}]
 
     def test_create_dataset(self):
         mock_conn = MagicMock()
@@ -43,7 +41,8 @@ class TestAPIClient(unittest.TestCase):
         client = APIClient()
         client._connection = mock_conn
         client.get_dataset(self.organization_id, self.dataset_id)
-        path = '/organizations/{}/datasets/{}'.format(self.organization_id, self.dataset_id)
+        path = '/organizations/{}/datasets/{}'.format(
+            self.organization_id, self.dataset_id)
         mock_conn.api_request.assert_called_once_with(method='GET', path=path)
 
     def test_list_datasets(self):
@@ -61,22 +60,24 @@ class TestAPIClient(unittest.TestCase):
         client = APIClient()
         client._connection = mock_conn
         next_token = 'dummy'
-        client.list_datasets(self.organization_id, max_results=100, next_token=next_token)
+        client.list_datasets(
+            self.organization_id,
+            max_results=100,
+            next_token=next_token)
         path = '/organizations/{}/datasets'.format(self.organization_id)
-        mock_conn.api_request.assert_called_once_with(method='GET',
-                                                      path=path,
-                                                      params={
-                                                          'max_results': 100,
-                                                          'next_token': next_token
-                                                      })
+        mock_conn.api_request.assert_called_once_with(
+            method='GET', path=path, params={
+                'max_results': 100, 'next_token': next_token})
 
     def test_delete_dataset(self):
         mock_conn = MagicMock()
         client = APIClient()
         client._connection = mock_conn
         client.delete_dataset(self.organization_id, self.dataset_id)
-        path = '/organizations/{}/datasets/{}'.format(self.organization_id, self.dataset_id)
-        mock_conn.api_request.assert_called_once_with(method='DELETE', path=path)
+        path = '/organizations/{}/datasets/{}'.format(
+            self.organization_id, self.dataset_id)
+        mock_conn.api_request.assert_called_once_with(
+            method='DELETE', path=path)
 
     def test_create_datatest_item(self):
         mock_conn = MagicMock()
@@ -85,8 +86,8 @@ class TestAPIClient(unittest.TestCase):
         client.create_dataset_item(self.organization_id, self.dataset_id,
                                    self.source_data,
                                    self.attributes)
-        path = '/organizations/{}/datasets/{}/items'.format(self.organization_id,
-                                                            self.dataset_id)
+        path = '/organizations/{}/datasets/{}/items'.format(
+            self.organization_id, self.dataset_id)
         params = {
             'attributes': self.attributes,
             'source_data': self.source_data
@@ -101,9 +102,8 @@ class TestAPIClient(unittest.TestCase):
         client._connection = mock_conn
         client.get_dataset_item(self.organization_id, self.dataset_id,
                                 self.dataset_item_id)
-        path = '/organizations/{}/datasets/{}/items/{}'.format(self.organization_id,
-                                                               self.dataset_id,
-                                                               self.dataset_item_id)
+        path = '/organizations/{}/datasets/{}/items/{}'.format(
+            self.organization_id, self.dataset_id, self.dataset_item_id)
         mock_conn.api_request.assert_called_once_with(method='GET',
                                                       path=path)
 
@@ -112,8 +112,8 @@ class TestAPIClient(unittest.TestCase):
         client = APIClient()
         client._connection = mock_conn
         client.list_dataset_items(self.organization_id, self.dataset_id)
-        path = '/organizations/{}/datasets/{}/items'.format(self.organization_id,
-                                                            self.dataset_id)
+        path = '/organizations/{}/datasets/{}/items'.format(
+            self.organization_id, self.dataset_id)
         mock_conn.api_request.assert_called_once_with(method='GET',
                                                       path=path,
                                                       params={})
@@ -123,9 +123,10 @@ class TestAPIClient(unittest.TestCase):
         client = APIClient()
         client._connection = mock_conn
         params = {'preceding_id': 1}
-        client.list_dataset_items(self.organization_id, self.dataset_id, params)
-        path = '/organizations/{}/datasets/{}/items'.format(self.organization_id,
-                                                            self.dataset_id)
+        client.list_dataset_items(
+            self.organization_id, self.dataset_id, params)
+        path = '/organizations/{}/datasets/{}/items'.format(
+            self.organization_id, self.dataset_id)
         mock_conn.api_request.assert_called_once_with(method='GET',
                                                       path=path,
                                                       params=params)
@@ -136,8 +137,7 @@ class TestAPIClient(unittest.TestCase):
         client._connection = mock_conn
         client.delete_dataset_item(self.organization_id, self.dataset_id,
                                    self.dataset_item_id)
-        path = '/organizations/{}/datasets/{}/items/{}'.format(self.organization_id,
-                                                               self.dataset_id,
-                                                               self.dataset_item_id)
+        path = '/organizations/{}/datasets/{}/items/{}'.format(
+            self.organization_id, self.dataset_id, self.dataset_item_id)
         mock_conn.api_request.assert_called_once_with(method='DELETE',
                                                       path=path)

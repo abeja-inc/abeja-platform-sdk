@@ -21,7 +21,8 @@ class Client:
             credential: Optional[Dict[str, str]] = None,
             timeout: Optional[int] = None) -> None:
         self.api = APIClient(credential=credential, timeout=timeout)
-        self.organization_id = organization_id or os.environ.get('ABEJA_ORGANIZATION_ID')
+        self.organization_id = organization_id or os.environ.get(
+            'ABEJA_ORGANIZATION_ID')
 
     def get_dataset(self, dataset_id: str) -> Dataset:
         """Get dataset for specific dataset_id

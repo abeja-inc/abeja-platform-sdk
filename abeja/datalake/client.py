@@ -22,7 +22,10 @@ class Client(BaseClient):
             timeout: Optional[int] = None,
             max_retry_count: Optional[int] = None) -> None:
         super().__init__(organization_id, credential)
-        self.api = APIClient(credential=credential, timeout=timeout, max_retry_count=max_retry_count)
+        self.api = APIClient(
+            credential=credential,
+            timeout=timeout,
+            max_retry_count=max_retry_count)
 
     def get_channel(self, channel_id) -> Channel:
         """Get channel for specific channel_id

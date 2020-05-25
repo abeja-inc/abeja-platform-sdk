@@ -5,7 +5,11 @@ from abeja.datalake.file import DatalakeFile
 from abeja.exceptions import UnsupportedURI
 
 
-def file_factory(client: APIClient, uri: str, type: str, **kwargs) -> DatalakeFile:
+def file_factory(
+        client: APIClient,
+        uri: str,
+        type: str,
+        **kwargs) -> DatalakeFile:
     """generate file for the given uri
 
     :param client:

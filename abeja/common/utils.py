@@ -34,7 +34,9 @@ def print_feature_new(
     print(message, file=sys.stderr)     # noqa: T001
 
 
-def get_filter_archived_applied_params(_params: dict, filter_archived: Optional[bool]) -> dict:
+def get_filter_archived_applied_params(
+        _params: dict,
+        filter_archived: Optional[bool]) -> dict:
     params = _params.copy()
     if filter_archived is None:
         return params

@@ -71,8 +71,10 @@ class APIClient(BaseAPIClient):
         }
         if description is not None:
             payload['description'] = description
-        path = '/organizations/{}/registry/repositories'.format(organization_id)
-        return self._connection.api_request(method='POST', path=path, json=payload)
+        path = '/organizations/{}/registry/repositories'.format(
+            organization_id)
+        return self._connection.api_request(
+            method='POST', path=path, json=payload)
 
     def get_repositories(
             self, organization_id: str,
@@ -140,8 +142,10 @@ class APIClient(BaseAPIClient):
             params['limit'] = limit
         if offset is not None:
             params['offset'] = offset
-        path = '/organizations/{}/registry/repositories'.format(organization_id)
-        return self._connection.api_request(method='GET', path=path, params=params)
+        path = '/organizations/{}/registry/repositories'.format(
+            organization_id)
+        return self._connection.api_request(
+            method='GET', path=path, params=params)
 
     def get_repository(
             self, organization_id: str,
@@ -193,7 +197,8 @@ class APIClient(BaseAPIClient):
             - Unauthorized: Authentication failed
             - InternalServerError
         """
-        path = '/organizations/{}/registry/repositories/{}'.format(organization_id, repository_id)
+        path = '/organizations/{}/registry/repositories/{}'.format(
+            organization_id, repository_id)
         return self._connection.api_request(method='GET', path=path)
 
     def delete_repository(
@@ -246,7 +251,8 @@ class APIClient(BaseAPIClient):
             - Unauthorized: Authentication failed
             - InternalServerError
         """
-        path = '/organizations/{}/registry/repositories/{}'.format(organization_id, repository_id)
+        path = '/organizations/{}/registry/repositories/{}'.format(
+            organization_id, repository_id)
         return self._connection.api_request(method='DELETE', path=path)
 
     def get_repository_tags(
@@ -320,5 +326,7 @@ class APIClient(BaseAPIClient):
             params['limit'] = limit
         if offset is not None:
             params['offset'] = offset
-        path = '/organizations/{}/registry/repositories/{}/tags'.format(organization_id, repository_id)
-        return self._connection.api_request(method='GET', path=path, params=params)
+        path = '/organizations/{}/registry/repositories/{}/tags'.format(
+            organization_id, repository_id)
+        return self._connection.api_request(
+            method='GET', path=path, params=params)

@@ -68,7 +68,10 @@ class TestAPIClient(unittest.TestCase):
         m.post(path, json=DEPLOYMENT_RES)
 
         client = APIClient()
-        ret = client.create_deployment(ORGANIZATION_ID, name=DEPLOYMENT_NAME, description='description')
+        ret = client.create_deployment(
+            ORGANIZATION_ID,
+            name=DEPLOYMENT_NAME,
+            description='description')
         expected_payload = {
             'name': DEPLOYMENT_NAME,
             'description': 'description',
@@ -82,7 +85,8 @@ class TestAPIClient(unittest.TestCase):
 
     @requests_mock.Mocker()
     def test_get_deployment(self, m):
-        path = '/organizations/{}/deployments/{}'.format(ORGANIZATION_ID, DEPLOYMENT_ID)
+        path = '/organizations/{}/deployments/{}'.format(
+            ORGANIZATION_ID, DEPLOYMENT_ID)
         m.get(path, json=DEPLOYMENT_RES)
 
         client = APIClient()
@@ -100,7 +104,8 @@ class TestAPIClient(unittest.TestCase):
 
     @requests_mock.Mocker()
     def test_delete_deployment(self, m):
-        path = '/organizations/{}/deployments/{}'.format(ORGANIZATION_ID, DEPLOYMENT_ID)
+        path = '/organizations/{}/deployments/{}'.format(
+            ORGANIZATION_ID, DEPLOYMENT_ID)
         res = {
             'message': '{} deleted'.format(DEPLOYMENT_ID)
         }
@@ -112,12 +117,16 @@ class TestAPIClient(unittest.TestCase):
 
     @requests_mock.Mocker()
     def test_patch_deployment(self, m):
-        path = '/organizations/{}/deployments/{}'.format(ORGANIZATION_ID, DEPLOYMENT_ID)
+        path = '/organizations/{}/deployments/{}'.format(
+            ORGANIZATION_ID, DEPLOYMENT_ID)
         m.patch(path, json=DEPLOYMENT_RES)
 
         client = APIClient()
-        ret = client.patch_deployment(ORGANIZATION_ID, DEPLOYMENT_ID, DEPLOYMENT_NAME,
-                                      default_environment=DEPLOYMENT_DEFAULT_ENV)
+        ret = client.patch_deployment(
+            ORGANIZATION_ID,
+            DEPLOYMENT_ID,
+            DEPLOYMENT_NAME,
+            default_environment=DEPLOYMENT_DEFAULT_ENV)
         expected_payload = {
             'name': DEPLOYMENT_NAME,
             'default_environment': DEPLOYMENT_DEFAULT_ENV
@@ -127,7 +136,8 @@ class TestAPIClient(unittest.TestCase):
 
     @requests_mock.Mocker()
     def test_get_deployment_versions(self, m):
-        path = '/organizations/{}/deployments/{}/versions'.format(ORGANIZATION_ID, DEPLOYMENT_ID)
+        path = '/organizations/{}/deployments/{}/versions'.format(
+            ORGANIZATION_ID, DEPLOYMENT_ID)
         m.get(path, json=DEPLOYMENT_VERSION_LIST_RES)
 
         client = APIClient()
@@ -136,7 +146,8 @@ class TestAPIClient(unittest.TestCase):
 
     @requests_mock.Mocker()
     def test_create_deployment_version(self, m):
-        path = '/organizations/{}/deployments/{}/versions'.format(ORGANIZATION_ID, DEPLOYMENT_ID)
+        path = '/organizations/{}/deployments/{}/versions'.format(
+            ORGANIZATION_ID, DEPLOYMENT_ID)
         upload_url = "https://xxxxxxxx.s3.amazonaws.com/9999999999999/ver-abcdefghij123456/" \
                      "source.tgz?XXXXXXXXXXXXXXXXXXXX"
         res = {
@@ -158,12 +169,14 @@ class TestAPIClient(unittest.TestCase):
             'image': IMAGE
         }
         client = APIClient()
-        client.create_deployment_version(ORGANIZATION_ID, DEPLOYMENT_ID, **params)
+        client.create_deployment_version(
+            ORGANIZATION_ID, DEPLOYMENT_ID, **params)
         self.assertDictEqual(m.request_history[0].json(), params)
 
     @requests_mock.Mocker()
     def test_create_deployment_from_template(self, m):
-        path = '/organizations/{}/deployments/{}/code_templates'.format(ORGANIZATION_ID, DEPLOYMENT_ID)
+        path = '/organizations/{}/deployments/{}/code_templates'.format(
+            ORGANIZATION_ID, DEPLOYMENT_ID)
         res = {
             "created_at": "2018-06-14T07:15:43.462664Z",
             "handler": "main:handler",
@@ -183,7 +196,8 @@ class TestAPIClient(unittest.TestCase):
             'image': IMAGE
         }
         client = APIClient()
-        client.create_deployment_from_template(ORGANIZATION_ID, DEPLOYMENT_ID, **params)
+        client.create_deployment_from_template(
+            ORGANIZATION_ID, DEPLOYMENT_ID, **params)
         self.assertDictEqual(m.request_history[0].json(), params)
 
     @requests_mock.Mocker()
@@ -193,7 +207,8 @@ class TestAPIClient(unittest.TestCase):
         m.get(path, json=DEPLOYMENT_VERSION_RES)
 
         client = APIClient()
-        ret = client.get_deployment_version(ORGANIZATION_ID, DEPLOYMENT_ID, DEPLOYMENT_VERSION_ID)
+        ret = client.get_deployment_version(
+            ORGANIZATION_ID, DEPLOYMENT_ID, DEPLOYMENT_VERSION_ID)
         self.assertDictEqual(ret, DEPLOYMENT_VERSION_RES)
 
     @requests_mock.Mocker()
@@ -206,7 +221,8 @@ class TestAPIClient(unittest.TestCase):
         m.delete(path, json=res)
 
         client = APIClient()
-        ret = client.delete_deployment_version(ORGANIZATION_ID, DEPLOYMENT_ID, DEPLOYMENT_VERSION_ID)
+        ret = client.delete_deployment_version(
+            ORGANIZATION_ID, DEPLOYMENT_ID, DEPLOYMENT_VERSION_ID)
         self.assertDictEqual(ret, res)
 
     @requests_mock.Mocker()
@@ -219,5 +235,6 @@ class TestAPIClient(unittest.TestCase):
         m.get(path, json=res)
 
         client = APIClient()
-        ret = client.download_deployment_version(ORGANIZATION_ID, DEPLOYMENT_ID, DEPLOYMENT_VERSION_ID)
+        ret = client.download_deployment_version(
+            ORGANIZATION_ID, DEPLOYMENT_ID, DEPLOYMENT_VERSION_ID)
         self.assertDictEqual(ret, res)

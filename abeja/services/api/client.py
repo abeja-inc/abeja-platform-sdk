@@ -14,10 +14,18 @@ class APIClient(BaseAPIClient):
        api_client = APIClient()
     """
 
-    def create_service(
-            self, organization_id: str, deployment_id: str, version_id: str,
-            instance_number: int=1, min_instance_number: Optional[int]=None, max_instance_number: Optional[int]=None, enable_autoscale: Optional[bool]=None,
-            instance_type: str='cpu-0.25', environment: Optional[Dict[str, str]]=None, model_id: Optional[str] = None) -> dict:
+    def create_service(self,
+                       organization_id: str,
+                       deployment_id: str,
+                       version_id: str,
+                       instance_number: int=1,
+                       min_instance_number: Optional[int]=None,
+                       max_instance_number: Optional[int]=None,
+                       enable_autoscale: Optional[bool]=None,
+                       instance_type: str='cpu-0.25',
+                       environment: Optional[Dict[str,
+                                                  str]]=None,
+                       model_id: Optional[str] = None) -> dict:
         """create a service
 
         API reference: POST /organizations/{organization_id}/deployments/{deployment_id}/services
@@ -109,10 +117,16 @@ class APIClient(BaseAPIClient):
             payload.update({
                 'enable_autoscale': enable_autoscale
             })
-        path = '/organizations/{}/deployments/{}/services'.format(organization_id, deployment_id)
-        return self._connection.api_request(method='POST', path=path, json=payload)
+        path = '/organizations/{}/deployments/{}/services'.format(
+            organization_id, deployment_id)
+        return self._connection.api_request(
+            method='POST', path=path, json=payload)
 
-    def get_service(self, organization_id: str, deployment_id: str, service_id: str) -> dict:
+    def get_service(
+            self,
+            organization_id: str,
+            deployment_id: str,
+            service_id: str) -> dict:
         """get a service
 
         API reference: GET /organizations/<organization_id>/deployments/<deployment_id>/services/<service_id>
@@ -159,7 +173,8 @@ class APIClient(BaseAPIClient):
           - Unauthorized: Authentication failed
           - InternalServerError
         """
-        path = '/organizations/{}/deployments/{}/services/{}'.format(organization_id, deployment_id, service_id)
+        path = '/organizations/{}/deployments/{}/services/{}'.format(
+            organization_id, deployment_id, service_id)
         return self._connection.api_request(method='GET', path=path)
 
     def get_services(self, organization_id: str, deployment_id: str) -> dict:
@@ -211,11 +226,16 @@ class APIClient(BaseAPIClient):
             - Unauthorized: Authentication failed
             - InternalServerError
         """
-        path = '/organizations/{}/deployments/{}/services'.format(organization_id, deployment_id)
+        path = '/organizations/{}/deployments/{}/services'.format(
+            organization_id, deployment_id)
         return self._connection.api_request(method='GET', path=path)
 
-    def update_service(self, organization_id: str, deployment_id: str, service_id: str,
-                       payload: Optional[dict] = None) -> dict:
+    def update_service(
+            self,
+            organization_id: str,
+            deployment_id: str,
+            service_id: str,
+            payload: Optional[dict] = None) -> dict:
         """update a service
 
         API reference: PATCH /organizations/<organization_id>/deployments/<deployment_id>/services/<service_id>
@@ -275,10 +295,16 @@ class APIClient(BaseAPIClient):
           - Unauthorized: Authentication failed
           - InternalServerError
         """
-        path = '/organizations/{}/deployments/{}/services/{}'.format(organization_id, deployment_id, service_id)
-        return self._connection.api_request(method='PATCH', path=path, json=payload)
+        path = '/organizations/{}/deployments/{}/services/{}'.format(
+            organization_id, deployment_id, service_id)
+        return self._connection.api_request(
+            method='PATCH', path=path, json=payload)
 
-    def delete_service(self, organization_id: str, deployment_id: str, service_id: str) -> dict:
+    def delete_service(
+            self,
+            organization_id: str,
+            deployment_id: str,
+            service_id: str) -> dict:
         """delete a service
 
         API reference: DELETE /organizations/<organization_id>/deployments/<deployment_id>/services/<service_id>
@@ -310,10 +336,15 @@ class APIClient(BaseAPIClient):
           - Unauthorized: Authentication failed
           - InternalServerError
         """
-        path = '/organizations/{}/deployments/{}/services/{}'.format(organization_id, deployment_id, service_id)
+        path = '/organizations/{}/deployments/{}/services/{}'.format(
+            organization_id, deployment_id, service_id)
         return self._connection.api_request(method='DELETE', path=path)
 
-    def stop_service(self, organization_id: str, deployment_id: str, service_id: str) -> dict:
+    def stop_service(
+            self,
+            organization_id: str,
+            deployment_id: str,
+            service_id: str) -> dict:
         """stop a service
 
         API reference: POST /organizations/<organization_id>/deployments/<deployment_id>/services/<service_id>/stop
@@ -346,10 +377,15 @@ class APIClient(BaseAPIClient):
           - Unauthorized: Authentication failed
           - InternalServerError
         """
-        path = '/organizations/{}/deployments/{}/services/{}/stop'.format(organization_id, deployment_id, service_id)
+        path = '/organizations/{}/deployments/{}/services/{}/stop'.format(
+            organization_id, deployment_id, service_id)
         return self._connection.api_request(method='POST', path=path)
 
-    def start_service(self, organization_id: str, deployment_id: str, service_id: str) -> dict:
+    def start_service(
+            self,
+            organization_id: str,
+            deployment_id: str,
+            service_id: str) -> dict:
         """start a service
 
         API reference: POST /organizations/<organization_id>/deployments/<deployment_id>/services/<service_id>/start
@@ -382,12 +418,19 @@ class APIClient(BaseAPIClient):
           - Unauthorized: Authentication failed
           - InternalServerError
         """
-        path = '/organizations/{}/deployments/{}/services/{}/start'.format(organization_id, deployment_id, service_id)
+        path = '/organizations/{}/deployments/{}/services/{}/start'.format(
+            organization_id, deployment_id, service_id)
         return self._connection.api_request(method='POST', path=path)
 
-    def get_service_recent_logs(self, organization_id: str, deployment_id: str, service_id: str,
-                                next_forward_token: Optional[str]=None, next_backward_token: Optional[str]=None,
-                                start_time: Optional[datetime]=None, end_time: Optional[datetime]=None) -> dict:
+    def get_service_recent_logs(
+            self,
+            organization_id: str,
+            deployment_id: str,
+            service_id: str,
+            next_forward_token: Optional[str]=None,
+            next_backward_token: Optional[str]=None,
+            start_time: Optional[datetime]=None,
+            end_time: Optional[datetime]=None) -> dict:
         """get recent logs of the service
 
         API reference: GET /organizations/<organization_id>/deployments/<deployment_id>/services/<service_id>/recentlogs
@@ -451,4 +494,5 @@ class APIClient(BaseAPIClient):
             params['end_time'] = end_time.strftime("%Y-%m-%dT%H:%M:%S")
         path = '/organizations/{}/deployments/{}/services/{}/recentlogs'.format(
             organization_id, deployment_id, service_id)
-        return self._connection.api_request(method='GET', path=path, params=params)
+        return self._connection.api_request(
+            method='GET', path=path, params=params)

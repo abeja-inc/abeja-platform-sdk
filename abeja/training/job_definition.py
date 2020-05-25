@@ -10,7 +10,9 @@ class JobDefinition():
     """Training job definition object.
     """
 
-    def __init__(self, api: APIClient, organization_id: str,
+    def __init__(self,
+                 api: APIClient,
+                 organization_id: str,
                  job_definition_id: str,
                  name: str,
                  version_count: int,
@@ -37,7 +39,11 @@ class JobDefinition():
         self.__modified_at = modified_at
 
     @classmethod
-    def from_response(klass, api: APIClient, organization_id: str, response: Dict[str, Any]) -> 'JobDefinition':
+    def from_response(klass,
+                      api: APIClient,
+                      organization_id: str,
+                      response: Dict[str,
+                                     Any]) -> 'JobDefinition':
         """Construct an object from API response.
 
         NOTE: For convenient, this method DOES NOT validate the input response and
@@ -46,9 +52,8 @@ class JobDefinition():
         versions = None
         vs = response.get('versions')
         if vs is not None:
-            versions = [
-                job_definition_version.JobDefinitionVersion.from_response(api=api, organization_id=organization_id, response=v)
-                for v in vs]
+            versions = [job_definition_version.JobDefinitionVersion.from_response(
+                api=api, organization_id=organization_id, response=v) for v in vs]
 
         return klass(
             api=api,
@@ -101,7 +106,8 @@ class JobDefinition():
         return self.__tensorboard_count
 
     @property
-    def versions(self) -> Optional[List['job_definition_version.JobDefinitionVersion']]:
+    def versions(
+            self) -> Optional[List['job_definition_version.JobDefinitionVersion']]:
         """Get the versions of this job definition."""
         return self.__versions
 
@@ -126,7 +132,8 @@ class JobDefinition():
         """Get the modified date string (ISO 8601) of this job definition."""
         return self.__modified_at
 
-    def job_definition_versions(self) -> 'job_definition_version.JobDefinitionVersions':
+    def job_definition_versions(
+            self) -> 'job_definition_version.JobDefinitionVersions':
         """Return a adapter object for handling training job definition versions under
         this job definition.
 
@@ -137,9 +144,10 @@ class JobDefinition():
                 version = adapter.get(job_definition_version_id=1)
 
         Return type:
-            :class:`JobDefinitions <abeja.training.JobDefinitions>` object
+            :class:`JobDefinitionVersions <abeja.training.JobDefinitionVersions>` object
         """
-        return job_definition_version.JobDefinitionVersions(api=self.__api, job_definition=self)
+        return job_definition_version.JobDefinitionVersions(
+            api=self.__api, job_definition=self)
 
     def jobs(self) -> 'job.Jobs':
         """Return a adapter object for handling training jobs under
@@ -152,7 +160,7 @@ class JobDefinition():
                 version = adapter.get(job_id='1234567890123')
 
         Return type:
-            :class:`JobDefinitions <abeja.training.Jobs>` object
+            :class:`Jobs <abeja.training.Jobs>` object
         """
         return job.Jobs(api=self.__api, job_definition=self)
 
@@ -172,7 +180,10 @@ class JobDefinitions():
         """Get the organization ID."""
         return self.__organization_id
 
-    def get(self, name: str, include_jobs: Optional[bool] = False) -> JobDefinition:
+    def get(
+            self,
+            name: str,
+            include_jobs: Optional[bool] = False) -> JobDefinition:
         """Get a training job definition.
 
         Request Syntax:
@@ -304,5 +315,6 @@ class JobDefinitionIterator(AbstractSizedIterator[JobDefinition]):
             offset=self.offset,
             limit=self.limit)
 
-    def build_entry(self, api: APIClient, entry: Dict[str, Any]) -> JobDefinition:
+    def build_entry(self, api: APIClient,
+                    entry: Dict[str, Any]) -> JobDefinition:
         return JobDefinition.from_response(api, self.organization_id, entry)
