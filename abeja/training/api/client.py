@@ -1042,6 +1042,72 @@ class APIClient(BaseAPIClient):
             organization_id, job_definition_name, training_job_id)
         return self._connection.api_request(method='POST', path=path)
 
+    def archive_training_job(
+            self,
+            organization_id: str,
+            job_definition_name: str,
+            training_job_id: str) -> dict:
+        """Archive a training job.
+
+        API reference: POST /organizations/<organization_id>/training/definitions/{job_definition_name}/jobs/{training_job_id}/archive
+
+        Request Syntax:
+            .. code-block:: python
+
+                organization_id = "1102940376065"
+                job_definition_name = "test"
+                training_job_id = "1234567890123"
+                response = api_client.archive_training_job(organization_id,
+                                                           job_definition_name,
+                                                           training_job_id)
+
+        Params:
+            - **organization_id** (str): ORGANIZATION_ID
+            - **job_definition_name** (str): training job definition name
+            - **training_job_id** (str): TRAINING_JOB_ID
+
+        Raises:
+            - BadRequest
+            - Unauthorized: Authentication failed
+            - InternalServerError
+        """
+        path = '/organizations/{}/training/definitions/{}/jobs/{}/archive'.format(
+            organization_id, job_definition_name, training_job_id)
+        return self._connection.api_request(method='POST', path=path, json={})
+
+    def unarchive_training_job(
+            self,
+            organization_id: str,
+            job_definition_name: str,
+            training_job_id: str) -> dict:
+        """Archive a training job.
+
+        API reference: POST /organizations/<organization_id>/training/definitions/{job_definition_name}/jobs/{training_job_id}/unarchive
+
+        Request Syntax:
+            .. code-block:: python
+
+                organization_id = "1102940376065"
+                job_definition_name = "test"
+                training_job_id = "1234567890123"
+                response = api_client.unarchive_training_job(organization_id,
+                                                             job_definition_name,
+                                                             training_job_id)
+
+        Params:
+            - **organization_id** (str): ORGANIZATION_ID
+            - **job_definition_name** (str): training job definition name
+            - **training_job_id** (str): TRAINING_JOB_ID
+
+        Raises:
+            - BadRequest
+            - Unauthorized: Authentication failed
+            - InternalServerError
+        """
+        path = '/organizations/{}/training/definitions/{}/jobs/{}/unarchive'.format(
+            organization_id, job_definition_name, training_job_id)
+        return self._connection.api_request(method='POST', path=path, json={})
+
     def get_training_result(
             self,
             organization_id: str,

@@ -303,7 +303,7 @@ def test_create_job(
     assert job.job_definition.job_definition_id == definition.job_definition_id
 
 
-def test_stop_job(requests_mock, api_base_url, training_api_client,
+def test_stop_job(requests_mock, api_base_url,
                   job_id, job_definition_factory) -> None:
     definition = job_definition_factory()  # type: JobDefinition
     adapter = definition.jobs()
@@ -318,6 +318,42 @@ def test_stop_job(requests_mock, api_base_url, training_api_client,
             'message': "test-1 stopped"})
 
     adapter.stop(job_id)
+    assert requests_mock.called
+
+
+def test_archive_job(requests_mock, api_base_url,
+                     job_id, job_definition_factory) -> None:
+    definition = job_definition_factory()  # type: JobDefinition
+    adapter = definition.jobs()
+
+    requests_mock.post(
+        '{}/organizations/{}/training/definitions/{}/jobs/{}/archive'.format(
+            api_base_url,
+            adapter.organization_id,
+            adapter.job_definition_name,
+            job_id),
+        json={
+            'message': "test-1 archived"})
+
+    adapter.archive(job_id)
+    assert requests_mock.called
+
+
+def test_unarchive_job(requests_mock, api_base_url,
+                       job_id, job_definition_factory) -> None:
+    definition = job_definition_factory()  # type: JobDefinition
+    adapter = definition.jobs()
+
+    requests_mock.post(
+        '{}/organizations/{}/training/definitions/{}/jobs/{}/unarchive'.format(
+            api_base_url,
+            adapter.organization_id,
+            adapter.job_definition_name,
+            job_id),
+        json={
+            'message': "test-1 unarchived"})
+
+    adapter.unarchive(job_id)
     assert requests_mock.called
 
 
