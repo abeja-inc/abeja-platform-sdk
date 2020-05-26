@@ -130,7 +130,7 @@ class APIClient(BaseAPIClient):
             - **organization_id** (str): ORGANIZATION_ID
             - **limit** (int): **[optional]** max number of channels to be returned
             - **offset** (int): **[optional]** offset of channels ( which starts from 0 )
-            - **filter_archived** (bool): **[optional]** whether include archived ones or not. (default is not-filtered)
+            - **filter_archived** (bool): **[optional]** If ``true``, include archived jobs, otherwise exclude archived jobs. (default: ``false``)
 
         Return type:
             dict
