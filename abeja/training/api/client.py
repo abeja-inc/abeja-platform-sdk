@@ -144,7 +144,7 @@ class APIClient(BaseAPIClient):
 
         Params:
             - **organization_id** (str): ORGANIZATION_ID
-            - **filter_archived** (bool): **[optional]** whether include archived ones or not. (default is not-filtered)
+            - **filter_archived** (bool): **[optional]** If ``true``, include archived jobs, otherwise exclude archived jobs. (default: ``false``)
             - **offset** (int): **[optional]** paging offset.
             - **limit** (int): **[optional]** paging limit.
 
@@ -477,7 +477,7 @@ class APIClient(BaseAPIClient):
         Params:
             - **organization_id** (str): ORGANIZATION_ID
             - **job_definition_name** (str): training job definition name
-            - **filter_archived** (bool): **[optional]** whether include archived ones or not. (default is not-filtered)
+            - **filter_archived** (bool): **[optional]** If ``true``, include archived jobs, otherwise exclude archived jobs. (default: ``false``)
 
         Return type:
             dict
@@ -878,7 +878,7 @@ class APIClient(BaseAPIClient):
             - **job_definition_name** (str): training job definition name
             - **limit** (int): **[optional]** max number of jobs to be returned (default: 10)
             - **offset** (int): **[optional]** offset of jobs ( which starts from 0 )
-            - **filter_archived** (bool): **[optional]** whether include archived ones or not. (default is not-filtered)
+            - **filter_archived** (bool): **[optional]** If ``true``, include archived jobs, otherwise exclude archived jobs. (default: ``false``)
 
         Return type:
             dict
