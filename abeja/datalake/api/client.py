@@ -623,7 +623,8 @@ class APIClient(BaseAPIClient):
             file_obj: IO,
             content_type: str,
             metadata: dict=None,
-            lifetime: str=None) -> dict:
+            lifetime: str=None,
+            conflict_target: str=None) -> dict:
         """upload a file to a channel.
 
         API reference: POST /channels/<channel_id>/upload
@@ -646,6 +647,7 @@ class APIClient(BaseAPIClient):
             - **content_type** (str): content type of a file to be uploaded
             - **metadata** (dict): **[optional]** key-value pair of metadata for the file
             - **lifetime** (str): **[optional]** each one of `1day` / `1week` / `1month` / `6months`. the file will be deleted after the specified time.
+            - **conflict_target** (str): **[optional]** return `409 Conflict` when the same value of specified key already exists in channel. for now, `filename` is only supported key.
 
         Return type:
             dict
@@ -682,8 +684,10 @@ class APIClient(BaseAPIClient):
         headers.update(encoded_metadata)
 
         params = {}
-        if lifetime:
+        if lifetime is not None:
             params['lifetime'] = lifetime
+        if conflict_target is not None:
+            params['conflict_target'] = conflict_target
         res = self._connection.api_request(
             method='POST',
             headers=headers,

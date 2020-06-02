@@ -27,6 +27,7 @@ ENCODED_METADATA = {
     'x-abeja-meta-%E3%83%86%E3%82%B9%E3%83%88': '%E3%83%86%E3%82%B9%E3%83%88%EF%BC%91'
 }
 LIFETIME = '1day'
+CONFLICT_TARGET = 'filename'
 FILE_ID = '20180510T110208-193d0d17-f0b1-4549-96df-651c02ccb8c9'
 API_BASE_URL = 'http://localhost:8080'
 BUCKET_ID = '1240000000000'
@@ -288,13 +289,13 @@ class TestApiClient(TestCase):
         api_client = APIClient()
         res = api_client.post_channel_file_upload(
             CHANNEL_ID, BytesIO('test data'.encode('utf-8')), CONTENT_TYPE,
-            metadata=METADATA, lifetime=LIFETIME)
+            metadata=METADATA, lifetime=LIFETIME, conflict_target=CONFLICT_TARGET)
 
         req = m.request_history[0]
         assert req.method == 'POST'
         assert ENCODED_METADATA.items() < req.headers.items()
         assert req.headers['Content-Type'] == CONTENT_TYPE
-        assert req.query == 'lifetime={}'.format(LIFETIME)
+        assert req.query == 'lifetime={}&conflict_target={}'.format(LIFETIME, CONFLICT_TARGET)
 
         assert METADATA.items() < res['metadata'].items()
 
