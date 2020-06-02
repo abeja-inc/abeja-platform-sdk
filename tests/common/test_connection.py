@@ -24,6 +24,9 @@ TEST_TOKEN = 'test_token'
 TEST_USER_ID = 'user-test_user_id'
 TEST_NON_PREFIX_USER_ID = 'test_user_id'
 TEST_PERSONAL_ACCESS_TOKEN = 'test_personal_access_token'
+TEST_DATASOURCE_ID = 'datasource-test_datasource_id'
+TEST_NON_PREFIX_DATASOURCE_ID = 'test_datasource_id'
+TEST_DATASOURCE_SECRET = 'test_datasource_secret'
 TEST_ABEJA_SDK_CONNECTION_TIMEOUT = '120'
 TEST_ABEJA_SDK_MAX_RETRY_COUNT = '10'
 
@@ -61,6 +64,24 @@ class TestConnection(unittest.TestCase):
         self.assertEqual(connection.credential['user_id'], TEST_USER_ID)
         self.assertEqual(connection.credential['personal_access_token'],
                          TEST_PERSONAL_ACCESS_TOKEN)
+
+    @patch.dict(os.environ, {
+        'ABEJA_PLATFORM_DATASOURCE_ID': TEST_DATASOURCE_ID,
+        'ABEJA_PLATFORM_DATASOURCE_SECRET': TEST_DATASOURCE_SECRET
+    })
+    def test_init_with_datasource_id_and_secret(self):
+        connection = Connection()
+        self.assertEqual(connection.credential['datasource_id'], TEST_DATASOURCE_ID)
+        self.assertEqual(connection.credential['datasource_secret'], TEST_DATASOURCE_SECRET)
+
+    @patch.dict(os.environ, {
+        'ABEJA_PLATFORM_DATASOURCE_ID': TEST_NON_PREFIX_DATASOURCE_ID,
+        'ABEJA_PLATFORM_DATASOURCE_SECRET': TEST_DATASOURCE_SECRET
+    })
+    def test_init_with_non_prefix_datasource_id_and_secret(self):
+        connection = Connection()
+        self.assertEqual(connection.credential['datasource_id'], TEST_DATASOURCE_ID)
+        self.assertEqual(connection.credential['datasource_secret'], TEST_DATASOURCE_SECRET)
 
     def test_api_request(self):
         Connection.BASE_URL = 'http://localhost:8080'
@@ -199,6 +220,22 @@ class TestConnection(unittest.TestCase):
         connection = Connection(credential=credential)
         header = connection._get_auth_header()
         s = '{}:{}'.format(user_id, personal_access_token)
+        s = base64.b64encode(s.encode('utf-8'))
+        expected = {
+            'Authorization': 'Basic {}'.format(s.decode('utf-8'))
+        }
+        self.assertDictEqual(header, expected)
+
+    def test_get_auth_header_with_datasource_id_and_secret(self):
+        datasource_id = TEST_DATASOURCE_ID
+        datasource_secret = TEST_DATASOURCE_SECRET
+        credential = {
+            'datasource_id': datasource_id,
+            'datasource_secret': datasource_secret
+        }
+        connection = Connection(credential=credential)
+        header = connection._get_auth_header()
+        s = '{}:{}'.format(datasource_id, datasource_secret)
         s = base64.b64encode(s.encode('utf-8'))
         expected = {
             'Authorization': 'Basic {}'.format(s.decode('utf-8'))
