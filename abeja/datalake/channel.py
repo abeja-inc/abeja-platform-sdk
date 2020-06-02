@@ -153,7 +153,7 @@ class Channel:
             - **content_type** (str): MIME type of content.
             - **metadata** (dict): **[optional]** metadata to be added to uploaded file. Object can not be set to the key or value of dict. It must be a string.
             - **lifetime** (str): **[optional]** each one of `1day` / `1week` / `6months`. the file will be deleted after the specified time.
-            - **conflict_target** (str): **[optional]** return `409 Conflict` when the same value of specified key already exists in channel. for now, `filename` is only supported key.
+            - **conflict_target** (str): **[optional]** return `409 Conflict` when the same value of specified key already exists in channel.
 
         Return type:
             :class:`DatalakeFile <abeja.datalake.file.DatalakeFile>` object
@@ -214,7 +214,7 @@ class Channel:
             - **metadata** (dict): **[optional]** metadata to be added to uploaed file.
             - **content_type** (str): **[optional]** MIME type of content. Content-Type is assumed by the extension if not specified.
             - **lifetime** (str): **[optional]** each one of `1day` / `1week` / `6months`. the file will be deleted after the specified time.
-            - **conflict_target** (str): **[optional]** return `409 Conflict` when the same value of specified key already exists in channel. for now, `filename` is only supported key.
+            - **conflict_target** (str): **[optional]** return `409 Conflict` when the same value of specified key already exists in channel.
 
         Return type:
             :class:`DatalakeFile <abeja.datalake.file.DatalakeFile>` object
@@ -272,7 +272,7 @@ class Channel:
             - **metadata** (dict): metadata to be added to uploaed file. **[optional]**
             - **content_type** (str): MIME type of content. Content-Type is assumed by extensions if not specified **[optional]**
             - **lifetime** (str): **[optional]** each one of `1day` / `1week` / `6months`. the file will be deleted after the specified time.
-            - **conflict_target** (str): **[optional]** return `409 Conflict` when the same value of specified key already exists in channel. for now, `filename` is only supported key.
+            - **conflict_target** (str): **[optional]** return `409 Conflict` when the same value of specified key already exists in channel.
 
         Return type:
             list of :class:`DatalakeFile <abeja.datalake.file.DatalakeFile>` object
