@@ -50,6 +50,10 @@ class Connection:
                 "user-"):
             self.credential['user_id'] = 'user-{}'.format(
                 self.credential['user_id'])
+        if 'datasource_id' in self.credential and \
+                not self.credential['datasource_id'].startswith('datasource-'):
+            self.credential['datasource_id'] = 'datasource-{}'.format(
+                self.credential['datasource_id'])
 
     def api_request(
             self,
@@ -147,6 +151,15 @@ class Connection:
             user_id = self.credential['user_id']
             personal_access_token = self.credential['personal_access_token']
             base = '{}:{}'.format(user_id, personal_access_token)
+            encoded = base64.b64encode(base.encode('utf-8'))
+            return {
+                'Authorization': 'Basic {}'.format(encoded.decode('utf-8'))
+            }
+        if self.credential.get('datasource_id') and self.credential.get(
+                'datasource_secret'):
+            datasource_id = self.credential['datasource_id']
+            datasource_secret = self.credential['datasource_secret']
+            base = '{}:{}'.format(datasource_id, datasource_secret)
             encoded = base64.b64encode(base.encode('utf-8'))
             return {
                 'Authorization': 'Basic {}'.format(encoded.decode('utf-8'))
