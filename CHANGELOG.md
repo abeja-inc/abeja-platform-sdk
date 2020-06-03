@@ -1,3 +1,11 @@
+# 1.1.5
+- Update doc about filter_archived (#31)
+- support datasource basic auth (#32)
+- support conflict_target in Data Lake (#33)
+
+# 1.1.4
+- Not available due to various circumstances
+
 # 1.1.3
 - Archive/Unarchive job (#30)
 - Update conftest (#29)

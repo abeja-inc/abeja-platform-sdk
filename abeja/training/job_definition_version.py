@@ -183,7 +183,7 @@ class JobDefinitionVersions():
         get the total number of training job definition versions.
 
         Params:
-            - **filter_archived** (bool): **[optional]** whether include archived ones or not. (default is not-filtered)
+            - **filter_archived** (bool): **[optional]** If ``true``, include archived jobs, otherwise exclude archived jobs. (default: ``false``)
 
         Return type:
             SizedIterable[JobDefinitionVersion]

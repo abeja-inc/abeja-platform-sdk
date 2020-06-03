@@ -135,7 +135,7 @@ class Channel:
             lifetime=download_info.get('lifetime'))
 
     def upload(self, file_obj: BytesIO, content_type: str, metadata: dict=None,
-               lifetime: str=None) -> DatalakeFile:
+               lifetime: str=None, conflict_target: str=None) -> DatalakeFile:
         """upload a content to a channel with file-like object.
 
         Request syntax:
@@ -153,6 +153,7 @@ class Channel:
             - **content_type** (str): MIME type of content.
             - **metadata** (dict): **[optional]** metadata to be added to uploaded file. Object can not be set to the key or value of dict. It must be a string.
             - **lifetime** (str): **[optional]** each one of `1day` / `1week` / `6months`. the file will be deleted after the specified time.
+            - **conflict_target** (str): **[optional]** return `409 Conflict` when the same value of specified key already exists in channel.
 
         Return type:
             :class:`DatalakeFile <abeja.datalake.file.DatalakeFile>` object
@@ -180,7 +181,8 @@ class Channel:
             file_obj,
             content_type,
             metadata=metadata,
-            lifetime=lifetime)
+            lifetime=lifetime,
+            conflict_target=conflict_target)
 
         return DatalakeFile(
             api=self._api,
@@ -194,7 +196,7 @@ class Channel:
 
     def upload_file(
             self, file_path: str, metadata: dict=None, content_type: str=None,
-            lifetime: str=None) -> DatalakeFile:
+            lifetime: str=None, conflict_target: str=None) -> DatalakeFile:
         """upload a file to a channel.
         This method infers the content_type of given file if content_type is not specified,
         and set the filename as `x-abeja-meta-filename` in metadata.
@@ -212,6 +214,7 @@ class Channel:
             - **metadata** (dict): **[optional]** metadata to be added to uploaed file.
             - **content_type** (str): **[optional]** MIME type of content. Content-Type is assumed by the extension if not specified.
             - **lifetime** (str): **[optional]** each one of `1day` / `1week` / `6months`. the file will be deleted after the specified time.
+            - **conflict_target** (str): **[optional]** return `409 Conflict` when the same value of specified key already exists in channel.
 
         Return type:
             :class:`DatalakeFile <abeja.datalake.file.DatalakeFile>` object
@@ -238,7 +241,8 @@ class Channel:
                 f,
                 content_type,
                 metadata=update_metadata,
-                lifetime=lifetime)
+                lifetime=lifetime,
+                conflict_target=conflict_target)
 
     def upload_dir(
             self,
@@ -246,6 +250,7 @@ class Channel:
             metadata: dict=None,
             content_type: str=None,
             lifetime: str=None,
+            conflict_target: str=None,
             recursive: bool=False,
             use_thread: bool=True) -> Iterable[DatalakeFile]:
         """upload files in directory to a channel.
@@ -267,6 +272,7 @@ class Channel:
             - **metadata** (dict): metadata to be added to uploaed file. **[optional]**
             - **content_type** (str): MIME type of content. Content-Type is assumed by extensions if not specified **[optional]**
             - **lifetime** (str): **[optional]** each one of `1day` / `1week` / `6months`. the file will be deleted after the specified time.
+            - **conflict_target** (str): **[optional]** return `409 Conflict` when the same value of specified key already exists in channel.
 
         Return type:
             list of :class:`DatalakeFile <abeja.datalake.file.DatalakeFile>` object
@@ -283,11 +289,12 @@ class Channel:
             file_path_iter,
             content_type=content_type,
             metadata=metadata,
-            lifetime=lifetime)
+            lifetime=lifetime,
+            conflict_target=conflict_target)
 
     def _upload_files_threaded(
             self, file_paths: Iterable[str], content_type: str=None,
-            metadata: dict=None, lifetime: str=None) -> Iterable[DatalakeFile]:
+            metadata: dict=None, lifetime: str=None, conflict_target: str=None) -> Iterable[DatalakeFile]:
         """upload files asynchronously using thread
         this method does not return generator to avoid lazy evaluation.
         """
@@ -301,7 +308,8 @@ class Channel:
                         f,
                         metadata=metadata,
                         content_type=content_type,
-                        lifetime=lifetime))
+                        lifetime=lifetime,
+                        conflict_target=conflict_target))
             for f in as_completed(futures):
                 try:
                     files.append(f.result())
@@ -314,7 +322,8 @@ class Channel:
             file_paths: Iterable[str],
             content_type: str=None,
             metadata: dict=None,
-            lifetime: str=None) -> Iterable[DatalakeFile]:
+            lifetime: str=None,
+            conflict_target: str=None) -> Iterable[DatalakeFile]:
         """upload files synchronously using thread
         this method does not return generator to avoid lazy evaluation.
         """
@@ -325,7 +334,8 @@ class Channel:
                     file_path,
                     content_type=content_type,
                     metadata=metadata,
-                    lifetime=lifetime)
+                    lifetime=lifetime,
+                    conflict_target=conflict_target)
                 files.append(file)
             except Exception as e:
                 logger.error(e)

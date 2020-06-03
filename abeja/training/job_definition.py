@@ -220,7 +220,7 @@ class JobDefinitions():
         get the total number of training job definitions.
 
         Params:
-            - **filter_archived** (bool): **[optional]** whether include archived ones or not. (default is not-filtered)
+            - **filter_archived** (bool): **[optional]** If ``true``, include archived jobs, otherwise exclude archived jobs. (default: ``false``)
             - **offset** (int): **[optional]** paging offset.
             - **limit** (int): **[optional]** paging limit.
 

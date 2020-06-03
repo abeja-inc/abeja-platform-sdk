@@ -176,7 +176,7 @@ class TestChannel(TestCase):
         }
         mock_api.post_channel_file_upload.assert_called_once_with(
             CHANNEL_ID, dummy_file, content_type,
-            metadata=expected_metadata, lifetime=None)
+            metadata=expected_metadata, lifetime=None, conflict_target=None)
 
     def test_upload_file(self):
         mock_api = Mock()
@@ -211,6 +211,7 @@ class TestChannel(TestCase):
         self.assertEqual(call_args[0], CHANNEL_ID)
         self.assertDictEqual(call_kwargs, {
             'lifetime': None,
+            'conflict_target': None,
             'metadata': expected_metadata
         })
 
@@ -243,6 +244,7 @@ class TestChannel(TestCase):
         self.assertEqual(call_args[2], content_type)
         self.assertDictEqual(call_kwargs, {
             'lifetime': None,
+            'conflict_target': None,
             'metadata': metadata
         })
 
@@ -277,6 +279,42 @@ class TestChannel(TestCase):
         self.assertEqual(call_args[2], content_type)
         self.assertDictEqual(call_kwargs, {
             'lifetime': dummy_lifetime,
+            'conflict_target': None,
+            'metadata': metadata
+        })
+
+    def test_upload_file_with_conflict_target(self):
+        conflict_target = 'filename'
+        mock_api = Mock()
+        mock_api.post_channel_file_upload.return_value = {
+            "uploaded_at": None,
+            "metadata": {},
+            "content_type": "image/jpeg",
+            "lifetime": None,
+            "file_id": "20180515T180605-f4acc798-9afa-40a1-b500-ebce42a4fa3f"
+        }
+        channel = Channel(mock_api, ORGANIZATION_ID, CHANNEL_ID)
+        dummy_file_data = json.dumps({'data': 'dummy'}).encode('utf-8')
+        with tempfile.NamedTemporaryFile(suffix='.json') as tmp:
+            tmp.write(dummy_file_data)
+            tmp.seek(0)
+            filename = os.path.basename(tmp.name)
+            file = channel.upload_file(tmp.name, conflict_target=conflict_target)
+        self.assertIsInstance(file, DatalakeFile)
+
+        content_type = 'application/json'
+        metadata = {'x-abeja-meta-filename': filename}
+
+        self.assertEqual(mock_api.post_channel_file_upload.call_count, 1)
+
+        call_args = mock_api.post_channel_file_upload.call_args[0]
+        call_kwargs = mock_api.post_channel_file_upload.call_args[1]
+
+        self.assertEqual(call_args[0], CHANNEL_ID)
+        self.assertEqual(call_args[2], content_type)
+        self.assertDictEqual(call_kwargs, {
+            'lifetime': None,
+            'conflict_target': conflict_target,
             'metadata': metadata
         })
 

@@ -33,7 +33,7 @@ class APIClient(BaseAPIClient):
         Params:
             - **organization_id** (str): organization_id
             - **job_definition_name** (str): training job definition name
-            - **filter_archived** (bool): **[optional]** whether include archived ones or not. (default is not-filtered)
+            - **filter_archived** (bool): **[optional]** If ``true``, include archived jobs, otherwise exclude archived jobs. (default: ``false``)
 
         Return type:
             dict
