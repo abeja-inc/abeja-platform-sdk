@@ -299,7 +299,8 @@ class TestChannel(TestCase):
             tmp.write(dummy_file_data)
             tmp.seek(0)
             filename = os.path.basename(tmp.name)
-            file = channel.upload_file(tmp.name, conflict_target=conflict_target)
+            file = channel.upload_file(
+                tmp.name, conflict_target=conflict_target)
         self.assertIsInstance(file, DatalakeFile)
 
         content_type = 'application/json'

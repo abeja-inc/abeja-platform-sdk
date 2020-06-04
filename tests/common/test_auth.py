@@ -50,8 +50,11 @@ class TestAuth(unittest.TestCase):
             'datasource_secret': TEST_DATASOURCE_SECRET
         })
 
-    @patch.dict(os.environ, {'ABEJA_PLATFORM_DATASOURCE_ID': TEST_DATASOURCE_ID})
-    def test_get_datasource_basic_auth_from_environment_with_only_datasource_id(self):
+    @patch.dict(
+        os.environ, {
+            'ABEJA_PLATFORM_DATASOURCE_ID': TEST_DATASOURCE_ID})
+    def test_get_datasource_basic_auth_from_environment_with_only_datasource_id(
+            self):
         token = get_datasource_basic_auth_from_environment()
         self.assertIsNone(token)
 
