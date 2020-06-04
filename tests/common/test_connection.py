@@ -71,8 +71,12 @@ class TestConnection(unittest.TestCase):
     })
     def test_init_with_datasource_id_and_secret(self):
         connection = Connection()
-        self.assertEqual(connection.credential['datasource_id'], TEST_DATASOURCE_ID)
-        self.assertEqual(connection.credential['datasource_secret'], TEST_DATASOURCE_SECRET)
+        self.assertEqual(
+            connection.credential['datasource_id'],
+            TEST_DATASOURCE_ID)
+        self.assertEqual(
+            connection.credential['datasource_secret'],
+            TEST_DATASOURCE_SECRET)
 
     @patch.dict(os.environ, {
         'ABEJA_PLATFORM_DATASOURCE_ID': TEST_NON_PREFIX_DATASOURCE_ID,
@@ -80,8 +84,12 @@ class TestConnection(unittest.TestCase):
     })
     def test_init_with_non_prefix_datasource_id_and_secret(self):
         connection = Connection()
-        self.assertEqual(connection.credential['datasource_id'], TEST_DATASOURCE_ID)
-        self.assertEqual(connection.credential['datasource_secret'], TEST_DATASOURCE_SECRET)
+        self.assertEqual(
+            connection.credential['datasource_id'],
+            TEST_DATASOURCE_ID)
+        self.assertEqual(
+            connection.credential['datasource_secret'],
+            TEST_DATASOURCE_SECRET)
 
     def test_api_request(self):
         Connection.BASE_URL = 'http://localhost:8080'

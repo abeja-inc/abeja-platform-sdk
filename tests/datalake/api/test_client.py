@@ -295,7 +295,8 @@ class TestApiClient(TestCase):
         assert req.method == 'POST'
         assert ENCODED_METADATA.items() < req.headers.items()
         assert req.headers['Content-Type'] == CONTENT_TYPE
-        assert req.query == 'lifetime={}&conflict_target={}'.format(LIFETIME, CONFLICT_TARGET)
+        assert req.query == 'lifetime={}&conflict_target={}'.format(
+            LIFETIME, CONFLICT_TARGET)
 
         assert METADATA.items() < res['metadata'].items()
 

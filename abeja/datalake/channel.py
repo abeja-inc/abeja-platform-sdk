@@ -293,8 +293,12 @@ class Channel:
             conflict_target=conflict_target)
 
     def _upload_files_threaded(
-            self, file_paths: Iterable[str], content_type: str=None,
-            metadata: dict=None, lifetime: str=None, conflict_target: str=None) -> Iterable[DatalakeFile]:
+            self,
+            file_paths: Iterable[str],
+            content_type: str=None,
+            metadata: dict=None,
+            lifetime: str=None,
+            conflict_target: str=None) -> Iterable[DatalakeFile]:
         """upload files asynchronously using thread
         this method does not return generator to avoid lazy evaluation.
         """
