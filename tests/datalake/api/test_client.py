@@ -2,6 +2,7 @@ from io import BytesIO
 import pytest
 from unittest import TestCase
 from unittest.mock import patch
+from urllib.parse import parse_qs
 
 import requests_mock
 
@@ -295,9 +296,10 @@ class TestApiClient(TestCase):
         assert req.method == 'POST'
         assert ENCODED_METADATA.items() < req.headers.items()
         assert req.headers['Content-Type'] == CONTENT_TYPE
-        assert req.query == 'lifetime={}&conflict_target={}'.format(
-            LIFETIME, CONFLICT_TARGET)
-
+        assert parse_qs(req.query) == {
+            'lifetime': [LIFETIME],
+            'conflict_target': [CONFLICT_TARGET]
+        }
         assert METADATA.items() < res['metadata'].items()
 
     @requests_mock.Mocker()
