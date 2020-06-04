@@ -6,6 +6,7 @@ from abeja.exceptions import InvalidPathException
 from abeja.models.api.client import APIClient as ModelClient
 from abeja.training.api.client import APIClient as TrainingClient
 from abeja.training.statistics import Statistics as ABEJAStatistics
+from abeja.tracking.metric import Metric
 from tensorboardX import SummaryWriter
 
 
@@ -93,15 +94,11 @@ class Tracking:
             self.log_param(key, value)
 
     def log_metric(self, key: str, value: float) -> None:
-        if isinstance(key, str) and isinstance(value, float):
-            if self._step is not None and key in [
-                    'main/loss', 'main/acc', 'test/loss', 'test/acc']:
-                self._summary_writer.add_scalar(key, value, self._step)
-            if '/' in key:
-                key = key.replace('/', '_')
-            self._metrics.update({key: value})
-        else:
-            raise TypeError
+        metric = Metric(key, value)
+        if self._step is not None and metric.is_scalar():
+            self._summary_writer.add_scalar(
+                metric.key, metric.value, self._step)
+        self._metrics.update(metric.to_dict())
 
     def log_metrics(self, metrics: Dict[str, float]) -> None:
         for key, value in metrics.items():
