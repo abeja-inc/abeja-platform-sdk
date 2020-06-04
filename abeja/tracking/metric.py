@@ -5,14 +5,17 @@ from typing import Union
 class Metric:
     def __init__(self, key: str, value: float) -> None:
         if not isinstance(key, str):
-            raise TypeError(f'metric key must be str type, got {type(key)}')
+            raise TypeError(
+                'metric key must be str type, got {}'.format(
+                    type(key)))
         self.key = key
         if not (
             isinstance(
                 value, (int, float)) and not isinstance(
                 value, bool)):
             raise TypeError(
-                f'metric value must be int or float type, got {type(value)}')
+                'metric value must be int or float type, got {}'.format(
+                    type(value)))
         self.value = float(value)
 
     def is_scalar(self) -> bool:
