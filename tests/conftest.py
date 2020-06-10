@@ -81,6 +81,11 @@ def channel_id():
 
 
 @pytest.fixture
+def deployment_id():
+    return fake_platform_id()
+
+
+@pytest.fixture
 def job_definition_id():
     return fake_platform_id()
 
@@ -105,6 +110,26 @@ def job_id(job_id_factory):
 @pytest.fixture
 def job_definition_version_id():
     return 'ver-' + random_hex(8)
+
+
+@pytest.fixture
+def training_model_id():
+    return fake_platform_id()
+
+
+@pytest.fixture
+def training_model_version_id():
+    return 'ver-' + random_hex(8)
+
+
+@pytest.fixture
+def deployment_version_id():
+    return 'ver-' + random_hex(8)
+
+
+@pytest.fixture
+def service_id():
+    return 'ser-' + random_hex(8)
 
 
 # Faker - Plala
@@ -181,6 +206,27 @@ def api_base_url(monkeypatch):
 
 
 # Responses
+
+@pytest.fixture
+def user_response(user_id):
+    def _response():
+        return {
+            "email": "test@abeja.asia",
+            "is_registered": True,
+            "preferred_language": "ja",
+            "created_at": fake_iso8601(),
+            "id": user_id,
+            "display_name": 'Test',
+            "updated_at": fake_iso8601(),
+            "role": "admin",
+            "profile_icon": {
+                "thumbnail_icon_url": "https://icon.example.com/users/{}".format(user_id),
+                "original_icon_url": "https://icon.example.com/users/{}".format(user_id),
+                "mini_icon_url": "https://icon.example.com/users/{}".format(user_id),
+            }
+        }
+    return _response
+
 
 @pytest.fixture
 def channel_response():
@@ -309,13 +355,12 @@ def job_definition_version_response():
 
 
 @pytest.fixture
-def job_response(organization_id, job_definition_id, job_id):
+def job_response(organization_id, job_definition_id, job_id, user_response):
     def _job_response(
             _organization_id=organization_id,
             training_job_definition_id=job_definition_id,
             training_job_id=job_id,
             **extra):
-        user_id = fake_platform_id()
 
         return {
             "job_definition_id": training_job_definition_id,
@@ -330,21 +375,7 @@ def job_response(organization_id, job_definition_id, job_id):
             "status": "Pending",
             "instance_type": "cpu-1",
             "modified_at": fake_iso8601(),
-            "creator": {
-                "email": "test@abeja.asia",
-                "is_registered": True,
-                "preferred_language": "ja",
-                "created_at": fake_iso8601(),
-                "id": user_id,
-                "display_name": None,
-                "updated_at": fake_iso8601(),
-                "role": "admin",
-                "profile_icon": {
-                    "thumbnail_icon_url": "https://icon.example.com/users/{}".format(user_id),
-                    "original_icon_url": "https://icon.example.com/users/{}".format(user_id),
-                    "mini_icon_url": "https://icon.example.com/users/{}".format(user_id),
-                }
-            },
+            "creator": user_response(),
             "description": None,
             "statistics": {
                 "stages": {
@@ -398,3 +429,103 @@ def job_result_response():
         }
 
     return _job_result_response
+
+
+@pytest.fixture
+def training_model_response(job_definition_id, job_id, training_model_id, user_response):
+    def _response(**extra):
+        return {
+            'user_parameters': {},
+            'user': user_response(),
+            'training_model_id': training_model_id,
+            'training_job_id': job_id,
+            'modified_at': fake_iso8601(),
+            'metrics': {},
+            'job_definition_id': job_definition_id,
+            'id': training_model_id,
+            'exec_env': 'cloud',
+            'description': '',
+            'created_at': fake_iso8601(),
+            'archived': False,
+            **extra
+        }
+
+    return _response
+
+
+@pytest.fixture
+def deployment_response(deployment_id, user_response):
+    def _response(**extra):
+        return {
+            'triggers': [],
+            'services': [],
+            'runs': [],
+            'endpoints': [],
+            'daemons': [],
+            'codes': [],
+            'name': 'deployment 1',
+            'model_id': None,
+            'description': '',
+            'deployment_id': deployment_id,
+            'default_environment': {},
+            'creator': user_response(),
+            'created_at': fake_iso8601(),
+            'modified_at': fake_iso8601(),
+            **extra,
+        }
+    return _response
+
+
+@pytest.fixture
+def deployment_version_response(deployment_id, deployment_version_id):
+    def _response(**extra):
+        return {
+            'version_id': deployment_version_id,
+            'version': '1.0.0',
+            'handler': 'main:handler',
+            'image': 'abeja-inc/all-cpu:18.10',
+            'description': '',
+            'user_parameters': {},
+            'training_job_id': None,
+            'job_definition_id': None,
+            'job_definition_version': None,
+            'model_id': None,
+            'deployment_id': deployment_id,
+            'created_at': fake_iso8601(),
+            'modified_at': fake_iso8601(),
+            **extra,
+        }
+    return _response
+
+
+@pytest.fixture
+def create_service_response(service_id, deployment_id, deployment_version_id, job_definition_id,
+                            training_model_id, training_model_version_id, user_response):
+    def _response(training_model_id=training_model_id, job_definition_id=job_definition_id, **extra):
+        return {
+            'user_env_vars': {},
+            'status': 'IN_PROGRESS',
+            'service_id': service_id,
+            'models': {
+                'alias': {
+                    'model_id': training_model_id,
+                    'job_definition_id': job_definition_id,
+                }
+            },
+            'model_version_id': training_model_version_id,
+            'model_version': '1.0.0',
+            'min_instance_number': 1,
+            'metrics_url': None,
+            'merged_env_vars': {},
+            'max_instance_number': 2,
+            'instance_type': 'cpu-1',
+            'instance_number': 1,
+            'enable_autoscale': True,
+            'disruptable': True,
+            'deployment_id': deployment_id,
+            'creator': user_response(),
+            'created_at': fake_iso8601(),
+            'modified_at': fake_iso8601(),
+            **extra,
+        }
+    return _response
