@@ -2,6 +2,7 @@ from typing import Any, Dict, Optional
 from .api.client import APIClient
 from abeja.common.exec_env import ExecEnv
 from abeja.user import User
+from .common import SizedIterable, AbstractSizedIterator
 from . import job_definition, job
 
 # Entity class
@@ -204,3 +205,53 @@ class Models():
             organization_id=self.organization_id,
             response=res,
             job_definition=self.__job_definition)
+
+    def list(self,
+             filter_archived: Optional[bool] = None) -> SizedIterable[Model]:
+        """Returns an iterator object that iterates training models
+        under this object.
+
+        This method returns an instance of :class:`SizedIterable`, so you can
+        get the total number of training models.
+
+        Params:
+            - **filter_archived** (bool): **[optional]** If ``true``, include archived models, otherwise exclude archived models. (default: ``false``)
+
+        Return type:
+            SizedIterable[Model]
+        """
+        return ModelIterator(
+            api=self.__api,
+            organization_id=self.organization_id,
+            job_definition=self.__job_definition,
+            filter_archived=filter_archived)
+
+# Iterator class
+
+
+class ModelIterator(AbstractSizedIterator[Model]):
+
+    def __init__(self, api: APIClient,
+                 organization_id: str,
+                 job_definition: 'job_definition.JobDefinition',
+                 filter_archived: Optional[bool]) -> None:
+        super().__init__(api=api,
+                         organization_id=organization_id,
+                         filter_archived=filter_archived,
+                         # offset and limit are dummy
+                         offset=0,
+                         limit=1000)
+        self.__job_definition = job_definition
+
+    def invoke_api(self, api: APIClient) -> Dict[str, Any]:
+        return api.get_training_models(
+            organization_id=self.organization_id,
+            job_definition_name=self.__job_definition.name,
+            filter_archived=self.filter_archived)
+
+    def build_entry(self, api: APIClient, entry: Dict[str, Any]) -> Model:
+        return Model.from_response(
+            api,
+            self.organization_id,
+            job_definition=self.__job_definition,
+            response=entry)
