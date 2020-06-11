@@ -353,12 +353,13 @@ def job_definition_version_response():
 
 
 @pytest.fixture
-def job_response(organization_id, job_definition_id, job_id, user_response):
+def job_response(organization_id, job_definition_id, user_response):
     def _job_response(
             _organization_id=organization_id,
             training_job_definition_id=job_definition_id,
-            training_job_id=job_id,
+            training_job_id=None,
             **extra):
+        training_job_id = training_job_id or fake_platform_id()
 
         return {
             "job_definition_id": training_job_definition_id,
