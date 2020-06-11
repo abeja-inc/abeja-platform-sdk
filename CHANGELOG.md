@@ -1,3 +1,9 @@
+# 1.2.0
+- Refactor file format (#34)
+- Feature/support infinity in metric (#35)
+- Support 1month Data Lake lifetime (#37)
+- Deprecated abeja.models package (#36)
+
 # 1.1.5
 - Update doc about filter_archived (#31)
 - support datasource basic auth (#32)
