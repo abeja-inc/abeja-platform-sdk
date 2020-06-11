@@ -389,6 +389,10 @@ class TestDatalakeFile(unittest.TestCase):
         datalake_file = DatalakeFile(None, uri=self.uri, type=type)
         datalake_file.lifetime = None
 
+    def test_lifetime_1month(self):
+        datalake_file = DatalakeFile(None, uri=self.uri, type=type)
+        datalake_file.lifetime = '1month'
+
     def test_lifetime_invalid(self):
         with self.assertRaises(RuntimeError):
             DatalakeFile(None, uri=self.uri, type=type, lifetime='invalid')
