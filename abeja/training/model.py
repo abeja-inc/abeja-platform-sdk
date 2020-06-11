@@ -298,6 +298,27 @@ class Models():
             response=res,
             job_definition=self.__job_definition)
 
+    def get_download_uri(self, model_id: str) -> str:
+        """Get download URL for training model.
+
+        Request Syntax:
+            .. code-block:: python
+
+                uri = models.get_download_uri(model_id)
+
+        Params:
+            - **model_id** (str): Model ID
+
+        Return type:
+            str
+        """
+        res = self.__api.download_training_model(
+            organization_id=self.organization_id,
+            job_definition_name=self.job_definition_name,
+            model_id=model_id)
+
+        return res['download_uri']
+
 # Iterator class
 
 

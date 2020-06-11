@@ -198,3 +198,23 @@ def test_update_model(requests_mock, api_base_url,
     assert model
     assert model.model_id == training_model_id
     assert model.description == description
+
+
+def test_get_download_uri(requests_mock, api_base_url,
+                          training_model_id,
+                          job_definition_factory, training_model_response) -> None:
+    definition = job_definition_factory()  # type: JobDefinition
+    adapter = definition.models()
+
+    uri = 'https://sample.example.com/file'
+    res = training_model_response()
+    training_model_id = res['id']
+    requests_mock.get(
+        '{}/organizations/{}/training/definitions/{}/models/{}/download'.format(
+            api_base_url,
+            adapter.organization_id,
+            adapter.job_definition_name,
+            training_model_id),
+        json={'download_uri': uri})
+
+    assert adapter.get_download_uri(training_model_id) == uri
