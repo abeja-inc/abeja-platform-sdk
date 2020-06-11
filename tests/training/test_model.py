@@ -1,3 +1,6 @@
+from io import BytesIO
+import json
+import cgi
 from abeja.training.model import Model
 from abeja.common import exec_env
 from abeja.training import JobDefinition  # noqa: F401
@@ -121,3 +124,54 @@ def test_list_models_filter_archived(
     models = list(iterator)
     assert len(models) == 1
     assert models[0].model_id == model1['id']
+
+
+def test_create_model(
+        requests_mock, api_base_url,
+        make_random_file_content,
+        job_definition_factory, training_model_response) -> None:
+    definition = job_definition_factory()  # type: JobDefinition
+    adapter = definition.models()
+
+    res = training_model_response()
+
+    requests_mock.post(
+        '{}/organizations/{}/training/definitions/{}/models'.format(
+            api_base_url,
+            adapter.organization_id,
+            adapter.job_definition_name),
+        json=res)
+
+    file_content = make_random_file_content()
+    model_data = BytesIO(file_content)
+    environment = {'BATCH_SIZE': 32, 'EPOCHS': 50}
+    metrics = {'acc': 0.76, 'loss': 1.99}
+
+    model = adapter.create(
+        model_data,
+        environment=environment,
+        metrics=metrics)
+
+    assert model.job_definition
+    assert model.job_definition.job_definition_id == definition.job_definition_id
+
+    history = requests_mock.request_history
+    assert len(history) == 1
+
+    fs = cgi.FieldStorage(
+        fp=BytesIO(
+            history[0].body),
+        headers=history[0].headers,
+        environ={
+            'REQUEST_METHOD': 'POST'})
+
+    item = fs['parameters']
+    parameters = json.loads(item.value.decode('utf-8'))
+
+    assert item.headers['Content-Type'] == 'application/json'
+    assert parameters['user_parameters'] == environment
+    assert parameters['metrics'] == metrics
+
+    item = fs['model_data']
+    assert item.headers['Content-Type'] == 'application/zip'
+    assert len(history) == 1

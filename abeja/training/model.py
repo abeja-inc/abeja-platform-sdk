@@ -1,4 +1,4 @@
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Optional, IO, AnyStr
 from .api.client import APIClient
 from abeja.common.exec_env import ExecEnv
 from abeja.user import User
@@ -225,6 +225,51 @@ class Models():
             organization_id=self.organization_id,
             job_definition=self.__job_definition,
             filter_archived=filter_archived)
+
+    def create(self,
+               model_data: IO[AnyStr],
+               environment: Optional[Dict[str, Any]] = None,
+               metrics: Optional[Dict[str, Any]] = None,
+               description: Optional[str] = None) -> Model:
+        """Create a new training model.
+
+        Request Syntax:
+            .. code-block:: python
+
+                model = models.create(
+                    model_data,
+                    environment={'BATCH_SIZE': 32, 'EPOCHS': 50},
+                    metrics={'acc': 0.76, 'loss': 1.99})
+
+        Params:
+            - **model_data** (IO): An input source for ML model. It must be a zip archived file like object
+            - **environment** (dict): **[optional]** user defined parameters set as environment variables
+            - **metrics** (dict): **[optional]** user defined metrics for this model
+            - **description** (str): **[optional]** description
+
+        Return type:
+            :class:`Model` object
+        """
+        parameters = {}  # type: Dict[str, Any]
+
+        if environment is not None:
+            parameters['user_parameters'] = environment
+        if metrics is not None:
+            parameters['metrics'] = metrics
+        if description is not None:
+            parameters['description'] = description
+
+        res = self.__api.create_training_model(
+            organization_id=self.organization_id,
+            job_definition_name=self.job_definition_name,
+            model_data=model_data,
+            parameters=parameters)
+
+        return Model.from_response(
+            api=self.__api,
+            organization_id=self.organization_id,
+            response=res,
+            job_definition=self.__job_definition)
 
 # Iterator class
 

@@ -1314,6 +1314,7 @@ class APIClient(BaseAPIClient):
             - **parameters** (dict): parameters for creating training model
                 - **description** (str): Description
                 - **user_parameters** (dict): user defined parameters.
+                - **metrics** (dict): user defined metrics.
 
         Return type:
             dict
