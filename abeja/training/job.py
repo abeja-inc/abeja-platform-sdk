@@ -386,7 +386,7 @@ class Jobs():
         Request Syntax:
             .. code-block:: python
 
-                job = jobs.archive(job_id)
+                job = jobs.unarchive(job_id)
 
         Params:
             - **job_id** (str): Job ID

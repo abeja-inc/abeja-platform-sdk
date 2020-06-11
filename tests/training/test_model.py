@@ -178,7 +178,6 @@ def test_create_model(
 
 
 def test_update_model(requests_mock, api_base_url,
-                      training_model_id,
                       job_definition_factory, training_model_response) -> None:
     definition = job_definition_factory()  # type: JobDefinition
     adapter = definition.models()
@@ -201,7 +200,6 @@ def test_update_model(requests_mock, api_base_url,
 
 
 def test_get_download_uri(requests_mock, api_base_url,
-                          training_model_id,
                           job_definition_factory, training_model_response) -> None:
     definition = job_definition_factory()  # type: JobDefinition
     adapter = definition.models()
@@ -218,3 +216,43 @@ def test_get_download_uri(requests_mock, api_base_url,
         json={'download_uri': uri})
 
     assert adapter.get_download_uri(training_model_id) == uri
+
+
+def test_models_archive(requests_mock, api_base_url,
+                        job_definition_factory, training_model_response) -> None:
+    definition = job_definition_factory()  # type: JobDefinition
+    adapter = definition.models()
+
+    res = training_model_response()
+    training_model_id = res['id']
+    requests_mock.post(
+        '{}/organizations/{}/training/definitions/{}/models/{}/archive'.format(
+            api_base_url,
+            adapter.organization_id,
+            adapter.job_definition_name,
+            training_model_id),
+        json={
+            'message': "test-1 archived"})
+
+    adapter.archive(training_model_id)
+    assert requests_mock.called
+
+
+def test_models_unarchive(requests_mock, api_base_url,
+                          job_definition_factory, training_model_response) -> None:
+    definition = job_definition_factory()  # type: JobDefinition
+    adapter = definition.models()
+
+    res = training_model_response()
+    training_model_id = res['id']
+    requests_mock.post(
+        '{}/organizations/{}/training/definitions/{}/models/{}/unarchive'.format(
+            api_base_url,
+            adapter.organization_id,
+            adapter.job_definition_name,
+            training_model_id),
+        json={
+            'message': "test-1 unarchived"})
+
+    adapter.unarchive(training_model_id)
+    assert requests_mock.called

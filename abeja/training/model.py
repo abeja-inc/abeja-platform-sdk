@@ -319,6 +319,38 @@ class Models():
 
         return res['download_uri']
 
+    def archive(self, model_id: str) -> None:
+        """Archive a training model.
+
+        Request Syntax:
+            .. code-block:: python
+
+                model = models.archive(model_id)
+
+        Params:
+            - **model_id** (str): Job ID
+        """
+        self.__api.archive_training_model(
+            organization_id=self.organization_id,
+            job_definition_name=self.job_definition_name,
+            model_id=model_id)
+
+    def unarchive(self, model_id: str) -> None:
+        """Unarchive a training model.
+
+        Request Syntax:
+            .. code-block:: python
+
+                model = models.unarchive(model_id)
+
+        Params:
+            - **model_id** (str): Job ID
+        """
+        self.__api.unarchive_training_model(
+            organization_id=self.organization_id,
+            job_definition_name=self.job_definition_name,
+            model_id=model_id)
+
 # Iterator class
 
 
