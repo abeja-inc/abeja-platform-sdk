@@ -30,6 +30,12 @@ Job
    :members:
    :undoc-members:
 
+Model
+^^^^^
+.. autoclass:: abeja.training.Model
+   :members:
+   :undoc-members:
+
 Adapter classes
 ---------------
 
@@ -51,6 +57,13 @@ Jobs
 ^^^^
 
 .. autoclass:: abeja.training.Jobs
+   :members:
+   :undoc-members:
+
+Models
+^^^^^^
+
+.. autoclass:: abeja.training.Models
    :members:
    :undoc-members:
 

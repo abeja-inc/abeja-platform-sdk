@@ -2,8 +2,7 @@ from typing import Any, Dict, Optional
 from .api.client import APIClient
 from abeja.common.exec_env import ExecEnv
 from abeja.user import User
-from .job_definition import JobDefinition, JobDefinitions
-from .job import Job, Jobs
+from . import job_definition, job
 
 # Entity class
 
@@ -25,8 +24,8 @@ class Model():
                  archived: bool,
                  created_at: str,
                  modified_at: str,
-                 job_definition: Optional[JobDefinition] = None,
-                 job: Optional[Job] = None) -> None:
+                 job_definition: Optional['job_definition.JobDefinition'] = None,
+                 job: Optional['job.Job'] = None) -> None:
         self.__api = api
         self.__organization_id = organization_id
         self.__job_definition_id = job_definition_id
@@ -47,8 +46,8 @@ class Model():
     def from_response(klass, api: APIClient,
                       organization_id: str,
                       response: Dict[str, Any],
-                      job_definition: Optional[JobDefinition] = None,
-                      job: Optional[Job] = None) -> 'Model':
+                      job_definition: Optional['job_definition.JobDefinition'] = None,
+                      job: Optional['job.Job'] = None) -> 'Model':
         """Construct an object from API response.
 
         NOTE: For convenient, this method DOES NOT validate the input response and
@@ -134,19 +133,48 @@ class Model():
         return self.__modified_at
 
     @property
-    def job_definition(self) -> JobDefinition:
+    def job_definition(self) -> 'job_definition.JobDefinition':
         """Get the job definition of this model."""
         if self.__job_definition is None:
-            self.__job_definition = JobDefinitions(
+            self.__job_definition = job_definition.JobDefinitions(
                 api=self.__api, organization_id=self.organization_id).get(
                 name=self.job_definition_id)
         return self.__job_definition
 
     @property
-    def job(self) -> Job:
+    def job(self) -> 'job.Job':
         """Get the job of this model."""
         if self.__job is None:
-            self.__job = Jobs(
+            self.__job = job.Jobs(
                 api=self.__api, job_definition=self.job_definition).get(
                 job_id=self.job_id)
         return self.__job
+
+# Adapter class
+
+
+class Models():
+    """The training models adapter class.
+    """
+
+    def __init__(
+            self,
+            api: APIClient,
+            job_definition: 'job_definition.JobDefinition') -> None:
+        self.__api = api
+        self.__job_definition = job_definition
+
+    @property
+    def organization_id(self) -> str:
+        """Get the organization ID."""
+        return self.__job_definition.organization_id
+
+    @property
+    def job_definition_id(self) -> str:
+        """Get the job definition ID."""
+        return self.__job_definition.job_definition_id
+
+    @property
+    def job_definition_name(self) -> str:
+        """Get the job definition name."""
+        return self.__job_definition.name
