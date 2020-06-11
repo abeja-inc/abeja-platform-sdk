@@ -175,3 +175,26 @@ def test_create_model(
     item = fs['model_data']
     assert item.headers['Content-Type'] == 'application/zip'
     assert len(history) == 1
+
+
+def test_update_model(requests_mock, api_base_url,
+                      training_model_id,
+                      job_definition_factory, training_model_response) -> None:
+    definition = job_definition_factory()  # type: JobDefinition
+    adapter = definition.models()
+
+    description = 'my model'
+    res = training_model_response(description=description)
+    training_model_id = res['id']
+    requests_mock.patch(
+        '{}/organizations/{}/training/definitions/{}/models/{}'.format(
+            api_base_url,
+            adapter.organization_id,
+            adapter.job_definition_name,
+            training_model_id),
+        json=res)
+
+    model = adapter.update(training_model_id, description)
+    assert model
+    assert model.model_id == training_model_id
+    assert model.description == description

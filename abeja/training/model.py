@@ -271,6 +271,33 @@ class Models():
             response=res,
             job_definition=self.__job_definition)
 
+    def update(self, model_id: str, description: str) -> Model:
+        """Update a training model.
+
+        Request Syntax:
+            .. code-block:: python
+
+                model = models.update(model_id, 'description')
+
+        Params:
+            - **model_id** (str): Model ID
+            - **description** (str): description
+
+        Return type:
+            :class:`Model` object
+        """
+        res = self.__api.patch_training_model(
+            organization_id=self.organization_id,
+            job_definition_name=self.job_definition_name,
+            model_id=model_id,
+            description=description)
+
+        return Model.from_response(
+            api=self.__api,
+            organization_id=self.organization_id,
+            response=res,
+            job_definition=self.__job_definition)
+
 # Iterator class
 
 
