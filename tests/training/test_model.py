@@ -64,3 +64,60 @@ def test_get_model(requests_mock, api_base_url,
 
     assert model.job_definition
     assert model.job_definition.job_definition_id == adapter.job_definition_id
+
+
+def test_list_models(requests_mock, api_base_url,
+                     job_definition_factory, training_model_response) -> None:
+    definition = job_definition_factory()  # type: JobDefinition
+    adapter = definition.models()
+
+    model1 = training_model_response(id='1020304050123')
+    model2 = training_model_response(id='1020304050124')
+    requests_mock.get(
+        '{}/organizations/{}/training/definitions/{}/models'.format(
+            api_base_url,
+            adapter.organization_id,
+            adapter.job_definition_name),
+        json={
+            'entries': [
+                model1,
+                model2],
+            'limit': 50,
+            'offset': 0,
+            'total': 2})
+
+    iterator = adapter.list()
+    assert len(iterator) == 2
+
+    models = list(iterator)
+    assert len(models) == 2
+    assert models[0].model_id == model1['id']
+    assert models[1].model_id == model2['id']
+
+
+def test_list_models_filter_archived(
+        requests_mock,
+        api_base_url,
+        job_definition_factory,
+        training_model_response) -> None:
+    definition = job_definition_factory()  # type: JobDefinition
+    adapter = definition.models()
+
+    model1 = training_model_response(id='1020304050123')
+    requests_mock.get(
+        '{}/organizations/{}/training/definitions/{}/models?filter_archived=exclude_archived'.format(
+            api_base_url,
+            adapter.organization_id,
+            adapter.job_definition_name),
+        json={
+            'entries': [model1],
+            'limit': 50,
+            'offset': 0,
+            'total': 1})
+
+    iterator = adapter.list(filter_archived=True)
+    assert len(iterator) == 1
+
+    models = list(iterator)
+    assert len(models) == 1
+    assert models[0].model_id == model1['id']
