@@ -178,3 +178,29 @@ class Models():
     def job_definition_name(self) -> str:
         """Get the job definition name."""
         return self.__job_definition.name
+
+    def get(self, model_id: str) -> Model:
+        """Get a training model.
+
+        Request Syntax:
+            .. code-block:: python
+
+                model = models.get(model_id)
+
+        Params:
+            - **model_id** (str): Model ID
+
+        Return type:
+            :class:`Model` object
+
+        """
+        res = self.__api.get_training_model(
+            organization_id=self.organization_id,
+            job_definition_name=self.job_definition_name,
+            model_id=model_id)
+
+        return Model.from_response(
+            api=self.__api,
+            organization_id=self.organization_id,
+            response=res,
+            job_definition=self.__job_definition)

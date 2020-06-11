@@ -78,9 +78,11 @@ class Job():
             api=api,
             organization_id=organization_id,
             job_definition_id=response.get('job_definition_id', ''),
-            job_definition_version_id=response.get('job_definition_version', 0),
+            job_definition_version_id=response.get(
+                'job_definition_version', 0),
             job_id=response.get('id', response.get('training_job_id', '')),
-            instance_type=InstanceType.parse(response.get('instance_type', '')),
+            instance_type=InstanceType.parse(
+                response.get('instance_type', '')),
             exec_env=ExecEnv(str(response.get('exec_env'))),
             environment=(response.get('environment') or {}),
             statistics=statistics,
@@ -263,7 +265,7 @@ class Jobs():
                 job = jobs.get(job_id)
 
         Params:
-            - **job_id** (int): Job ID
+            - **job_id** (str): Job ID
 
         Return type:
             :class:`Job` object
