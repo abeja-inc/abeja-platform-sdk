@@ -39,6 +39,7 @@ def test_get_model(requests_mock, api_base_url,
     adapter = definition.models()
 
     res = training_model_response()
+    training_model_id = res['id']
     requests_mock.get(
         '{}/organizations/{}/training/definitions/{}/models/{}'.format(
             api_base_url,

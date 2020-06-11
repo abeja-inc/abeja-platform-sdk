@@ -431,8 +431,9 @@ def job_result_response():
 
 
 @pytest.fixture
-def training_model_response(job_definition_id, job_id, training_model_id, user_response):
-    def _response(**extra):
+def training_model_response(job_definition_id, job_id,  user_response):
+    def _response(model_id=None, **extra):
+        training_model_id = model_id or fake_platform_id()
         return {
             'user_parameters': {},
             'user': user_response(),
