@@ -7,3 +7,4 @@ from .job_definition import JobDefinitions, JobDefinition
 from .job_definition_version import JobDefinitionVersion, JobDefinitionVersions
 from .job import Job, Jobs, JobArtifacts
 from .job_status import JobStatus
+from .model import Model
