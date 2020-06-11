@@ -3,6 +3,11 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
+.. warning::
+   We're planning to deprecate ``abeja.models`` package in the future version.
+   Instead, the :doc:`abeja.training </training/index>` package contains far more detailed new high-level
+   APIs. Furthermore, these classes provide more consistent and cleaner interface for developers.
+
 =============================
 ABEJA Model SDK documentation
 =============================

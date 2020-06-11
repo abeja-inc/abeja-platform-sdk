@@ -60,6 +60,7 @@ class DatalakeFile(FileMixin):
     LIFETIME = (
         '1day',
         '1week',
+        '1month',
         '6months'
     )
 
