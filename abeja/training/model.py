@@ -10,12 +10,17 @@ from . import job_definition, job
 
 class Model():
     """Training model object.
+
+    Training model object is a representation of a machine learning model file.
+
+    - Training Job can generate single or multiple training models.
+    - You can upload your local model files which are on the local machine.
     """
 
     def __init__(self, api: APIClient,
                  organization_id: str,
                  job_definition_id: str,
-                 job_id: str,
+                 job_id: Optional[str],
                  model_id: str,
                  description: Optional[str],
                  metrics: Dict[str, Any],
@@ -60,7 +65,7 @@ class Model():
             api=api,
             organization_id=organization_id,
             job_definition_id=response.get('job_definition_id', ''),
-            job_id=response.get('training_job_id', ''),
+            job_id=response.get('training_job_id'),
             model_id=response.get('id', ''),
             description=response.get('description', ''),
             metrics=(response.get('metrics') or {}),
@@ -84,8 +89,9 @@ class Model():
         return self.__job_definition_id
 
     @property
-    def job_id(self) -> str:
-        """Get the job_id of this model."""
+    def job_id(self) -> Optional[str]:
+        """Get the Job ID of this model. Returns ``None`` if the model doesn't
+        have a back reference to a job."""
         return self.__job_id
 
     @property
@@ -143,9 +149,9 @@ class Model():
         return self.__job_definition
 
     @property
-    def job(self) -> 'job.Job':
+    def job(self) -> Optional['job.Job']:
         """Get the job of this model."""
-        if self.__job is None:
+        if self.__job is None and self.job_id is not None:
             self.__job = job.Jobs(
                 api=self.__api, job_definition=self.job_definition).get(
                 job_id=self.job_id)

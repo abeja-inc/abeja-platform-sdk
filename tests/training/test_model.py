@@ -12,6 +12,23 @@ def test_model_from_response(training_api_client, organization_id, training_mode
     assert model
 
 
+def test_model_get_job_without_job(requests_mock, api_base_url, training_api_client,
+                                   organization_id, job_definition_id, job_definition_name,
+                                   training_model_response, job_definition_response):
+    requests_mock.get(
+        '{}/organizations/{}/training/definitions/{}'.format(
+            api_base_url,
+            organization_id,
+            job_definition_id),
+        json=job_definition_response())
+
+    response = training_model_response()
+    del response['training_job_id']
+
+    model = Model.from_response(training_api_client, organization_id, response)
+    assert model.job is None
+
+
 def test_model_get_job(requests_mock, api_base_url, training_api_client,
                        organization_id, job_definition_id, job_definition_name, job_id,
                        training_model_response, job_definition_response, job_response):
