@@ -298,14 +298,12 @@ def delete_file_response():
 
 
 @pytest.fixture
-def job_definition_response(organization_id, job_definition_id):
+def job_definition_response(organization_id, job_definition_id, job_definition_name):
     def _training_job_definition_response(
             organization_id=organization_id,
             training_job_definition_id=job_definition_id,
-            name=None,
+            name=job_definition_name,
             **extra):
-        if name is None:
-            name = "test-{}".format(random.randint(1, 1000))
         return {
             "organization_id": organization_id,
             "job_definition_id": training_job_definition_id,
@@ -422,7 +420,8 @@ def job_result_response():
             "artifacts": {
                 "complete": {
                     "uri": 'https://download.example.com/organizations/{}/training/definitions/'
-                           '{}/jobs/{}'.format(organization_id, training_job_definition_id, training_job_id),
+                           '{}/jobs/{}'.format(organization_id,
+                                               training_job_definition_id, training_job_id),
                     **extra
                 }
             }

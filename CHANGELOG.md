@@ -1,3 +1,6 @@
+# 1.2.1
+- Add abeja.training.model package (#38)
+
 # 1.2.0
 - Refactor file format (#34)
 - Feature/support infinity in metric (#35)

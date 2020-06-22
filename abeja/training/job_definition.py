@@ -1,7 +1,7 @@
 from typing import Any, Dict, List, Optional
 from .api.client import APIClient
 from .common import SizedIterable, AbstractSizedIterator
-from . import job_definition_version, job
+from . import job_definition_version, job, model
 
 # Entity class
 
@@ -157,12 +157,27 @@ class JobDefinition():
             .. code-block:: python
 
                 adapter = definition.jobs()
-                version = adapter.get(job_id='1234567890123')
+                job = adapter.get(job_id='1234567890123')
 
         Return type:
-            :class:`Jobs <abeja.training.Jobs>` object
+            :class:`Jobs <abeja.training.job.Jobs>` object
         """
         return job.Jobs(api=self.__api, job_definition=self)
+
+    def models(self) -> 'model.Models':
+        """Return a adapter object for handling training models under
+        this job definition.
+
+        Request syntax:
+            .. code-block:: python
+
+                adapter = definition.models()
+                model = adapter.get(model_id='1234567890123')
+
+        Return type:
+            :class:`Models <abeja.training.model.Models>` object
+        """
+        return model.Models(api=self.__api, job_definition=self)
 
 # Adapter classes
 
