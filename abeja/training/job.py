@@ -313,7 +313,8 @@ class Jobs():
                instance_type: InstanceType,
                datasets: Optional[Dict[str, str]] = None,
                environment: Optional[Dict[str, Any]] = None,
-               description: Optional[str] = None) -> Job:
+               description: Optional[str] = None,
+               export_log: Optional[bool] = None) -> Job:
         """Create a new training job.
 
         Request Syntax:
@@ -329,6 +330,8 @@ class Jobs():
             - **datasets** (dict): **[optional]** datasets, combination of alias and dataset_id
             - **environment** (dict): **[optional]** user defined parameters set as environment variables
             - **description** (str): **[optional]** description of this job
+            - **export_log** (bool): **[optional]** If ``true``, include the log in the model.
+              This feature is only available with 19.04 or later images.  (default: ``false``)
 
         Return type:
             :class:`Job` object
@@ -340,7 +343,9 @@ class Jobs():
             datasets=datasets,
             instance_type=str(instance_type),
             environment=environment,
-            description=description)
+            description=description,
+            export_log=export_log
+        )
 
         return Job.from_response(
             api=self.__api,
