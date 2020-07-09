@@ -314,11 +314,12 @@ class TestApiClient:
 
     @patch('requests.Session.request')
     @pytest.mark.parametrize(
-        'user_params,environment,datasets,instance_type,description,expected',
+        'user_params,environment,datasets,instance_type,description,export_log,expected',
         [
-            (None, None, None, None, None, {}),
+            (None, None, None, None, None, None, {}),
             (
                 {'DUMMY_ENV_VAR': 'dummy'},
+                None,
                 None,
                 None,
                 None,
@@ -328,6 +329,7 @@ class TestApiClient:
             (
                 None,
                 {'DUMMY_ENV_VAR': 'dummy'},
+                None,
                 None,
                 None,
                 None,
@@ -339,12 +341,14 @@ class TestApiClient:
                 None,
                 None,
                 None,
+                None,
                 {'environment': {'DUMMY_ENV_VAR': 'dummy2'}}
             ),
             (
                 None,
                 None,
                 {"mnist": "1111111111111"},
+                None,
                 None,
                 None,
                 {'datasets': {"mnist": "1111111111111"}}
@@ -355,6 +359,7 @@ class TestApiClient:
                 None,
                 'cpu-1',
                 None,
+                None,
                 {'instance_type': 'cpu-1'}
             ),
             (
@@ -363,12 +368,22 @@ class TestApiClient:
                 {"mnist": "1111111111111"},
                 'cpu-1',
                 'dummy description',
+                None,
                 {
                     'datasets': {"mnist": "1111111111111"},
                     'environment': {'DUMMY_ENV_VAR': 'dummy'},
                     'instance_type': 'cpu-1',
                     'description': 'dummy description'
                 }
+            ),
+            (
+                None,
+                None,
+                None,
+                None,
+                None,
+                True,
+                {'export_log': True}
             ),
         ]
     )
@@ -380,10 +395,18 @@ class TestApiClient:
             datasets,
             instance_type,
             description,
+            export_log,
             expected):
         self.api_client.create_training_job(
-            ORGANIZATION_ID, JOB_DEFINITION_NAME, VERSION_ID,
-            user_params, datasets, instance_type, environment, description)
+            ORGANIZATION_ID,
+            JOB_DEFINITION_NAME,
+            VERSION_ID,
+            user_params,
+            datasets,
+            instance_type,
+            environment,
+            description,
+            export_log)
         url = '{}/organizations/{}/training/definitions/{}/versions/{}/jobs'.format(
             ABEJA_API_URL, ORGANIZATION_ID, JOB_DEFINITION_NAME, VERSION_ID)
         m.assert_called_once_with(
