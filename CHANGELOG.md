@@ -1,3 +1,6 @@
+# 1.2.2
+- add export_log option to Jobs.create (#39)
+
 # 1.2.1
 - Add abeja.training.model package (#38)
 
