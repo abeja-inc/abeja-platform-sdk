@@ -766,7 +766,8 @@ class APIClient(BaseAPIClient):
             datasets: Optional[dict] = None,
             instance_type: Optional[str] = None,
             environment: Optional[dict] = None,
-            description: Optional[str] = None) -> dict:
+            description: Optional[str] = None,
+            export_log: Optional[bool] = None) -> dict:
         """create a training job
 
         API reference: POST /organizations/<organization_id>/training/definitions/<job_definition_name>/versions/<version_id>/jobs
@@ -795,6 +796,8 @@ class APIClient(BaseAPIClient):
             - **instance_type** (str): **[optional]** instance type of running environment
             - **environment** (dict): **[optional]** user defined parameters set as environment variables
             - **description** (str): **[optional]** description of this job
+            - **export_log** (bool): **[optional]** If ``true``, include the log in the model.
+              This feature is only available with 19.04 or later images.  (default: ``false``)
 
         Return type:
             dict
@@ -854,6 +857,8 @@ class APIClient(BaseAPIClient):
                     status_code=400)
         if description is not None:
             data['description'] = description
+        if export_log is not None:
+            data['export_log'] = export_log
         path = '/organizations/{}/training/definitions/{}/versions/{}/jobs'.format(
             organization_id, job_definition_name, version_id)
         return self._connection.api_request(
