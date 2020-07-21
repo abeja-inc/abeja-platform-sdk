@@ -1,5 +1,6 @@
 from urllib.parse import urlparse
 
+from abeja.common.public_file import PublicFile
 from abeja.common.source_data import SourceData
 from abeja.datalake.api.client import APIClient
 from abeja.datalake.file import DatalakeFile
@@ -23,4 +24,6 @@ def file_factory(
     pr = urlparse(uri)
     if pr.scheme == 'datalake':
         return DatalakeFile(client, uri=uri, type=type, **kwargs)
+    elif pr.scheme == "http" or pr.scheme == "https":
+        return PublicFile(client, uri=uri)
     raise UnsupportedURI('{} is not supported.'.format(uri))
