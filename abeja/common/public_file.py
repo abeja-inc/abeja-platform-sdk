@@ -15,7 +15,7 @@ class PublicFile(SourceData):
             res = self.__api._connection.request("GET", self.uri)
             return res.content
         except requests.exceptions.HTTPError as e:
-            http_error_handler(e)
+            raise http_error_handler(e)
 
     def to_source_data(self):
         return {
