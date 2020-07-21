@@ -4,7 +4,7 @@ from unittest.mock import Mock
 from parameterized import parameterized
 
 from abeja.common.file_factory import file_factory
-from abeja.common.public_file import PublicFile
+from abeja.common.http_file import HTTPFile
 from abeja.datalake.file import DatalakeFile
 from abeja.exceptions import UnsupportedURI
 
@@ -18,11 +18,11 @@ class TestFileFactory(TestCase):
              ),
             ("http://example.com/hoge/foo/bar",
              None,
-             PublicFile,
+             HTTPFile,
              ),
             ("https://example.com/1/2/3/4",
              None,
-             PublicFile,
+             HTTPFile,
              )])
     def test_file_factory(self, uri, _type, expected):
         mock_api = Mock()

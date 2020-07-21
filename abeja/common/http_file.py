@@ -5,7 +5,7 @@ from abeja.common.source_data import SourceData
 from abeja.datalake.api.client import APIClient
 
 
-class PublicFile(SourceData):
+class HTTPFile(SourceData):
     def __init__(self, api: APIClient, uri: str) -> None:
         self.__api = api
         self.uri = uri
