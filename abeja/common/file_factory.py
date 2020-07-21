@@ -1,5 +1,6 @@
 from urllib.parse import urlparse
 
+from abeja.common.source_data import SourceData
 from abeja.datalake.api.client import APIClient
 from abeja.datalake.file import DatalakeFile
 from abeja.exceptions import UnsupportedURI
@@ -9,7 +10,7 @@ def file_factory(
         client: APIClient,
         uri: str,
         type: str,
-        **kwargs) -> DatalakeFile:
+        **kwargs) -> SourceData:
     """generate file for the given uri
 
     :param client:

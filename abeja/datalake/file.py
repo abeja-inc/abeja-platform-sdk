@@ -11,6 +11,7 @@ from requests.models import Response
 
 from abeja.common.config import DEFAULT_CHUNK_SIZE, FETCH_WORKER_COUNT, DOWNLOAD_RETRY_ATTEMPT_NUMBER
 # from abeja.common.config import S3_CHUNK_SIZE
+from abeja.common.source_data import SourceData
 from abeja.common.iterator import Iterator
 from abeja.common.connection import http_error_handler
 from abeja.common.local_file import (
@@ -19,7 +20,6 @@ from abeja.common.local_file import (
     use_iter_content_cache,
     use_iter_lines_cache
 )
-from abeja.common.file_utils import FileMixin
 # from abeja.common.s3etag import calc_s3etag
 from abeja.exceptions import HttpError, EtagHashNotMatch
 from abeja.datalake.api.client import APIClient
@@ -30,7 +30,7 @@ def retry_if_etag_hash_not_match(error):
     return isinstance(error, EtagHashNotMatch)
 
 
-class DatalakeFile(FileMixin):
+class DatalakeFile(SourceData):
     """a model class for a datalake channel file
 
     if the file exists in local, get data from the file.
@@ -80,7 +80,12 @@ class DatalakeFile(FileMixin):
             uploaded_at: str=None,
             lifetime: str=None,
             **kwargs) -> None:
-        super(DatalakeFile, self).__init__(api, uri, type, **kwargs)
+        self._api = api
+        self.uri = uri
+        self.type = type
+        for k, v in kwargs.items():
+            setattr(self, k, v)
+
         self.organization_id = organization_id
         if self.uri:
             pr = urlparse(self.uri)
@@ -380,6 +385,17 @@ class DatalakeFile(FileMixin):
                     self.channel_id, self.file_id, metadata=file_info.get('metadata'))
                 raise
         return True
+
+    def to_source_data(self) -> Dict[str, str]:
+        """Convert to source data format
+
+        Return type:
+            dict
+        """
+        source_data = {'data_uri': self.uri}
+        if self.type:
+            source_data['data_type'] = self.type
+        return source_data
 
 
 def _download_file_content(item: DatalakeFile) -> DatalakeFile:
