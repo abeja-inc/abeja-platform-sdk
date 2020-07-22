@@ -1,18 +1,33 @@
 from unittest import TestCase
 from unittest.mock import Mock
 
+from parameterized import parameterized
+
 from abeja.common.file_factory import file_factory
+from abeja.common.http_file import HTTPFile
 from abeja.datalake.file import DatalakeFile
 from abeja.exceptions import UnsupportedURI
 
 
 class TestFileFactory(TestCase):
-    def test_file_factory(self):
+    @parameterized.expand(
+        [
+            ('datalake://1234567890123/20171128T113546-9fa120a3-96bc-4b84-b56b-1bc2273178a1',
+             'image/jpeg',
+             DatalakeFile,
+             ),
+            ("http://example.com/hoge/foo/bar",
+             None,
+             HTTPFile,
+             ),
+            ("https://example.com/1/2/3/4",
+             None,
+             HTTPFile,
+             )])
+    def test_file_factory(self, uri, _type, expected):
         mock_api = Mock()
-        uri = 'datalake://1234567890123/20171128T113546-9fa120a3-96bc-4b84-b56b-1bc2273178a1'
-        type = 'image/jpeg'
-        file = file_factory(mock_api, uri, type)
-        self.assertIsInstance(file, DatalakeFile)
+        file = file_factory(mock_api, uri, _type)
+        self.assertIsInstance(file, expected)
 
     def test_file_factory_not_supported(self):
         mock_api = Mock()

@@ -9,7 +9,6 @@ from mock import MagicMock
 
 from abeja.exceptions import HttpError
 from abeja.datalake.file import (
-    FileMixin,
     FileIterator,
     DatalakeFile
 )
@@ -19,21 +18,6 @@ TEST_MOUNT_DIR = 'tests/datasets/tmp'
 
 ORGANIZATION_ID = '1234567890123'
 CHANNEL_ID = '1230000000000'
-
-
-class TestFileMixin(unittest.TestCase):
-    def test_init(self):
-        class AFile(FileMixin):
-            pass
-        uri = 'datalake://1234567890123/20171128T113546-9fa120a3-96bc-4b84-b56b-1bc2273178a1'
-        type = 'image/jpeg'
-        height = 500,
-        width = 200
-        a_file = AFile(None, uri, type, height=height, width=width)
-        self.assertEqual(a_file.uri, uri)
-        self.assertEqual(a_file.type, type)
-        self.assertEqual(a_file.height, height)
-        self.assertEqual(a_file.width, width)
 
 
 class TestFileIterator(unittest.TestCase):
