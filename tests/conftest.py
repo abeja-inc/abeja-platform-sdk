@@ -223,8 +223,7 @@ def user_response(user_id):
                 "thumbnail_icon_url": "https://icon.example.com/users/{}".format(user_id),
                 "original_icon_url": "https://icon.example.com/users/{}".format(user_id),
                 "mini_icon_url": "https://icon.example.com/users/{}".format(user_id),
-            }
-        }
+            }}
     return _response
 
 
@@ -298,7 +297,10 @@ def delete_file_response():
 
 
 @pytest.fixture
-def job_definition_response(organization_id, job_definition_id, job_definition_name):
+def job_definition_response(
+        organization_id,
+        job_definition_id,
+        job_definition_name):
     def _training_job_definition_response(
             organization_id=organization_id,
             training_job_definition_id=job_definition_id,
@@ -431,7 +433,11 @@ def job_result_response():
 
 
 @pytest.fixture
-def training_model_response(job_definition_id, job_id, training_model_id, user_response):
+def training_model_response(
+        job_definition_id,
+        job_id,
+        training_model_id,
+        user_response):
     def _response(**extra):
         return {
             'user_parameters': {},
@@ -498,9 +504,18 @@ def deployment_version_response(deployment_id, deployment_version_id):
 
 
 @pytest.fixture
-def create_service_response(service_id, deployment_id, deployment_version_id, job_definition_id,
-                            training_model_id, training_model_version_id, user_response):
-    def _response(training_model_id=training_model_id, job_definition_id=job_definition_id, **extra):
+def create_service_response(
+        service_id,
+        deployment_id,
+        deployment_version_id,
+        job_definition_id,
+        training_model_id,
+        training_model_version_id,
+        user_response):
+    def _response(
+            training_model_id=training_model_id,
+            job_definition_id=job_definition_id,
+            **extra):
         return {
             'user_env_vars': {},
             'status': 'IN_PROGRESS',

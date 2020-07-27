@@ -12,9 +12,7 @@ DATASET_ITEM_SOURCE_DATA_DATALAKE = [
         'data_type': 'image/jpeg',
         'data_uri': 'datalake://1200123803688/20170815T044617-f20dde80-1e3b-4496-bc06-1b63b026b872',
         'height': 500,
-        'width': 200
-    }
-]
+        'width': 200}]
 DATASET_ITEM_SOURCE_DATA_HTTP = [
     {
         "data_uri": "http://example.com/hoge/foo/bar.jpg",
@@ -91,21 +89,12 @@ class TestDatasetItem(unittest.TestCase):
         self.assertEqual(item.created_at, self.created_at)
         self.assertEqual(item.updated_at, self.updated_at)
 
-    @parameterized.expand([
-        (
-            DATASET_ITEM_SOURCE_DATA_DATALAKE,
-            [
-                {
-                    "data_type": "image/jpeg",
-                    "data_uri": "datalake://1200123803688/20170815T044617-f20dde80-1e3b-4496-bc06-1b63b026b872",
-                }
-            ]
-        ),
-        (
-            DATASET_ITEM_SOURCE_DATA_HTTP,
-            DATASET_ITEM_SOURCE_DATA_HTTP
-        )
-    ])
+    @parameterized.expand([(DATASET_ITEM_SOURCE_DATA_DATALAKE,
+                            [{"data_type": "image/jpeg",
+                              "data_uri": "datalake://1200123803688/20170815T044617-f20dde80-1e3b-4496-bc06-1b63b026b872",
+                              }]),
+                           (DATASET_ITEM_SOURCE_DATA_HTTP,
+                            DATASET_ITEM_SOURCE_DATA_HTTP)])
     def test_asdict(self, source_data, expected_source_data):
         item = DatasetItem(None, self.organization_id,
                            self.dataset_id, self.item_id,

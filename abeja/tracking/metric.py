@@ -1,4 +1,5 @@
 from enum import Enum
+import math
 from typing import Union
 
 
@@ -24,12 +25,15 @@ class Metric:
     class SpecialValues(Enum):
         INFINITY = "Infinity"
         MINUS_INFINITY = "-Infinity"
+        NAN = "NaN"
 
     def __format_value(self) -> Union[float, str]:
         if self.value == float('inf'):
             return Metric.SpecialValues.INFINITY.value
         elif self.value == float('-inf'):
             return Metric.SpecialValues.MINUS_INFINITY.value
+        elif math.isnan(self.value):
+            return Metric.SpecialValues.NAN.value
         return self.value
 
     def to_dict(self):
