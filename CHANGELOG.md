@@ -1,3 +1,7 @@
+# 1.2.3
+- Support http url in dataset item datasource (#40) 
+- Support nan in metrics (#41)
+
 # 1.2.2
 - add export_log option to Jobs.create (#39)
 
