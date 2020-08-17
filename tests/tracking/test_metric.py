@@ -26,6 +26,7 @@ class TestMetric:
             (('xxx', 123), {'xxx': 123}),
             (('main/acc', float('inf')), {'main_acc': 'Infinity'}),
             (('xxx', float('-inf')), {'xxx': '-Infinity'}),
+            (('main/acc', float('nan')), {'main_acc': 'NaN'}),
         ]
     )
     def test_to_dict(self, given, expected):

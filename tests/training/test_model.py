@@ -6,15 +6,24 @@ from abeja.common import exec_env
 from abeja.training import JobDefinition  # noqa: F401
 
 
-def test_model_from_response(training_api_client, organization_id, training_model_response):
+def test_model_from_response(
+        training_api_client,
+        organization_id,
+        training_model_response):
     response = training_model_response()
     model = Model.from_response(training_api_client, organization_id, response)
     assert model
 
 
-def test_model_get_job_without_job(requests_mock, api_base_url, training_api_client,
-                                   organization_id, job_definition_id, job_definition_name,
-                                   training_model_response, job_definition_response):
+def test_model_get_job_without_job(
+        requests_mock,
+        api_base_url,
+        training_api_client,
+        organization_id,
+        job_definition_id,
+        job_definition_name,
+        training_model_response,
+        job_definition_response):
     requests_mock.get(
         '{}/organizations/{}/training/definitions/{}'.format(
             api_base_url,
@@ -29,9 +38,17 @@ def test_model_get_job_without_job(requests_mock, api_base_url, training_api_cli
     assert model.job is None
 
 
-def test_model_get_job(requests_mock, api_base_url, training_api_client,
-                       organization_id, job_definition_id, job_definition_name, job_id,
-                       training_model_response, job_definition_response, job_response):
+def test_model_get_job(
+        requests_mock,
+        api_base_url,
+        training_api_client,
+        organization_id,
+        job_definition_id,
+        job_definition_name,
+        job_id,
+        training_model_response,
+        job_definition_response,
+        job_response):
     requests_mock.get(
         '{}/organizations/{}/training/definitions/{}'.format(
             api_base_url,
@@ -216,8 +233,11 @@ def test_update_model(requests_mock, api_base_url,
     assert model.description == description
 
 
-def test_get_download_uri(requests_mock, api_base_url,
-                          job_definition_factory, training_model_response) -> None:
+def test_get_download_uri(
+        requests_mock,
+        api_base_url,
+        job_definition_factory,
+        training_model_response) -> None:
     definition = job_definition_factory()  # type: JobDefinition
     adapter = definition.models()
 
@@ -235,8 +255,11 @@ def test_get_download_uri(requests_mock, api_base_url,
     assert adapter.get_download_uri(training_model_id) == uri
 
 
-def test_models_archive(requests_mock, api_base_url,
-                        job_definition_factory, training_model_response) -> None:
+def test_models_archive(
+        requests_mock,
+        api_base_url,
+        job_definition_factory,
+        training_model_response) -> None:
     definition = job_definition_factory()  # type: JobDefinition
     adapter = definition.models()
 
@@ -255,8 +278,11 @@ def test_models_archive(requests_mock, api_base_url,
     assert requests_mock.called
 
 
-def test_models_unarchive(requests_mock, api_base_url,
-                          job_definition_factory, training_model_response) -> None:
+def test_models_unarchive(
+        requests_mock,
+        api_base_url,
+        job_definition_factory,
+        training_model_response) -> None:
     definition = job_definition_factory()  # type: JobDefinition
     adapter = definition.models()
 
