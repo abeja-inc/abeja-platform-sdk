@@ -1,3 +1,7 @@
+# 1.2.4
+- add typing-extensions dependency (#42)
+
+
 # 1.2.3
 - Support http url in dataset item datasource (#40) 
 - Support nan in metrics (#41)
