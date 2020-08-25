@@ -90,5 +90,7 @@ class DockerImageName(__DockerImageName):
 # Define pre-defined instance types
 ALL_CPU_19_04 = DockerImageName.parse('abeja-inc/all-cpu:19.04')
 ALL_CPU_19_10 = DockerImageName.parse('abeja-inc/all-cpu:19.10')
+ALL_CPU_20_10 = DockerImageName.parse('abeja-inc/all-cpu:20.10')
 ALL_GPU_19_04 = DockerImageName.parse('abeja-inc/all-gpu:19.04')
 ALL_GPU_19_10 = DockerImageName.parse('abeja-inc/all-gpu:19.10')
+ALL_GPU_20_10 = DockerImageName.parse('abeja-inc/all-gpu:20.10')

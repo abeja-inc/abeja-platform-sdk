@@ -27,9 +27,11 @@ class ImageType(Enum):
     IMAGE_CPU_1810 = 'abeja-inc/all-cpu:18.10'
     IMAGE_CPU_1904 = 'abeja-inc/all-cpu:19.04'
     IMAGE_CPU_1910 = 'abeja-inc/all-cpu:19.10'
+    IMAGE_CPU_2010 = 'abeja-inc/all-cpu:20.10'
     IMAGE_GPU_1810 = 'abeja-inc/all-gpu:18.10'
     IMAGE_GPU_1904 = 'abeja-inc/all-gpu:19.04'
     IMAGE_GPU_1910 = 'abeja-inc/all-gpu:19.10'
+    IMAGE_GPU_2010 = 'abeja-inc/all-gpu:20.10'
 
     @classmethod
     def to_enum(cls, status: str):
