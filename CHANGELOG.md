@@ -1,6 +1,8 @@
+# 1.2.5
+- Add 20.10 images (#43)
+
 # 1.2.4
 - add typing-extensions dependency (#42)
-
 
 # 1.2.3
 - Support http url in dataset item datasource (#40) 
