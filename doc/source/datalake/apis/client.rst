@@ -14,6 +14,13 @@ Channel
    :members:
    :undoc-members:
 
+Channels
+--------
+
+.. autoclass:: abeja.datalake.channel.Channels
+   :members:
+   :undoc-members:
+
 File
 -----
 
