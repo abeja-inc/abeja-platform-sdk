@@ -1,3 +1,6 @@
+# 1.2.6
+- add_datalake_channels_doc (#45)
+
 # 1.2.5
 - Add 20.10 images (#43)
 
