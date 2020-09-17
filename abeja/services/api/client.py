@@ -1,5 +1,7 @@
 from datetime import datetime
-from typing import Dict, Optional
+from typing import Dict, Optional, IO, Text, Union, Any
+
+import requests
 
 from abeja.common.api_client import BaseAPIClient
 
@@ -496,3 +498,59 @@ class APIClient(BaseAPIClient):
             organization_id, deployment_id, service_id)
         return self._connection.api_request(
             method='GET', path=path, params=params)
+
+    def request_service(
+            self,
+            organization_id: str,
+            deployment_id: str,
+            service_id: str,
+            data: Union[None, Text, bytes, IO]=None,
+            json: Optional[Any]=None,
+            content_type: Optional[str]=None) -> requests.Response:
+        """post request to the service
+
+        API reference: POST https://<organization_id>.api.abeja.io/deployments/<deployment_id>/services/<service_id>
+
+        Request Syntax:
+            .. code-block:: python
+
+                organization_id = "1234567890123"
+                deployment_id = "1111111111111"
+                service_id = "ser-3333333333333333"
+
+                # send json data
+                json_data = {
+                    "foo": "bar",
+                    "baz": "qux"
+                }
+                response = api_client.request_service(organization_id, deployment_id, service_id, json=json_data)
+
+                # send image data
+                with open('./foo.png', 'rb') as f:
+                    response = api_client.request_service(organization_id, deployment_id, service_id, data=f, content_type='image/png')
+
+        Params:
+            - **organization_id** (str): organization_id
+            - **deployment_id** (str): deployment identifier
+            - **service_id** (str): service identifier
+            - **data** (Union[str, bytes, typing.IO]): **[optional]** a request payload of something other than json
+            - **json** (typing.Any): **[optional]** a request payload of json
+            - **content_type** (str): **[optional]** MIME-Type. Specify if you want to send data using `data` to the service
+
+        Return type:
+            requests.Response
+
+        Raises:
+            - Unauthorized: Authentication failed
+            - NotFound:
+            - Forbidden:
+            - InternalServerError:
+        """
+        headers = {}
+        if content_type is not None:
+            headers['Content-Type'] = content_type
+        elif data is not None:
+            headers['Content-Type'] = 'application/octet-stream'
+        path = '/deployments/{}/services/{}'.format(deployment_id, service_id)
+        return self._connection.service_request(
+            subdomain=organization_id, path=path, headers=headers, data=data, json=json)

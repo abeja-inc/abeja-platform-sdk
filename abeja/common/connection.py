@@ -2,7 +2,8 @@ import base64
 import json
 import os
 import http
-from typing import Optional
+from typing import Optional, Union, Text, IO, MutableMapping, Any
+from urllib.parse import urlparse
 
 from requests import Session
 from requests.adapters import HTTPAdapter
@@ -88,6 +89,45 @@ class Connection:
                                params=params,
                                **kwargs)
             return res.json()
+        except RequestsHTTPError as e:
+            http_error_handler(e)
+
+    def service_request(
+            self,
+            subdomain: str,
+            path: str,
+            data: Union[None, Text, bytes, IO]=None,
+            json: Optional[Any]=None,
+            headers: Optional[MutableMapping[Text, Text]]=None,
+            params: Union[None, bytes, MutableMapping[Text, Text]]=None,
+            **kwargs):
+        """call service api and handle errors if needed
+
+        :param subdomain:
+        :param path:
+        :param data:
+        :param json:
+        :param headers:
+        :param params:
+        :param kwargs:
+        :return: (requests.Response)
+        """
+        if headers is None:
+            headers = {}
+        headers.update(self._set_user_agent())
+        headers.update(self._get_auth_header())
+
+        base = urlparse(self.BASE_URL)
+        target_url = '{}://{}.{}{}'.format(base.scheme, subdomain, base.netloc, path)
+        try:
+            return self.request(
+                method='POST',
+                url=target_url,
+                data=data,
+                json=json,
+                headers=headers,
+                params=params,
+                **kwargs)
         except RequestsHTTPError as e:
             http_error_handler(e)
 
