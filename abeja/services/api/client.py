@@ -533,9 +533,9 @@ class APIClient(BaseAPIClient):
             - **organization_id** (str): organization_id
             - **deployment_id** (str): deployment identifier
             - **service_id** (str): service identifier
-            - **data** (bytes): a request payload of something other than json **[optional]**
-            - **json** (dict): a request payload of json **[optional]**
-            - **content_type** (string): MIME-Type. Specify if you want to send data using `data` to the service **[optional]**
+            - **data** (Union[str, bytes, typing.IO]): **[optional]** a request payload of something other than json
+            - **json** (typing.Any): **[optional]** a request payload of json
+            - **content_type** (str): **[optional]** MIME-Type. Specify if you want to send data using `data` to the service
 
         Return type:
             requests.Response
