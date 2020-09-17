@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Dict, Optional
+from typing import Dict, Optional, IO, Text, Union, Any
 
 import requests
 
@@ -504,8 +504,8 @@ class APIClient(BaseAPIClient):
             organization_id: str,
             deployment_id: str,
             service_id: str,
-            data: Optional[bytes]=None,
-            json: Optional[dict]=None,
+            data: Union[None, Text, bytes, IO]=None,
+            json: Optional[Any]=None,
             content_type: Optional[str]=None) -> requests.Response:
         """post request to the service
 
@@ -527,16 +527,15 @@ class APIClient(BaseAPIClient):
 
                 # send image data
                 with open('./foo.png', 'rb') as f:
-                    data = f.read()
-                response = api_client.request_service(organization_id, deployment_id, service_id, data=data, content_type='image/png')
+                    response = api_client.request_service(organization_id, deployment_id, service_id, data=f, content_type='image/png')
 
         Params:
             - **organization_id** (str): organization_id
             - **deployment_id** (str): deployment identifier
             - **service_id** (str): service identifier
-            - **data** (bytes): binary type request payload
-            - **json** (dict): json type request payload
-            - **content_type** (string): MIME-Type. Specify if you want to send binary data using `data` to the service
+            - **data** (bytes): a request payload of something other than json **[optional]**
+            - **json** (dict): a request payload of json **[optional]**
+            - **content_type** (string): MIME-Type. Specify if you want to send data using `data` to the service **[optional]**
 
         Return type:
             requests.Response

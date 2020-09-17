@@ -1,5 +1,6 @@
 import json
 import unittest
+from io import BytesIO
 
 import requests_mock
 
@@ -235,4 +236,37 @@ class TestAPIClient(unittest.TestCase):
             service_id=SERVICE_ID,
             data=request_binary,
             content_type='image/png')
+        self.assertEqual(ret.json(), message_res)
+
+    @requests_mock.Mocker()
+    def test_request_service_with_io(self, m):
+        request_binary = b'binary data'
+
+        def match_request(request):
+            content_type = request._request.headers.get('Content-Type', "")
+            if content_type != 'application/octet-stream':
+                return False
+            body = request._request.body
+            if not isinstance(body, BytesIO):
+                return False
+            if request_binary != body.read():
+                return False
+            return True
+
+        url = 'http://{}.{}/deployments/{}/services/{}'.format(
+            ORGANIZATION_ID, ABEJA_API_NETLOC, DEPLOYMENT_ID, SERVICE_ID)
+        message_res = {
+            "message": "ok"
+        }
+        m.post(url, additional_matcher=match_request, json=message_res)
+
+        Connection.BASE_URL = ABEJA_API_URL
+        client = APIClient()
+
+        b = BytesIO(request_binary)
+        ret = client.request_service(
+            organization_id=ORGANIZATION_ID,
+            deployment_id=DEPLOYMENT_ID,
+            service_id=SERVICE_ID,
+            data=b)
         self.assertEqual(ret.json(), message_res)

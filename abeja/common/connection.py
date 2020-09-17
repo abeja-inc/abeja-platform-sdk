@@ -2,7 +2,7 @@ import base64
 import json
 import os
 import http
-from typing import Optional
+from typing import Optional, Union, Text, IO, MutableMapping, Any
 from urllib.parse import urlparse
 
 from requests import Session
@@ -96,10 +96,10 @@ class Connection:
             self,
             subdomain: str,
             path: str,
-            data=None,
-            json=None,
-            headers=None,
-            params=None,
+            data: Union[None, Text, bytes, IO]=None,
+            json: Optional[Any]=None,
+            headers: Optional[MutableMapping[Text, Text]]=None,
+            params: Union[None, bytes, MutableMapping[Text, Text]]=None,
             **kwargs):
         """call service api and handle errors if needed
 
