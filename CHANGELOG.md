@@ -1,3 +1,6 @@
+# 1.3.0
+- add low-level API `abeja.services.APIClient.request_service` (#47)
+
 # 1.2.6
 - add_datalake_channels_doc (#45)
 
