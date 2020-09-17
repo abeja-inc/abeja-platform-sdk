@@ -52,3 +52,5 @@ API Mapping
 +----------+------------------------------------------------------------------------------------------+----------------------------------------------------------------------------------+
 | POST     | /organizations/<organization_id>/deployments/<deployment_id>/services/<service_id>/start | :meth:`APIClient.start_service() <abeja.services.APIClient.start_service>`       |
 +----------+------------------------------------------------------------------------------------------+----------------------------------------------------------------------------------+
+| POST     | https://<organization_id>.api.abeja.io/deployments/<deployment_id>/services/<service_id> | :meth:`APIClient.request_service() <abeja.services.APIClient.request_service>`   |
++----------+------------------------------------------------------------------------------------------+----------------------------------------------------------------------------------+
