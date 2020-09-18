@@ -367,12 +367,37 @@ class APIClient(BaseAPIClient):
                handler = 'main:handler'
                image = 'abeja-inc/all-cpu:18.10'
                user_parameters = {
-                    'SAMPLE_ENV': 'SAMPLE_VALUE'
-                }
+                   'SAMPLE_ENV': 'SAMPLE_VALUE'
+               }
 
                response = api_client.create_deployment_version(
                    organization_id, deployment_id, version, handler, image, user_parameters
                )
+
+               # Then, you need to upload the source code for prediction to the ABEJA Platform
+
+               # create an archive containing all the source codes.
+               # for example, source tree looks like:
+               # /path/
+               #   |-- to/
+               #       |-- project/
+               #             |-- root/
+               #                   |-- main.py
+               #                   |-- utils/
+               #                         |-- util.py
+               from shutil import make_archive
+               make_archive(
+                   './archive',
+                   'gztar',
+                   root_dir='/path/to/project/root',
+                   base_dir='.'
+               )
+
+               # upload archive
+               import requests
+               upload_url = response['upload_url']
+               with open('archive.tar.gz', 'rb') as file:
+                   requests.put(upload_url, data=file)
 
         Params:
             - **organization_id** (str): organization id
