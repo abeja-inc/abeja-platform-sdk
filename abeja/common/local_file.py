@@ -18,6 +18,11 @@ import random
 
 from abeja.common.config import MOUNT_DIR, DEFAULT_CHUNK_SIZE
 
+# A random number generator used for generate temporary file name. ML code
+# often sets random seed, it causes file name conflict. So we have our own
+# random generator.
+RANDOM = random.Random()
+
 
 def use_binary_cache(func):
     """NOTE: this function expects to take `method object` as an arg"""
@@ -171,7 +176,7 @@ def _write_iter_file(path, file_type, iter_content):
     suffix = '{}-{}-{:04x}'.format(
         os.getpid(),
         datetime.now().strftime('%Y%m%d%H%M%S'),
-        random.randint(0, 0xffff))
+        RANDOM.randint(0, 0xffff))
     tmppath = '{}.{}'.format(path, suffix)
 
     mode = 'w'
