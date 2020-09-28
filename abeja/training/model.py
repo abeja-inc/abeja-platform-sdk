@@ -234,6 +234,7 @@ class Models():
 
     def create(self,
                model_data: IO[AnyStr],
+               job_id: Optional[str] = None,
                environment: Optional[Dict[str, Any]] = None,
                metrics: Optional[Dict[str, Any]] = None,
                description: Optional[str] = None) -> Model:
@@ -249,6 +250,7 @@ class Models():
 
         Params:
             - **model_data** (IO): An input source for ML model. It must be a zip archived file like object
+            - **job_id** (str): **[optional]** job identifer
             - **environment** (dict): **[optional]** user defined parameters set as environment variables
             - **metrics** (dict): **[optional]** user defined metrics for this model
             - **description** (str): **[optional]** description
@@ -258,6 +260,8 @@ class Models():
         """
         parameters = {}  # type: Dict[str, Any]
 
+        if job_id is not None:
+            parameters['training_job_id'] = job_id
         if environment is not None:
             parameters['user_parameters'] = environment
         if metrics is not None:
