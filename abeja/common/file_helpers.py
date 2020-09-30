@@ -36,7 +36,9 @@ def generate_path_iter(path: str, **kwargs) -> Iterable[str]:
 
 
 def convert_to_zipfile_object(fileobj: IO):
-    if zipfile.is_zipfile(fileobj):
+    is_zipfile = zipfile.is_zipfile(fileobj)
+    fileobj.seek(0)
+    if is_zipfile:
         return fileobj
     if hasattr(fileobj, "name"):
         named_fileobj = fileobj

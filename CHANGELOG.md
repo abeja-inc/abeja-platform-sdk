@@ -1,3 +1,9 @@
+# 1.3.1
+- add job_id to training.Models.create (#49)
+- fix convert_to_zipfile_object (#51)
+- Generating tmp filepath should not be affected by random.seed (#50)
+- add sample code to create-deployment-version (#48)
+
 # 1.3.0
 - add low-level API `abeja.services.APIClient.request_service` (#47)
 
