@@ -178,11 +178,13 @@ def test_create_model(
 
     file_content = make_random_file_content()
     model_data = BytesIO(file_content)
+    job_id = '1'
     environment = {'BATCH_SIZE': 32, 'EPOCHS': 50}
     metrics = {'acc': 0.76, 'loss': 1.99}
 
     model = adapter.create(
         model_data,
+        job_id=job_id,
         environment=environment,
         metrics=metrics)
 
