@@ -1,3 +1,6 @@
+# 2.0.0
+- Switch python version to 3.6 (#44)
+
 # 1.3.1
 - add job_id to training.Models.create (#49)
 - fix convert_to_zipfile_object (#51)
