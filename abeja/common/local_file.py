@@ -10,6 +10,7 @@ local file is saved in MOUNT_DIR and follows the rules below.
 | http       | domain:port | path                    |
 
 """
+import errno
 import os
 import os.path
 from functools import wraps
@@ -23,9 +24,6 @@ from abeja.common.config import MOUNT_DIR, DEFAULT_CHUNK_SIZE
 # often sets random seed, it causes file name conflict. So we have our own
 # random generator.
 RANDOM = random.Random()
-
-# errno for "Stale file handle". Python's errno module doesn't define the value.
-E_STALE_FILE_HANDLE = 116
 
 
 def use_binary_cache(func):
@@ -155,7 +153,7 @@ def _read_file(path, file_type):
             return f.read()
         except OSError as exc:
             # The file is already deleted in the NFS server (EFS), try to re-open it and read.
-            if exc.errno == E_STALE_FILE_HANDLE:
+            if exc.errno == errno.ESTALE:
                 with open(path, mode) as f2:
                     return f2.read()
 
