@@ -2,18 +2,22 @@
 
 ABEJA Platform SDK is the ABEJA Platform Software Development Kit (SDK) for Python, which allows Python developers to write software that makes use of services like Datalake, Dataset, Training, Deployment, etc. You can find the latest, most up to date, documentation at our doc site, including a list of services that are supported.
 
-
 [![CircleCI](https://circleci.com/gh/abeja-inc/abeja-platform-sdk.svg?style=svg)](https://circleci.com/gh/abeja-inc/abeja-platform-sdk)
 
 ## How to install
+
 ### Using pip
+
 ```
 $ pip install abeja-sdk>=1.0.0
 ```
+
 If you want to use latest version including **release candidate**, add `--pre` option.
+
 ```
 $ pip install abeja-sdk>=1.0.0 --pre
 ```
+
 If you have bigger version than latest pre-release, bigger not-pre-release version in installed.
 For example, when there are versions of `1.0.1` and `1.0.0rc1`, `1.0.1` is installed even if you specify `--pre` option.
 
@@ -21,16 +25,17 @@ Release candidate is published when release branch is pushed to Github.
 
 ### Using requirements.txt
 
-*`requirements.txt`*
+_`requirements.txt`_
+
 ```
 abeja-sdk>=1.0.0
 ```
 
 If you want to use pre-release, add `rc0` suffix.
+
 ```
 abeja-sdk>=1.0.0rc
 ```
-
 
 ## Development
 
@@ -54,21 +59,24 @@ $ poetry run pytest tests/
 ```
 
 ### Generating Documentation
+
 Sphinx is used for documentation. You can generate HTML locally with the following:
 
 ```bash
+$ poetry install -E docs
 $ make docs
 ```
 
 #### Installling dependencies
+
 ```
 $ brew install sphinx-doc
 $ echo 'export PATH="/usr/local/opt/sphinx-doc/bin:$PATH"' >> ~/.bashrc
 $ poetry install
 ```
 
-
 ## Release
+
 Synchronize master and develop branch.
 
 ```bash
