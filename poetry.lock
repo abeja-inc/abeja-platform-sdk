@@ -255,7 +255,7 @@ python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*"
 version = "1.2.0"
 
 [[package]]
-category = "dev"
+category = "main"
 description = "Read metadata from Python packages"
 name = "importlib-metadata"
 optional = false
@@ -928,7 +928,7 @@ version = "0.35.1"
 test = ["pytest (>=3.0.0)", "pytest-cov"]
 
 [[package]]
-category = "dev"
+category = "main"
 description = "Backport of pathlib-compatible object wrapper for zip files"
 name = "zipp"
 optional = false
@@ -943,7 +943,7 @@ testing = ["pytest (>=3.5,<3.7.3 || >3.7.3)", "pytest-checkdocs (>=1.2.3)", "pyt
 docs = ["Sphinx", "guzzle_sphinx_theme"]
 
 [metadata]
-content-hash = "c0a8613cea0d98eda10ae4753a54abedd876fd250ab2bc9f20392c6be76dcc9c"
+content-hash = "312ef653bd6e15b300f76e13a1e43ede9e3283812611c45fed9027be6b5a1b22"
 python-versions = "~=3.6"
 
 [metadata.files]
