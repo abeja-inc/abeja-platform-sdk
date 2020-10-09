@@ -9,11 +9,15 @@ class SourceURI:
 
 
 @pytest.fixture
-def read_cache_factory(monkeypatch, tmp_path, tmpdir):
+def mount_dir(monkeypatch, tmpdir):
+    monkeypatch.setattr(local_file, 'MOUNT_DIR', str(tmpdir))
+    return tmpdir
+
+
+@pytest.fixture
+def read_cache_factory(mount_dir, tmp_path):
     def factory(cache_func, content):
         filename = 'testfile'
-        monkeypatch.setattr(local_file, 'MOUNT_DIR', str(tmpdir))
-
         obj = SourceURI(f'http://example.com/files/{filename}')
         original = tmp_path / filename
 
