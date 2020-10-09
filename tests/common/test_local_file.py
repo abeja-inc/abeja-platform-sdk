@@ -1,5 +1,6 @@
 from abeja.common import local_file
-from abeja.common.local_file import use_text_cache
+from abeja.common.local_file import use_text_cache, use_binary_cache
+import pytest
 
 
 class SourceURI:
@@ -7,15 +8,33 @@ class SourceURI:
         self.uri = uri
 
 
-def test_use_binary_cache(monkeypatch, tmp_path, tmpdir):
+@pytest.fixture
+def read_cache_factory(monkeypatch, tmp_path, tmpdir):
+    def factory(cache_func, content):
+        filename = 'testfile'
+        monkeypatch.setattr(local_file, 'MOUNT_DIR', str(tmpdir))
+
+        obj = SourceURI(f'http://example.com/files/{filename}')
+        original = tmp_path / filename
+
+        if isinstance(content, str):
+            mode = 'r'
+            original.write_text(content)
+        else:
+            mode = 'rb'
+            original.write_bytes(content)
+
+        with open(str(original), mode) as f:
+            decorated = cache_func(f.read)
+            return decorated(obj)
+    return factory
+
+
+def test_use_text_cache(read_cache_factory):
     content = 'Hello, World!'
-    filename = 'hello.txt'
-    monkeypatch.setattr(local_file, 'MOUNT_DIR', str(tmpdir))
+    assert read_cache_factory(use_text_cache, content) == content
 
-    obj = SourceURI(f'http://example.com/files/{filename}')
-    original = tmp_path / filename
-    original.write_text(content)
 
-    with open(str(original), 'r') as f:
-        decorated = use_text_cache(f.read)
-        assert decorated(obj) == content
+def test_use_binary_cache(read_cache_factory):
+    content = b'test'
+    assert read_cache_factory(use_binary_cache, content) == content
