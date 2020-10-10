@@ -166,7 +166,7 @@ def _read_iter_content_file(path, chunk_size):
 
 def _read_iter_lines_file(path):
     with open(path, 'r') as f:
-        for line in f.readline():
+        for line in f:
             yield line
 
 
