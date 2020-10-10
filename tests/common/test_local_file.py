@@ -37,8 +37,12 @@ def read_cache_factory(mount_dir, tmp_path):
 def test_use_text_cache(read_cache_factory):
     content = 'Hello, World!'
     assert read_cache_factory(use_text_cache, content) == content
+    # Read from cache
+    assert read_cache_factory(use_text_cache, content) == content
 
 
 def test_use_binary_cache(read_cache_factory):
     content = b'test'
+    assert read_cache_factory(use_binary_cache, content) == content
+    # Read from cache
     assert read_cache_factory(use_binary_cache, content) == content
