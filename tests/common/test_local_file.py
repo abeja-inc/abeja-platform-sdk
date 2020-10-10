@@ -110,11 +110,10 @@ def read_iter_factory(fake_file_factory, monkeypatch):
             sentinel = '' if isinstance(content, str) else b''
             return iter(partial(f.read, chunk_size), sentinel)
 
+        # We don't test raising "Stale file handle" error for iterator
         with f:
             decorated = cache_func(make_iter)
-            with monkeypatch.context() as m:
-                m.setattr(builtins, 'open', mock_open_factory())
-                return list(decorated(obj)), list(decorated(obj))
+            return decorated(obj), decorated(obj)
     return factory
 
 

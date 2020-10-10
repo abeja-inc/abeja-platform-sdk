@@ -154,34 +154,22 @@ def _read_file(path, file_type):
         except OSError as exc:
             # The file is already deleted in the NFS server (EFS), try to re-open it and read.
             if exc.errno == errno.ESTALE:
-                with open(path, mode) as f:
-                    return f.read()
+                with open(path, mode) as f2:
+                    return f2.read()
 
 
 def _read_iter_content_file(path, chunk_size):
+    # We can't handle "Stale file handle" error for this case.
     with open(path, 'rb') as f:
-        try:
-            for chunk in _read_in_chunks(f, chunk_size):
-                yield chunk
-        except OSError as exc:
-            # The file is already deleted in the NFS server (EFS), try to re-open it and read.
-            if exc.errno == errno.ESTALE:
-                with open(path, 'rb') as f:
-                    for chunk in _read_in_chunks(f, chunk_size):
-                        yield chunk
+        for chunk in _read_in_chunks(f, chunk_size):
+            yield chunk
 
 
 def _read_iter_lines_file(path):
+    # We can't handle "Stale file handle" error for this case.
     with open(path, 'r') as f:
-        try:
-            for line in f:
-                yield line
-        except OSError as exc:
-            # The file is already deleted in the NFS server (EFS), try to re-open it and read.
-            if exc.errno == errno.ESTALE:
-                with open(path, 'r') as f:
-                    for line in f:
-                        yield line
+        for line in f:
+            yield line
 
 
 def _write_file(path, file_type, content):
