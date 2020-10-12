@@ -166,9 +166,9 @@ class TestTracking(unittest.TestCase):
         with self.assertRaises(InvalidPathException):
             tracking.log_artifact('dummy')
 
-    @mock.patch('builtins.print')
-    def test_tracking_without_artifact(self, mock_print):
-        tracking = Tracking()
+    def test_tracking_without_artifact(self):
+        mock_logger = mock.MagicMock()
+        tracking = Tracking(logger=mock_logger)
         for k, v in USER_PARAMETERS.items():
             tracking.log_param(k, v)
         for k, v in METRICS.items():
@@ -176,13 +176,13 @@ class TestTracking(unittest.TestCase):
         tracking.log_description(description=DESCRIPTION)
         tracking.log_step(step=1)
         tracking.flush()
-        mock_print.assert_any_call(
+        mock_logger.warning.assert_any_call(
             'No output. Need to add "artifact" by "log_artifact()".')
 
-    @mock.patch('builtins.print')
-    def test_tracking_without_org_jobdef_job(self, mock_print):
-        Tracking()
-        mock_print.assert_any_call(
+    def test_tracking_without_org_jobdef_job(self):
+        mock_logger = mock.MagicMock()
+        Tracking(logger=mock_logger)
+        mock_logger.warning.assert_any_call(
             'WARNING: No params/metrics/artifact will be uploaded to ABEJA Platform. '
             'Please specify "ABEJA_ORGANIZATION_ID", "TRAINING_JOB_DEFINITION_NAME" '
             'and "TRAINING_JOB_ID" for uploading.')

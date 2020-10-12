@@ -1,4 +1,7 @@
+import logging
 import os
+import sys
+from logging import getLogger, Logger
 from pathlib import Path
 from typing import Dict, Optional
 
@@ -10,8 +13,39 @@ from abeja.tracking.metric import Metric
 from tensorboardX import SummaryWriter
 
 
+tracking_logger = getLogger('tracking')
+if len(tracking_logger.handlers) == 0:
+    tracking_logger.addHandler(logging.StreamHandler(stream=sys.stdout))
+if tracking_logger.level == logging.NOTSET:
+    tracking_logger.setLevel(logging.WARN)
+
+
 class Tracking:
-    def __init__(self, total_steps: Optional[int] = None):
+    """Model Tracking
+
+    Usage:
+        .. code-block:: python
+
+            from abeja.tracking import Tracking
+
+
+            NUM_EPOCHS = 10
+            for epoch in range(NUM_EPOCHS):
+                with Tracking(total_steps=NUM_EPOCHS) as tk:
+                    # Write your modeling code here.
+                    tk.log_description("Example")
+                    tk.log_param(key="LR", value="0.03")
+                    tk.log_param(key="DROPOUT", value="0.7")
+                    tk.log_metric(key="main/acc", value=0.95)
+                    tk.log_metric(key="main/loss", value=0.01)
+                    tk.log_artifact(filepath='filepath_to_your_model', delete_flag=True)
+    """
+
+    def __init__(
+            self,
+            total_steps: Optional[int] = None,
+            logger: Optional[Logger] = tracking_logger):
+        self.logger = logger
         self._organization_id = os.environ.get('ABEJA_ORGANIZATION_ID')
         self._job_definition_name = os.environ.get(
             'TRAINING_JOB_DEFINITION_NAME')
@@ -39,7 +73,7 @@ class Tracking:
                 job_definition_name=self._job_definition_name,
                 training_job_id=self._training_job_id)
         else:
-            print(     # noqa: T001
+            self.logger.warning(
                 'WARNING: No params/metrics/artifact will be uploaded to ABEJA Platform. '
                 'Please specify "ABEJA_ORGANIZATION_ID", "TRAINING_JOB_DEFINITION_NAME" '
                 'and "TRAINING_JOB_ID" for uploading.')
@@ -118,12 +152,12 @@ class Tracking:
     def flush(self) -> None:
         description = ""
         if self._step is not None:
-            print('step {}'.format(self._step))     # noqa: T001
+            self.logger.debug('step {}'.format(self._step))
             description = 'STEP {}. '.format(self._step)
-        print('description={}'.format(self._description))     # noqa: T001
-        print('params={}'.format(self._params))     # noqa: T001
-        print('metrics={}'.format(self._metrics))     # noqa: T001
-        print('artifact={}'.format(str(self._filepath)))    # noqa: T001
+        self.logger.debug('description={}'.format(self._description))
+        self.logger.debug('params={}'.format(self._params))
+        self.logger.debug('metrics={}'.format(self._metrics))
+        self.logger.debug('artifact={}'.format(str(self._filepath)))
         description += self._description
 
         self._summary_writer.flush()
@@ -159,9 +193,9 @@ class Tracking:
                         job_definition_name=self._job_definition_name,
                         training_job_id=self._training_job_id,
                         statistics=statistics.get_statistics())
-                    print(res)     # noqa: T001
+                    self.logger.debug(res)
                 except Exception as e:
-                    print(e)     # noqa: T001
+                    self.logger.error(e)
 
         if self._need_flush:
             if self._is_valid_job:
@@ -176,10 +210,11 @@ class Tracking:
                         organization_id=self._organization_id,
                         job_definition_name=self._job_definition_name,
                         model_data=fp, parameters=parameters)
-                    print(res)     # noqa: T001
+                    self.logger.debug(res)
                 if self._file_delete_flag:
                     self._filepath.unlink()
         else:
-            print('No output. Need to add "artifact" by "log_artifact()".')     # noqa: T001
+            self.logger.warning(
+                'No output. Need to add "artifact" by "log_artifact()".')
 
         self.clear()

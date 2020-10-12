@@ -553,4 +553,8 @@ class APIClient(BaseAPIClient):
             headers['Content-Type'] = 'application/octet-stream'
         path = '/deployments/{}/services/{}'.format(deployment_id, service_id)
         return self._connection.service_request(
-            subdomain=organization_id, path=path, headers=headers, data=data, json=json)
+            subdomain=organization_id,
+            path=path,
+            headers=headers,
+            data=data,
+            json=json)
