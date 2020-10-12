@@ -3,7 +3,6 @@ from abeja.common.local_file import use_text_cache, use_binary_cache, use_iter_c
 from abeja.common.config import DEFAULT_CHUNK_SIZE
 import pytest
 import secrets
-import io
 import errno
 from functools import partial
 import builtins
