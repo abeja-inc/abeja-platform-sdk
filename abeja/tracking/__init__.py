@@ -1,15 +1,23 @@
+import logging
 import os
-from logging import Logger
+import sys
+from logging import getLogger, Logger
 from pathlib import Path
 from typing import Dict, Optional
 
-from abeja import logging
 from abeja.exceptions import InvalidPathException
 from abeja.models.api.client import APIClient as ModelClient
 from abeja.training.api.client import APIClient as TrainingClient
 from abeja.training.statistics import Statistics as ABEJAStatistics
 from abeja.tracking.metric import Metric
 from tensorboardX import SummaryWriter
+
+
+tracking_logger = getLogger('tracking')
+if len(tracking_logger.handlers) == 0:
+    tracking_logger.addHandler(logging.StreamHandler(stream=sys.stdout))
+if tracking_logger.level == logging.NOTSET:
+    tracking_logger.setLevel(logging.WARN)
 
 
 class Tracking:
@@ -36,7 +44,7 @@ class Tracking:
     def __init__(
             self,
             total_steps: Optional[int] = None,
-            logger: Optional[Logger] = logging.logger):
+            logger: Optional[Logger] = tracking_logger):
         self.logger = logger
         self._organization_id = os.environ.get('ABEJA_ORGANIZATION_ID')
         self._job_definition_name = os.environ.get(
