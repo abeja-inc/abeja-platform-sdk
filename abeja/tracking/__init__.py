@@ -1,23 +1,15 @@
-import logging
 import os
-import sys
-from logging import getLogger
+from logging import Logger
 from pathlib import Path
 from typing import Dict, Optional
 
+from abeja import logging
 from abeja.exceptions import InvalidPathException
 from abeja.models.api.client import APIClient as ModelClient
 from abeja.training.api.client import APIClient as TrainingClient
 from abeja.training.statistics import Statistics as ABEJAStatistics
 from abeja.tracking.metric import Metric
 from tensorboardX import SummaryWriter
-
-
-logger = getLogger('tracking')
-if len(logger.handlers) == 0:
-    logger.addHandler(logging.StreamHandler(stream=sys.stdout))
-if logger.level == logging.NOTSET:
-    logger.setLevel(logging.WARN)
 
 
 class Tracking:
@@ -41,7 +33,11 @@ class Tracking:
                     tk.log_artifact(filepath='filepath_to_your_model', delete_flag=True)
     """
 
-    def __init__(self, total_steps: Optional[int] = None):
+    def __init__(
+            self,
+            total_steps: Optional[int] = None,
+            logger: Optional[Logger] = logging.logger):
+        self.logger = logger
         self._organization_id = os.environ.get('ABEJA_ORGANIZATION_ID')
         self._job_definition_name = os.environ.get(
             'TRAINING_JOB_DEFINITION_NAME')
@@ -69,7 +65,7 @@ class Tracking:
                 job_definition_name=self._job_definition_name,
                 training_job_id=self._training_job_id)
         else:
-            logger.warning(
+            self.logger.warning(
                 'WARNING: No params/metrics/artifact will be uploaded to ABEJA Platform. '
                 'Please specify "ABEJA_ORGANIZATION_ID", "TRAINING_JOB_DEFINITION_NAME" '
                 'and "TRAINING_JOB_ID" for uploading.')
@@ -148,12 +144,12 @@ class Tracking:
     def flush(self) -> None:
         description = ""
         if self._step is not None:
-            logger.debug('step {}'.format(self._step))
+            self.logger.debug('step {}'.format(self._step))
             description = 'STEP {}. '.format(self._step)
-        logger.debug('description={}'.format(self._description))
-        logger.debug('params={}'.format(self._params))
-        logger.debug('metrics={}'.format(self._metrics))
-        logger.debug('artifact={}'.format(str(self._filepath)))
+        self.logger.debug('description={}'.format(self._description))
+        self.logger.debug('params={}'.format(self._params))
+        self.logger.debug('metrics={}'.format(self._metrics))
+        self.logger.debug('artifact={}'.format(str(self._filepath)))
         description += self._description
 
         self._summary_writer.flush()
@@ -189,9 +185,9 @@ class Tracking:
                         job_definition_name=self._job_definition_name,
                         training_job_id=self._training_job_id,
                         statistics=statistics.get_statistics())
-                    logger.debug(res)
+                    self.logger.debug(res)
                 except Exception as e:
-                    logger.error(e)
+                    self.logger.error(e)
 
         if self._need_flush:
             if self._is_valid_job:
@@ -206,11 +202,11 @@ class Tracking:
                         organization_id=self._organization_id,
                         job_definition_name=self._job_definition_name,
                         model_data=fp, parameters=parameters)
-                    logger.debug(res)
+                    self.logger.debug(res)
                 if self._file_delete_flag:
                     self._filepath.unlink()
         else:
-            logger.warning(
+            self.logger.warning(
                 'No output. Need to add "artifact" by "log_artifact()".')
 
         self.clear()
