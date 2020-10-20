@@ -118,7 +118,8 @@ class Connection:
         headers.update(self._get_auth_header())
 
         base = urlparse(self.BASE_URL)
-        target_url = '{}://{}.{}{}'.format(base.scheme, subdomain, base.netloc, path)
+        target_url = '{}://{}.{}{}'.format(base.scheme,
+                                           subdomain, base.netloc, path)
         try:
             return self.request(
                 method='POST',

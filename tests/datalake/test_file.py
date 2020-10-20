@@ -472,6 +472,7 @@ class TestDatalakeFile(unittest.TestCase):
 
     @patch('abeja.common.local_file.MOUNT_DIR', TEST_MOUNT_DIR)
     def test_get_iter_lines(self):
+        self.text_data = 'a\nb\nc'
         datalake_file = DatalakeFile(None, uri=self.uri, type=type)
         mock_func = create_autospec(
             datalake_file._get_iter_lines_from_remote,
