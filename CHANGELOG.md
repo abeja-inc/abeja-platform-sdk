@@ -1,3 +1,7 @@
+# 2.1.0
+- Work/use logger for tracking (#54)
+- Handle "Stale file handle" error (#52)
+
 # 2.0.0
 - Switch python version to 3.6 (#44)
 
