@@ -46,7 +46,7 @@ replace-version: &replace-version
     name: replace version
     command: |
       ver=$(poetry version | cut -d ' ' -f 2)
-      sed -i -e "s/VERSION = \".*\"/VERSION = \"$ver\"/" abeja/version.py
+      sed -i -e "s/VERSION = ['\"][^'\"]*['\"]/VERSION = \"$ver\"/" abeja/version.py
 
 run-release: &run-release
   run:
