@@ -41,6 +41,13 @@ install-release-dependencies: &install-release-dependencies
       poetry config --local virtualenvs.in-project true
       poetry install
 
+replace-version: &replace-version
+  run:
+    name: replace version
+    command: |
+      ver=$(poetry version | cut -d ' ' -f 2)
+      sed -i -e "s/VERSION = ['\"][^'\"]*['\"]/VERSION = \"$ver\"/" abeja/version.py
+
 run-release: &run-release
   run:
     name: Deploy
@@ -58,6 +65,7 @@ release: &release
   - attach_workspace:
       at: .
   - *install-release-dependencies
+  - *replace-version
   - *run-release
   - *trigger-system-test
 
@@ -66,7 +74,8 @@ release-rc: &release-rc
   - attach_workspace:
       at: .
   - *install-release-dependencies
-  - run: poetry version $(PYTHONPATH=./ poetry run python tools/add_rc_version.py)
+  - run: poetry version "$(PYTHONPATH=./ poetry version | cut -d ' ' -f 2)rc1"
+  - *replace-version
   - *run-release
   - *trigger-system-test
 
