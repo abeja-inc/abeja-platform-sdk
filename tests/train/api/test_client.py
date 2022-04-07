@@ -410,7 +410,7 @@ class TestApiClient:
     def test_get_training_jobs(self, m):
         self.api_client.get_training_jobs(ORGANIZATION_ID, JOB_DEFINITION_NAME)
         url = '{}/organizations/{}/training/definitions/{}/jobs'.format(
-            ABEJA_API_URL, ORGANIZATION_ID, JOB_DEFINITION_NAME, VERSION_ID)
+            ABEJA_API_URL, ORGANIZATION_ID, JOB_DEFINITION_NAME)
         m.assert_called_once_with(
             'GET',
             url,
@@ -426,7 +426,7 @@ class TestApiClient:
         self.api_client.get_training_jobs(
             ORGANIZATION_ID, JOB_DEFINITION_NAME, limit=100)
         url = '{}/organizations/{}/training/definitions/{}/jobs'.format(
-            ABEJA_API_URL, ORGANIZATION_ID, JOB_DEFINITION_NAME, VERSION_ID)
+            ABEJA_API_URL, ORGANIZATION_ID, JOB_DEFINITION_NAME)
         expected_params = {
             'limit': 100
         }
@@ -445,7 +445,7 @@ class TestApiClient:
         self.api_client.get_training_jobs(
             ORGANIZATION_ID, JOB_DEFINITION_NAME, offset=20)
         url = '{}/organizations/{}/training/definitions/{}/jobs'.format(
-            ABEJA_API_URL, ORGANIZATION_ID, JOB_DEFINITION_NAME, VERSION_ID)
+            ABEJA_API_URL, ORGANIZATION_ID, JOB_DEFINITION_NAME)
         expected_params = {
             'offset': 20
         }
@@ -464,7 +464,7 @@ class TestApiClient:
         self.api_client.get_training_jobs(
             ORGANIZATION_ID, JOB_DEFINITION_NAME, limit=5, offset=20)
         url = '{}/organizations/{}/training/definitions/{}/jobs'.format(
-            ABEJA_API_URL, ORGANIZATION_ID, JOB_DEFINITION_NAME, VERSION_ID)
+            ABEJA_API_URL, ORGANIZATION_ID, JOB_DEFINITION_NAME)
         expected_params = {
             'offset': 20,
             'limit': 5
@@ -484,7 +484,7 @@ class TestApiClient:
         self.api_client.get_training_jobs(
             ORGANIZATION_ID, JOB_DEFINITION_NAME, filter_archived=True)
         url = '{}/organizations/{}/training/definitions/{}/jobs'.format(
-            ABEJA_API_URL, ORGANIZATION_ID, JOB_DEFINITION_NAME, VERSION_ID)
+            ABEJA_API_URL, ORGANIZATION_ID, JOB_DEFINITION_NAME)
         expected_params = {
             'filter_archived': 'exclude_archived'
         }
@@ -503,7 +503,7 @@ class TestApiClient:
         self.api_client.get_training_jobs(
             ORGANIZATION_ID, JOB_DEFINITION_NAME, filter_archived=False)
         url = '{}/organizations/{}/training/definitions/{}/jobs'.format(
-            ABEJA_API_URL, ORGANIZATION_ID, JOB_DEFINITION_NAME, VERSION_ID)
+            ABEJA_API_URL, ORGANIZATION_ID, JOB_DEFINITION_NAME)
         expected_params = {
             'filter_archived': 'include_archived'
         }

@@ -56,17 +56,17 @@ class DockerImageName(__DockerImageName):
             [name, tag] = name.split(':', maxsplit=2)
 
         # validations
-        if not re.fullmatch('\S+', repository):
+        if not re.fullmatch(r'\S+', repository):
             raise ValueError(
                 'invalid format: repository={}'.format(repository))
 
-        if not re.fullmatch('\S+', name):
+        if not re.fullmatch(r'\S+', name):
             raise ValueError('invalid format: name={}'.format(name))
 
-        if tag and not re.fullmatch('\S+', tag):
+        if tag and not re.fullmatch(r'\S+', tag):
             raise ValueError('invalid format: tag={}'.format(tag))
 
-        if host and not re.fullmatch('^[a-zA-Z0-9\._-]+(:\d+)?$', host):
+        if host and not re.fullmatch(r'^[a-zA-Z0-9\._-]+(:\d+)?$', host):
             raise ValueError('invalid format: host={}'.format(host))
 
         return klass(repository=repository, name=name, tag=tag, host=host)
