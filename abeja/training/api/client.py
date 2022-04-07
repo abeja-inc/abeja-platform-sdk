@@ -1317,6 +1317,7 @@ class APIClient(BaseAPIClient):
             - **job_definition_name** (str): training job definition name
             - **model_data** (IO): model data
             - **parameters** (dict): parameters for creating training model
+                - **training_job_id** (str): The ID of a corresponding training job.
                 - **description** (str): Description
                 - **user_parameters** (dict): user defined parameters.
                 - **metrics** (dict): user defined metrics.
