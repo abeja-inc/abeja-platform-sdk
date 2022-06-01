@@ -152,7 +152,8 @@ def _read_file(path, file_type):
         try:
             return f.read()
         except OSError as exc:
-            # The file is already deleted in the NFS server (EFS), try to re-open it and read.
+            # The file is already deleted in the NFS server (EFS), try to
+            # re-open it and read.
             if exc.errno == errno.ESTALE:
                 with open(path, mode) as f2:
                     return f2.read()

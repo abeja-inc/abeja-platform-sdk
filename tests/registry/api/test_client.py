@@ -29,14 +29,14 @@ REGISTRY_RES = {
 
 class TestRegistryAPIClient:
 
-    @pytest.mark.parametrize(
-        'name,description,expected',
-        [
-            (REPOSITORY_NAME, REPOSITORY_DESCRIPTION, {
-                'name': REPOSITORY_NAME, 'description': REPOSITORY_DESCRIPTION}),
-            (REPOSITORY_NAME, None, {'name': REPOSITORY_NAME})
-        ]
-    )
+    @pytest.mark.parametrize('name,description,expected',
+                             [(REPOSITORY_NAME,
+                               REPOSITORY_DESCRIPTION,
+                               {'name': REPOSITORY_NAME,
+                                'description': REPOSITORY_DESCRIPTION}),
+                                 (REPOSITORY_NAME,
+                                  None,
+                                  {'name': REPOSITORY_NAME})])
     def test_create_repository(
             self,
             requests_mock,
