@@ -42,9 +42,9 @@ parameterized = "==0.6.1"
 pytest = "==5.2.1"
 pytest-cov = "==2.6.1"
 requests-mock = "~=1.8"
-tensorflow = "~=1.13.0"
 pre-commit = "2.1.1"
 mypy = "^0.770"
+tensorflow = "<2"
 
 [tool.poetry.extras]
 docs = ["Sphinx", "guzzle_sphinx_theme", "importlib-metadata", "virtualenv"]
