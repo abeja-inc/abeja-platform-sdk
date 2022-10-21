@@ -1,3 +1,8 @@
+# 2.1.3
+- Updated requests module's version (#61)
+- Updated tensorflow lib version in dev dependency (#62)
+- Updated other liblaries (Pygments, PyYAML, py, protobuf, babel) (#63)
+
 # 2.1.2
 - add comment about training_job_id in `APIClient.create_training_model()` (#57)
 - specify less than version 4 of protobuf as a dependency to prevent tensorboardX from breaking (#58)
