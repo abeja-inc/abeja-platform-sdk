@@ -266,3 +266,7 @@ tags
 # logs
 logs
 .mypy_cache
+
+# for debug
+Dockerfile.local
+docker-compose.yml
