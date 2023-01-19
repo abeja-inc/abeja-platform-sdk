@@ -28,10 +28,10 @@ test_step: &test_step
       command: |
         make test
   # NOTE: need to fix test cases, because these are not stable.
-  # - run:
-  #     name: Integration Test
-  #     command: |
-  #       make integration_test
+  - run:
+      name: Integration Test
+      command: |
+        make integration_test
 
 install-release-dependencies: &install-release-dependencies
   run:
