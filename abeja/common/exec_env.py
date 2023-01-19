@@ -1,7 +1,7 @@
 from typing import NamedTuple
 
 
-__ExecEnv = NamedTuple('ExecEnv', [
+__ExecEnv = NamedTuple('__ExecEnv', [
     ('value', str),
 ])
 

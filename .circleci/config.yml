@@ -1,7 +1,7 @@
 default: &default
   working_directory: ~/abeja-platform-sdk
   docker:
-    - image: circleci/python:3.6
+    - image: circleci/python:3.9
 
 # Job Steps
 test_step: &test_step
@@ -12,33 +12,33 @@ test_step: &test_step
   - run:
       name: Install Dependencies
       command: |
-        sudo pip install poetry
-        poetry config --local virtualenvs.in-project true
+        sudo pip install poetry==1.2.2
+        poetry config --local virtualenvs.in-project false
         poetry install
   - save_cache:
       key: v1-dependencies-{{ checksum "poetry.lock" }}
       paths:
         - .venv
-  - persist_to_workspace:
-      root: .
-      paths:
-        - .venv
+  # - persist_to_workspace:
+  #     root: .
+  #     paths:
+  #       - .venv
   - run:
       name: Test
       command: |
         make test
   # NOTE: need to fix test cases, because these are not stable.
-  # - run:
-  #     name: Integration Test
-  #     command: |
-  #       make integration_test
+  - run:
+      name: Integration Test
+      command: |
+        make integration_test
 
 install-release-dependencies: &install-release-dependencies
   run:
     name: Install Dependencies
     command: |
       sudo apt-get update
-      poetry config --local virtualenvs.in-project true
+      poetry config --local virtualenvs.in-project false
       poetry install
 
 replace-version: &replace-version

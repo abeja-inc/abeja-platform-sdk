@@ -21,7 +21,7 @@ class CPUCategory(Enum):
     D = 'd'
 
 
-__InstanceType = NamedTuple('InstanceType', [
+__InstanceType = NamedTuple('__InstanceType', [
     ('cpu_type', CPUType),
     ('cpu_category', Optional[CPUCategory]),
     ('cpu', float),

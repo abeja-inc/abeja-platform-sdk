@@ -1,7 +1,7 @@
 from typing import NamedTuple
 
 
-__JobStatus = NamedTuple('InstanceType', [
+__JobStatus = NamedTuple('__JobStatus', [
     ('value', str),
 ])
 

@@ -2,7 +2,7 @@ from typing import Optional, NamedTuple
 import re
 
 
-__DockerImageName = NamedTuple('DockerImageName', [
+__DockerImageName = NamedTuple('__DockerImageName', [
     ('repository', str),
     ('name', str),
     ('tag', Optional[str]),
