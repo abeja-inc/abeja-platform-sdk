@@ -74,7 +74,7 @@ release-rc: &release-rc
   - attach_workspace:
       at: .
   - *install-release-dependencies
-  - run: sh bump_version_rc.sh
+  - run: sh .circleci/bump_version_rc.sh
   - *replace-version
   - *run-release
   - *trigger-system-test
