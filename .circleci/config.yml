@@ -74,7 +74,7 @@ release-rc: &release-rc
   - attach_workspace:
       at: .
   - *install-release-dependencies
-  - run: poetry version "$(PYTHONPATH=./ poetry version | cut -d ' ' -f 2)rc1"
+  - run: sh bump_version_rc.sh
   - *replace-version
   - *run-release
   - *trigger-system-test
