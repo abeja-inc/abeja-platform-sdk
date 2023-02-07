@@ -16,6 +16,7 @@ $ pip install abeja-sdk>=1.0.0
 ```
 
 If you want to use latest version including **release candidate**, add `--pre` option.
+
 **リリース候補を含む最新版**を使用したい場合は、`--pre`オプションを追加してください。
 
 ```
@@ -41,6 +42,7 @@ abeja-sdk>=1.0.0
 ```
 
 If you want to use pre-release, add `rc0` suffix.
+
 プレリリースを使いたい場合は、最後に`rc0` をつけてください。
 
 ```
@@ -57,6 +59,7 @@ $ poetry run pre-commit install
 ### Running Tests
 
 You can run tests in all supported Python versions using `pytest`.
+
 サポートされているすべてのバージョンのPython で `pytest` を使ってテストを実行することができます。
 
 ```bash
@@ -64,6 +67,7 @@ $ make test
 ```
 
 You can also run individual tests with your default Python version:
+
 また、デフォルトのPython バージョンで個々のテストを実行することも可能です。
 
 ```bash
@@ -73,6 +77,7 @@ $ poetry run pytest tests/
 ### Generating Documentation
 
 Sphinx is used for documentation. You can generate HTML locally with the following:
+
 Sphinx はドキュメント作成に使用します。以下のようにして、ローカルにHTML を生成することができます。
 
 ```bash
@@ -91,6 +96,7 @@ $ poetry install
 ## Release
 
 Synchronize master and develop branch.
+
 まず、master ブランチとdevelop ブランチをpull します。
 
 ```bash
@@ -101,6 +107,7 @@ $ git pull
 ```
 
 Create release branch and prepare for release.
+
 続いて、リリース用ブランチを作成し、リリースの準備をします。
 ※ rc2 以上を作る場合はpyproject.toml のversion を明示的に指定する必要があります。
 
