@@ -138,3 +138,33 @@ $ git push origin develop
 $ git push origin master
 $ git push origin X.X.X
 ```
+
+## 実装中のSDK をローカルで利用する方法
+以下のコマンドでwheel ファイルを作成する。dist ディレクトリに`abeja_sdk-x.x.x-py3-none-any.whl` というファイルが爆誕。
+
+```bash
+make release
+```
+
+SDK を利用する側を想定した環境で、上記のwhl ファイルを指定してpip install する
+
+```bash
+> pip install ./abeja_sdk-2.1.4rc3-py3-none-any.whl
+
+Processing ./abeja_sdk-2.1.4rc3-py3-none-any.whl
+Collecting protobuf<4
+  Downloading protobuf-3.20.3-cp39-cp39-manylinux_2_5_x86_64.manylinux1_x86_64.whl (1.0 MB)
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 1.0/1.0 MB 37.2 MB/s eta 0:00:00
+
+  （省略）
+
+Successfully installed abeja-sdk-2.1.4rc3 protobuf-3.20.1 retrying-1.3.4 tensorboardx-2.5.1 tomlkit-0.7.0 typing-extensions-3.7.4.3
+```
+
+以下のようにローカルファイルを指定してabeja-sdk のパッケージがインストールされるので、普通にpython コード内でimport（`import abeja.datalake.Client` とか）すればローカルに閉じて検証可能になる。
+
+```bash
+> pip freeze
+abeja-sdk @ file:///app/abeja_sdk-2.1.4rc3-py3-none-any.whl
+aiofiles==22.1.0
+```
