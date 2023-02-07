@@ -38,6 +38,7 @@ install-release-dependencies: &install-release-dependencies
     name: Install Dependencies
     command: |
       sudo apt-get update
+      sudo pip install poetry==1.2.2
       poetry config --local virtualenvs.in-project false
       poetry install
 
