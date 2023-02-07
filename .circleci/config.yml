@@ -1,7 +1,7 @@
 default: &default
   working_directory: ~/abeja-platform-sdk
   docker:
-    - image: circleci/python:3.9
+    - image: circleci/python:3.7
 
 # Job Steps
 test_step: &test_step
