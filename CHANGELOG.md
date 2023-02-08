@@ -1,3 +1,13 @@
+# 2.2.0
+- remove python 3.6 (#79)
+- add python 3.6 dummy (#77)
+- fix python version 3.9 -> 3.7 (#73, #74, #75, #76)
+- fix python version in Programming Language (#71, #72)
+- fix version with rc in circleci (#69, #70)
+- add python 3.10, 3.11 (#68)
+- fix for dependabot alerts (#67)
+- Update python version 3.6 => 3.9 (#65)
+
 # 2.1.2
 - add comment about training_job_id in `APIClient.create_training_model()` (#57)
 - specify less than version 4 of protobuf as a dependency to prevent tensorboardX from breaking (#58)
