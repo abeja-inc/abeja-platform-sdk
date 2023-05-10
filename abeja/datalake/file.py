@@ -514,6 +514,8 @@ class FileIterator(Iterator):
                 params['end'] = self.end
             if self.sort:
                 params['sort'] = self.sort
+            if self.timezone:
+                params['timezone'] = self.timezone
 
         res = self._api.list_channel_files(self.channel_id, **params)
 
