@@ -26,7 +26,6 @@ python = ">=3.7,<3.12"
 retrying = "==1.3.4"
 tensorboardx = "==2.5.1"
 tomlkit = "==0.7.0"
-typing-extensions = "==3.7.4.3"
 # Specify less than version 4 of protobuf as a dependency to prevent tensorboardX from breaking.
 # see https://github.com/lanpa/tensorboardX/issues/663
 protobuf = "<4"
