@@ -1,3 +1,6 @@
+# 2.2.1
+- remove typing-extentions library in poetry dependencies.
+
 # 2.2.0
 - remove python 3.6 (#79)
 - add python 3.6 dummy (#77)
