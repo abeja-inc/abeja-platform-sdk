@@ -1,3 +1,6 @@
+# 2.2.2
+- fix bugs for removing typing-extentions and updating urlib.
+
 # 2.2.1
 - remove typing-extentions library in poetry dependencies.
 
