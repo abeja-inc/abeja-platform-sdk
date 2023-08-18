@@ -1,10 +1,8 @@
 from abc import abstractmethod
 from typing import Dict
 
-from typing_extensions import Protocol
 
-
-class SourceData(Protocol):
+class SourceData:
     @abstractmethod
     def get_content(self, cache: bool = True) -> bytes:
         raise NotImplementedError
