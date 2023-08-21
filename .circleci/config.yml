@@ -12,7 +12,7 @@ test_step: &test_step
   - run:
       name: Install Dependencies
       command: |
-        sudo pip install poetry==1.2.2
+        sudo pip install poetry==1.3.0
         poetry config --local virtualenvs.in-project false
         poetry install
   - save_cache:
@@ -34,13 +34,20 @@ test_step: &test_step
         make integration_test
 
 install-release-dependencies: &install-release-dependencies
-  run:
+  - restore_cache:
+      keys:
+      - v1-dependencies-{{ checksum "poetry.lock" }}
+  - run:
     name: Install Dependencies
     command: |
       sudo apt-get update
-      sudo pip install poetry==1.2.2
+      sudo pip install poetry==1.3.0
       poetry config --local virtualenvs.in-project false
       poetry install
+  - save_cache:
+      key: v1-dependencies-{{ checksum "poetry.lock" }}
+      paths:
+        - .venv
 
 replace-version: &replace-version
   run:
