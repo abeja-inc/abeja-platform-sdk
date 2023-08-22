@@ -174,10 +174,17 @@ class Connection:
         :return: session
         """
         session = Session()
-        retries = Retry(
-            total=self.max_retry_count, backoff_factor=1, allowed_methods=(
-                'GET', 'POST', 'PUT', 'PATCH', 'DELETE'), status_forcelist=(
-                500, 502, 503, 504), raise_on_status=False)
+        try:
+            retries = Retry(
+                total=self.max_retry_count, backoff_factor=1, allowed_methods=(
+                    'GET', 'POST', 'PUT', 'PATCH', 'DELETE'), status_forcelist=(
+                    500, 502, 503, 504), raise_on_status=False)
+        except TypeError:
+            retries = Retry(
+                total=self.max_retry_count, backoff_factor=1, method_whitelist=(
+                    'GET', 'POST', 'PUT', 'PATCH', 'DELETE'), status_forcelist=(
+                    500, 502, 503, 504), raise_on_status=False)
+
         session.mount('http://', HTTPAdapter(max_retries=retries))
         session.mount('https://', HTTPAdapter(max_retries=retries))
         return session
