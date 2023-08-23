@@ -1,3 +1,7 @@
+# 2.2.3
+- fix urlib3 retry method args for multiple urlib3 versions.
+- fix ci/cd for unit test and pypi release environment.
+
 # 2.2.2
 - fix bugs for removing typing-extentions and updating urlib.
 
