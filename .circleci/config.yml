@@ -35,6 +35,7 @@ test_step: &test_step
         make integration_test
 
 install-release-dependencies: &install-release-dependencies
+  - checkout
   - restore_cache:
       keys:
       - v1-dependencies-{{ checksum "poetry.lock" }}
