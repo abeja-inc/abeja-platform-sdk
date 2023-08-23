@@ -72,7 +72,7 @@ release: &release
       - v1-dependencies-{{ checksum "poetry.lock" }}
   - *install-release-dependencies
   - *replace-version
-  # - *run-release
+  - *run-release
   - *trigger-system-test
 
 release-rc: &release-rc
@@ -85,7 +85,7 @@ release-rc: &release-rc
   - *install-release-dependencies
   - run: sh .circleci/bump_version_rc.sh
   - *replace-version
-  # - *run-release
+  - *run-release
   - *trigger-system-test
 
 # Jobs
@@ -119,6 +119,5 @@ workflows:
             branches:
               only:
                 - /^release\/.*/
-                - feature/fix_cicd_20230823
           requires:
             - codetest
