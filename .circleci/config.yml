@@ -35,9 +35,6 @@ test_step: &test_step
         make integration_test
 
 install-release-dependencies: &install-release-dependencies
-  - restore_cache:
-      keys:
-      - v1-dependencies-{{ checksum "poetry.lock" }}
   - run:
       name: Install Dependencies
       command: |
@@ -46,10 +43,6 @@ install-release-dependencies: &install-release-dependencies
         sudo pip install poetry==1.2.2
         poetry config --local virtualenvs.in-project false
         poetry install
-  - save_cache:
-      key: v1-dependencies-{{ checksum "poetry.lock" }}
-      paths:
-        - .venv
 
 replace-version: &replace-version
   run:
@@ -74,6 +67,9 @@ release: &release
   - checkout
   - attach_workspace:
       at: .
+  - restore_cache:
+      keys:
+      - v1-dependencies-{{ checksum "poetry.lock" }}
   - *install-release-dependencies
   - *replace-version
   - *run-release
@@ -83,6 +79,9 @@ release-rc: &release-rc
   - checkout
   - attach_workspace:
       at: .
+  - restore_cache:
+      keys:
+      - v1-dependencies-{{ checksum "poetry.lock" }}
   - *install-release-dependencies
   - run: sh .circleci/bump_version_rc.sh
   - *replace-version
