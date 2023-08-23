@@ -39,13 +39,13 @@ install-release-dependencies: &install-release-dependencies
       keys:
       - v1-dependencies-{{ checksum "poetry.lock" }}
   - run:
-    name: Install Dependencies
-    command: |
-      sudo apt-get update
-      sudo pip install pip -U
-      sudo pip install poetry==1.2.2
-      poetry config --local virtualenvs.in-project false
-      poetry install
+      name: Install Dependencies
+      command: |
+        sudo apt-get update
+        sudo pip install pip -U
+        sudo pip install poetry==1.2.2
+        poetry config --local virtualenvs.in-project false
+        poetry install
   - save_cache:
       key: v1-dependencies-{{ checksum "poetry.lock" }}
       paths:
