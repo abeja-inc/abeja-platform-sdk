@@ -39,13 +39,13 @@ install-release-dependencies: &install-release-dependencies
       keys:
       - v1-dependencies-{{ checksum "poetry.lock" }}
   - run:
-    name: Install Dependencies
-    command: |
-      sudo apt-get update
-      sudo pip install pip -U
-      sudo pip install poetry==1.2.2
-      poetry config --local virtualenvs.in-project false
-      poetry install
+      name: Install Dependencies
+      command: |
+        sudo apt-get update
+        sudo pip install pip -U
+        sudo pip install poetry==1.2.2
+        poetry config --local virtualenvs.in-project false
+        poetry install
   - save_cache:
       key: v1-dependencies-{{ checksum "poetry.lock" }}
       paths:
@@ -76,8 +76,8 @@ release: &release
       at: .
   - *install-release-dependencies
   - *replace-version
-  - *run-release
-  - *trigger-system-test
+  # - *run-release
+  # - *trigger-system-test
 
 release-rc: &release-rc
   - checkout
@@ -86,8 +86,8 @@ release-rc: &release-rc
   - *install-release-dependencies
   - run: sh .circleci/bump_version_rc.sh
   - *replace-version
-  - *run-release
-  - *trigger-system-test
+  # - *run-release
+  # - *trigger-system-test
 
 # Jobs
 version: 2
@@ -120,5 +120,6 @@ workflows:
             branches:
               only:
                 - /^release\/.*/
+                - feature/fix_cicd_20230823
           requires:
             - codetest
