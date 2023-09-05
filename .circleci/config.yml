@@ -12,6 +12,7 @@ test_step: &test_step
   - run:
       name: Install Dependencies
       command: |
+        sudo pip install pip -U
         sudo pip install poetry==1.2.2
         poetry config --local virtualenvs.in-project false
         poetry install
@@ -34,13 +35,14 @@ test_step: &test_step
         make integration_test
 
 install-release-dependencies: &install-release-dependencies
-  run:
-    name: Install Dependencies
-    command: |
-      sudo apt-get update
-      sudo pip install poetry==1.2.2
-      poetry config --local virtualenvs.in-project false
-      poetry install
+  - run:
+      name: Install Dependencies
+      command: |
+        sudo apt-get update
+        sudo pip install pip -U
+        sudo pip install poetry==1.2.2
+        poetry config --local virtualenvs.in-project false
+        poetry install
 
 replace-version: &replace-version
   run:
@@ -65,6 +67,9 @@ release: &release
   - checkout
   - attach_workspace:
       at: .
+  - restore_cache:
+      keys:
+      - v1-dependencies-{{ checksum "poetry.lock" }}
   - *install-release-dependencies
   - *replace-version
   - *run-release
@@ -74,6 +79,9 @@ release-rc: &release-rc
   - checkout
   - attach_workspace:
       at: .
+  - restore_cache:
+      keys:
+      - v1-dependencies-{{ checksum "poetry.lock" }}
   - *install-release-dependencies
   - run: sh .circleci/bump_version_rc.sh
   - *replace-version
