@@ -646,7 +646,8 @@ class APIClient(BaseAPIClient):
             - **file_obj** (a file-like object) : a file-like object to upload. It must implement the read method, and must return bytes.
             - **content_type** (str): content type of a file to be uploaded
             - **metadata** (dict): **[optional]** key-value pair of metadata for the file
-            - **lifetime** (str): **[optional]** each one of `1day` / `1week` / `1month` / `6months` / `1year`, the file will be deleted after the specified time.
+            - **lifetime** (str): **[optional]** each one of `1day` / `1week` / `1month` / `6months` / `1year`.
+                                                 the file will be deleted after the specified time.
             - **conflict_target** (str): **[optional]** return `409 Conflict` when the same value of specified key already exists in channel.
 
         Return type:
@@ -1347,7 +1348,8 @@ class APIClient(BaseAPIClient):
             - **file_location** (str): file location to store
             - **content_type** (str): content type of a file to be uploaded
             - **metadata** (dict): **[optional]** key-value pair of metadata for the file
-            - **lifetime** (str): **[optional]** each one of `1day` / `1week` / `1month` / `6months` / `1year`. the file will be deleted after the specified time.
+            - **lifetime** (str): **[optional]** each one of `1day` / `1week` / `1month` / `6months` / `1year`.
+                                                 the file will be deleted after the specified time.
 
         Return type:
             dict
@@ -1427,7 +1429,8 @@ class APIClient(BaseAPIClient):
             - **organization_id** (str): ORGANIZATION_ID
             - **bucket_id** (str): BUCKET_ID
             - **target_dir** (str) : a directory to upload. Directory structure will be kept on a bucket.
-            - **lifetime** (str): **[optional]** each one of `1day` / `1week` / `1month` / `6months` / `1year`. the file will be deleted after the specified time.
+            - **lifetime** (str): **[optional]** each one of `1day` / `1week` / `1month` / `6months` / `1year`.
+                                                 the file will be deleted after the specified time.
 
         Return type:
             dict
