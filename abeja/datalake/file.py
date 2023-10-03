@@ -61,7 +61,8 @@ class DatalakeFile(SourceData):
         '1day',
         '1week',
         '1month',
-        '6months'
+        '6months',
+        '1year',
     )
 
     def __init__(
