@@ -1,3 +1,6 @@
+# 2.2.4
+- Add lifetime "1year" of datalake channel files (#89)
+
 # 2.2.2
 - fix bugs for removing typing-extentions and updating urlib.
 
