@@ -2,7 +2,7 @@ import unittest
 
 import requests_mock
 
-from abeja.opsbeellm import APIClient
+from abeja.opsbeellm.history import APIClient
 from abeja.exceptions import BadRequest
 
 ACCOUNT_ID = '1111111111111'
