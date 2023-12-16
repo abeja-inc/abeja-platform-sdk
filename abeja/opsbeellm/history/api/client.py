@@ -5,11 +5,11 @@ from abeja.exceptions import BadRequest
 
 
 class APIClient(OpsBeeLLMBaseAPIClient):
-    """A Low-Level client for OpsBee LLM API
+    """A Low-Level client for OpsBee LLM History API
 
     .. code-block:: python
 
-       from abeja.opsbeellm import APIClient
+       from abeja.opsbeellm.history import APIClient
 
        api_client = APIClient()
     """
@@ -32,6 +32,8 @@ class APIClient(OpsBeeLLMBaseAPIClient):
                 account_id = "1122334455660"
                 organization_id = "1410000000000"
                 deployment_id = "1234567890123"
+                name = "thread name"
+                description = "thread description"
                 response = api_client.create_thread(
                     account_id, organization_id, deployment_id, name, description)
 
@@ -39,6 +41,8 @@ class APIClient(OpsBeeLLMBaseAPIClient):
             - **account_id** (str): account identifier
             - **organization_id** (str): organization identifier
             - **deployment_id** (str): deployment identifier for OpsBee LLM
+            - **name** (str): thread name
+            - **description** (str): **[optional]** thread description
 
         Return type:
             dict
@@ -118,8 +122,8 @@ class APIClient(OpsBeeLLMBaseAPIClient):
             - **output_text** (str): output text from LLM
             - **input_token_count** (str): token count of input text
             - **output_token_count** (str): token count of output text
-            - **tag_ids** (list): list of tag identifiers
-            - **metadata** (list[dict]): list of {key: value} metadata
+            - **tag_ids** (list): **[optional]** list of tag identifiers
+            - **metadata** (list[dict]): **[optional]** list of {key: value} metadata
 
         Return type:
             dict
