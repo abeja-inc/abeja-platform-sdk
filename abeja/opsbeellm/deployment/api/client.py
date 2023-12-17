@@ -18,8 +18,8 @@ class APIClient(OpsBeeLLMBaseAPIClient):
         self,
         account_id: str,
         organization_id: str,
-        offset: Optional[int] = None,
-        limit: Optional[int] = None,
+        offset: Optional[int] = 0,
+        limit: Optional[int] = 1000,
     ) -> dict:
         """get deployments
 
@@ -77,7 +77,7 @@ class APIClient(OpsBeeLLMBaseAPIClient):
                         ...
                     ],
                     'offset': 0,
-                    'limit': 10,
+                    'limit': 1000,
                     'has_next': False,
                 }
 
@@ -87,10 +87,12 @@ class APIClient(OpsBeeLLMBaseAPIClient):
             - InternalServerError
         """
         params = {}
-        if limit is not None:
-            params['limit'] = limit
-        if offset is not None:
-            params['offset'] = offset
+        if offset is None:
+            offset = 0
+        if limit is None:
+            limit = 1000
+        params['offset'] = offset
+        params['limit'] = limit
 
         path = '/accounts/{}/organizations/{}/deployments?offset={}&limit={}'.format(
             account_id,
@@ -199,8 +201,8 @@ class APIClient(OpsBeeLLMBaseAPIClient):
                     'name': "deployment name",
                     'description': "deployment description",
                     'type': "qa",
-                    'created_at' : 2023-12-13T04:42:34.913644Z,
-                    'updated_at' : 2023-12-13T04:42:34.913644Z,
+                    'created_at' : "2023-12-13T04:42:34.913644Z",
+                    'updated_at' : "2023-12-13T04:42:34.913644Z",
                 }
 
         Raises:
@@ -288,8 +290,8 @@ class APIClient(OpsBeeLLMBaseAPIClient):
                     'name': "deployment name",
                     'description': "deployment description",
                     'type': "qa",
-                    'created_at' : 2023-12-13T04:42:34.913644Z,
-                    'updated_at' : 2023-12-14T04:42:34.913644Z,
+                    'created_at' : "2023-12-13T04:42:34.913644Z",
+                    'updated_at' : "2023-12-14T04:42:34.913644Z",
                 }
 
         Raises:
