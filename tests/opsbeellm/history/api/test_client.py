@@ -62,7 +62,7 @@ THREADS_RES = {
     'has_next': False,
 }
 
-HISOTRY_RES = {
+HISTORY_RES = {
     "id": HISTORY_ID,
     "account_id": ACCOUNT_ID,
     "organization_id": ORGANIZATION_ID,
@@ -83,7 +83,7 @@ HISTORIES_RES = {
     'deployment_id': DEPLOYMENT_ID,
     'thread_id': THREAD_ID,
     'histories': [
-        HISOTRY_RES,
+        HISTORY_RES,
     ],
     'offset': 0,
     'limit': 1000,
@@ -278,7 +278,7 @@ class TestOpsBeeLLMAPIClient(unittest.TestCase):
             DEPLOYMENT_QA_ID,
             HISTORY_ID,
         )
-        m.get(path, json=HISOTRY_RES)
+        m.get(path, json=HISTORY_RES)
 
         # unit test
         client = APIClient()
@@ -288,7 +288,7 @@ class TestOpsBeeLLMAPIClient(unittest.TestCase):
             DEPLOYMENT_QA_ID,
             HISTORY_ID,
         )
-        self.assertDictEqual(ret, HISOTRY_RES)
+        self.assertDictEqual(ret, HISTORY_RES)
 
     @requests_mock.Mocker()
     def test_create_qa_history(self, m):
@@ -306,7 +306,7 @@ class TestOpsBeeLLMAPIClient(unittest.TestCase):
             ORGANIZATION_ID,
             DEPLOYMENT_QA_ID,
         )
-        m.post(path, json=HISOTRY_RES)
+        m.post(path, json=HISTORY_RES)
 
         # unit test
         client = APIClient()
@@ -329,7 +329,7 @@ class TestOpsBeeLLMAPIClient(unittest.TestCase):
         }
 
         self.assertDictEqual(m.request_history[1].json(), expected_payload)
-        self.assertDictEqual(ret, HISOTRY_RES)
+        self.assertDictEqual(ret, HISTORY_RES)
 
         with self.assertRaises(BadRequest) as e:
             client.create_qa_history(
@@ -368,35 +368,6 @@ class TestOpsBeeLLMAPIClient(unittest.TestCase):
         self.assertEqual(e.exception.error, 'deployment type is not supported')
 
     @requests_mock.Mocker()
-    def test_delete_qa_history(self, m):
-        # get-deployment-api mock
-        path = '/accounts/{}/organizations/{}/deployments/{}'.format(
-            ACCOUNT_ID,
-            ORGANIZATION_ID,
-            DEPLOYMENT_QA_ID,
-        )
-        m.get(path, json=DEPLOYMENT_QA_RES)
-
-        # delete-history-api mock
-        path = '/accounts/{}/organizations/{}/deployments/{}/qa_history/{}'.format(
-            ACCOUNT_ID,
-            ORGANIZATION_ID,
-            DEPLOYMENT_QA_ID,
-            HISTORY_ID,
-        )
-        m.delete(path, json=HISOTRY_RES)
-
-        # unit test
-        client = APIClient()
-        ret = client.delete_qa_history(
-            ACCOUNT_ID,
-            ORGANIZATION_ID,
-            DEPLOYMENT_QA_ID,
-            HISTORY_ID,
-        )
-        self.assertDictEqual(ret, HISOTRY_RES)
-
-    @requests_mock.Mocker()
     def test_update_qa_history(self, m):
         # get-deployment-api mock
         path = '/accounts/{}/organizations/{}/deployments/{}'.format(
@@ -413,7 +384,7 @@ class TestOpsBeeLLMAPIClient(unittest.TestCase):
             DEPLOYMENT_QA_ID,
             HISTORY_ID,
         )
-        m.get(path, json=HISOTRY_RES)
+        m.get(path, json=HISTORY_RES)
 
         # update-history-api mock
         path = '/accounts/{}/organizations/{}/deployments/{}/qa_history/{}'.format(
@@ -422,7 +393,7 @@ class TestOpsBeeLLMAPIClient(unittest.TestCase):
             DEPLOYMENT_QA_ID,
             HISTORY_ID,
         )
-        m.patch(path, json=HISOTRY_RES)
+        m.patch(path, json=HISTORY_RES)
 
         # unit test
         client = APIClient()
@@ -445,7 +416,7 @@ class TestOpsBeeLLMAPIClient(unittest.TestCase):
         }
 
         self.assertDictEqual(m.request_history[2].json(), expected_payload)
-        self.assertDictEqual(ret, HISOTRY_RES)
+        self.assertDictEqual(ret, HISTORY_RES)
 
         path = '/accounts/{}/organizations/{}/deployments/{}'.format(
             ACCOUNT_ID,
@@ -465,6 +436,35 @@ class TestOpsBeeLLMAPIClient(unittest.TestCase):
         self.assertEqual(e.exception.error, 'deployment type is not supported')
 
     @requests_mock.Mocker()
+    def test_delete_qa_history(self, m):
+        # get-deployment-api mock
+        path = '/accounts/{}/organizations/{}/deployments/{}'.format(
+            ACCOUNT_ID,
+            ORGANIZATION_ID,
+            DEPLOYMENT_QA_ID,
+        )
+        m.get(path, json=DEPLOYMENT_QA_RES)
+
+        # delete-history-api mock
+        path = '/accounts/{}/organizations/{}/deployments/{}/qa_history/{}'.format(
+            ACCOUNT_ID,
+            ORGANIZATION_ID,
+            DEPLOYMENT_QA_ID,
+            HISTORY_ID,
+        )
+        m.delete(path, json=HISTORY_RES)
+
+        # unit test
+        client = APIClient()
+        ret = client.delete_qa_history(
+            ACCOUNT_ID,
+            ORGANIZATION_ID,
+            DEPLOYMENT_QA_ID,
+            HISTORY_ID,
+        )
+        self.assertDictEqual(ret, HISTORY_RES)
+
+    @requests_mock.Mocker()
     def test_get_chat_histories(self, m):
         # get-deployment-api mock
         path = '/accounts/{}/organizations/{}/deployments/{}'.format(
@@ -474,7 +474,7 @@ class TestOpsBeeLLMAPIClient(unittest.TestCase):
         )
         m.get(path, json=DEPLOYMENT_CHAT_RES)
 
-        # get-historyies-api mock
+        # get-histories-api mock
         path = '/accounts/{}/organizations/{}/deployments/{}/history'.format(
             ACCOUNT_ID,
             ORGANIZATION_ID,
@@ -490,6 +490,37 @@ class TestOpsBeeLLMAPIClient(unittest.TestCase):
             DEPLOYMENT_CHAT_ID,
         )
         self.assertDictEqual(ret, HISTORIES_RES)
+
+    @requests_mock.Mocker()
+    def test_get_chat_history(self, m):
+        # get-deployment-api mock
+        path = '/accounts/{}/organizations/{}/deployments/{}'.format(
+            ACCOUNT_ID,
+            ORGANIZATION_ID,
+            DEPLOYMENT_CHAT_ID,
+        )
+        m.get(path, json=DEPLOYMENT_CHAT_RES)
+
+        # get-history-api mock
+        path = '/accounts/{}/organizations/{}/deployments/{}/threads/{}/history/{}'.format(
+            ACCOUNT_ID,
+            ORGANIZATION_ID,
+            DEPLOYMENT_CHAT_ID,
+            THREAD_ID,
+            HISTORY_ID,
+        )
+        m.get(path, json=HISTORY_RES)
+
+        # unit test
+        client = APIClient()
+        ret = client.get_chat_history(
+            ACCOUNT_ID,
+            ORGANIZATION_ID,
+            DEPLOYMENT_CHAT_ID,
+            THREAD_ID,
+            HISTORY_ID,
+        )
+        self.assertDictEqual(ret, HISTORY_RES)
 
     @requests_mock.Mocker()
     def test_create_chat_history(self, m):
@@ -508,7 +539,7 @@ class TestOpsBeeLLMAPIClient(unittest.TestCase):
             DEPLOYMENT_CHAT_ID,
             THREAD_ID,
         )
-        m.post(path, json=HISOTRY_RES)
+        m.post(path, json=HISTORY_RES)
 
         # unit test
         client = APIClient()
@@ -532,7 +563,7 @@ class TestOpsBeeLLMAPIClient(unittest.TestCase):
         }
 
         self.assertDictEqual(m.request_history[1].json(), expected_payload)
-        self.assertDictEqual(ret, HISOTRY_RES)
+        self.assertDictEqual(ret, HISTORY_RES)
 
         with self.assertRaises(BadRequest) as e:
             client.create_chat_history(
@@ -571,3 +602,106 @@ class TestOpsBeeLLMAPIClient(unittest.TestCase):
                 output_text=OUTPUT_TEXT,
             )
         self.assertEqual(e.exception.error, 'deployment type is not supported')
+
+    @requests_mock.Mocker()
+    def test_update_chat_history(self, m):
+        # get-deployment-api mock
+        path = '/accounts/{}/organizations/{}/deployments/{}'.format(
+            ACCOUNT_ID,
+            ORGANIZATION_ID,
+            DEPLOYMENT_CHAT_ID,
+        )
+        m.get(path, json=DEPLOYMENT_CHAT_RES)
+
+        # get-history-api mock
+        path = '/accounts/{}/organizations/{}/deployments/{}/threads/{}/history/{}'.format(
+            ACCOUNT_ID,
+            ORGANIZATION_ID,
+            DEPLOYMENT_CHAT_ID,
+            THREAD_ID,
+            HISTORY_ID,
+        )
+        m.get(path, json=HISTORY_RES)
+
+        # update-history-api mock
+        path = '/accounts/{}/organizations/{}/deployments/{}/threads/{}/history/{}'.format(
+            ACCOUNT_ID,
+            ORGANIZATION_ID,
+            DEPLOYMENT_CHAT_ID,
+            THREAD_ID,
+            HISTORY_ID,
+        )
+        m.patch(path, json=HISTORY_RES)
+
+        # unit test
+        client = APIClient()
+        ret = client.update_chat_history(
+            ACCOUNT_ID,
+            ORGANIZATION_ID,
+            DEPLOYMENT_CHAT_ID,
+            THREAD_ID,
+            HISTORY_ID,
+            INPUT_TEXT,
+            OUTPUT_TEXT,
+            INPUT_TOKEN_COUNT,
+            OUTPUT_TOKEN_COUNT,
+        )
+        expected_payload = {
+            'input_text': INPUT_TEXT,
+            'output_text': OUTPUT_TEXT,
+            'input_token_count': INPUT_TOKEN_COUNT,
+            'output_token_count': OUTPUT_TOKEN_COUNT,
+            'tag_ids': [],
+        }
+
+        self.assertDictEqual(m.request_history[2].json(), expected_payload)
+        self.assertDictEqual(ret, HISTORY_RES)
+
+        path = '/accounts/{}/organizations/{}/deployments/{}'.format(
+            ACCOUNT_ID,
+            ORGANIZATION_ID,
+            DEPLOYMENT_QA_ID,
+        )
+        m.get(path, json=DEPLOYMENT_QA_RES)
+        with self.assertRaises(BadRequest) as e:
+            client.update_chat_history(
+                ACCOUNT_ID,
+                ORGANIZATION_ID,
+                DEPLOYMENT_QA_ID,
+                THREAD_ID,
+                HISTORY_ID,
+                input_text=INPUT_TEXT,
+                output_text=OUTPUT_TEXT,
+            )
+        self.assertEqual(e.exception.error, 'deployment type is not supported')
+
+    @requests_mock.Mocker()
+    def test_delete_chat_history(self, m):
+        # get-deployment-api mock
+        path = '/accounts/{}/organizations/{}/deployments/{}'.format(
+            ACCOUNT_ID,
+            ORGANIZATION_ID,
+            DEPLOYMENT_CHAT_ID,
+        )
+        m.get(path, json=DEPLOYMENT_CHAT_RES)
+
+        # delete-history-api mock
+        path = '/accounts/{}/organizations/{}/deployments/{}/threads/{}/history/{}'.format(
+            ACCOUNT_ID,
+            ORGANIZATION_ID,
+            DEPLOYMENT_CHAT_ID,
+            THREAD_ID,
+            HISTORY_ID,
+        )
+        m.delete(path, json=HISTORY_RES)
+
+        # unit test
+        client = APIClient()
+        ret = client.delete_chat_history(
+            ACCOUNT_ID,
+            ORGANIZATION_ID,
+            DEPLOYMENT_CHAT_ID,
+            THREAD_ID,
+            HISTORY_ID,
+        )
+        self.assertDictEqual(ret, HISTORY_RES)
