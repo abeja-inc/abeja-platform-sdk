@@ -1751,3 +1751,366 @@ class APIClient(OpsBeeLLMBaseAPIClient):
             history_id,
         )
         return self._connection.api_request(method='DELETE', path=path)
+
+    def get_tags(
+        self,
+        account_id: str,
+        organization_id: str,
+        offset: Optional[int] = 0,
+        limit: Optional[int] = 1000,
+    ) -> dict:
+        """get history tags
+
+        API reference: GET /accounts/<account_id>/organizations/<organization_id>/tags
+
+        Request Syntax:
+            .. code-block:: python
+
+                account_id = "1122334455660"
+                organization_id = "1410000000000"
+                offset = 0
+                limit = 1000
+                response = api_client.get_tags(
+                    account_id, organization_id, offset, limit)
+
+        Params:
+            - **account_id** (str): account identifier
+            - **organization_id** (str): organization identifier
+            - **offset** (int): **[optional]** offset of threads ( which starts from 0 )
+            - **limit** (int): **[optional]** max number of threads to be returned
+
+        Return type:
+            dict
+
+        Returns:
+            Response Syntax:
+
+            .. code-block:: python
+                {
+                    'account_id': '1122334455660',
+                    'organization_id': '1410000000000'
+                    'tags': [
+                        {
+                            'id': "1234567890125",
+                            'name': "OK",
+                            'description': "",
+                            'color': "green",
+                            'created_at' : "2023-12-13T04:42:34.913644Z",
+                            'updated_at' : "2023-12-13T04:42:34.913644Z",
+                        },
+                        {
+                            'id': "1345667887931",
+                            'name': "NG",
+                            'description': "",
+                            'color': "red",
+                            'created_at' : "2023-12-13T04:42:34.913644Z",
+                            'updated_at' : "2023-12-13T04:42:34.913644Z",
+                        },
+                        ...
+                    ],
+                    'offset': 0,
+                    'limit': 1000,
+                    'has_next': False,
+                }
+
+        Raises:
+            - BadRequest
+            - Unauthorized: Authentication failed
+            - InternalServerError
+        """
+        params = {}
+        if offset is None:
+            offset = 0
+        if limit is None:
+            limit = 1000
+        params['offset'] = offset
+        params['limit'] = limit
+
+        path = '/accounts/{}/organizations/{}/tags?offset={}&limit={}'.format(
+            account_id,
+            organization_id,
+            offset,
+            limit,
+        )
+        return self._connection.api_request(method='GET', path=path, params=params)
+
+    def get_tag(
+        self,
+        account_id: str,
+        organization_id: str,
+        tag_id: str,
+    ) -> dict:
+        """get tags
+
+        API reference: GET /accounts/<account_id>/organizations/<organization_id>/tags/<tag_id>
+
+        Request Syntax:
+            .. code-block:: python
+
+                account_id = "1122334455660"
+                organization_id = "1410000000000"
+                tag_id = "1234567890125"
+                response = api_client.get_tag(
+                    account_id, organization_id, tag_id)
+
+        Params:
+            - **account_id** (str): account identifier
+            - **organization_id** (str): organization identifier
+            - **tag_id** (str): tag identifier
+
+        Return type:
+            dict
+
+        Returns:
+            Response Syntax:
+
+            .. code-block:: python
+                {
+                    'id': "1234567890125",
+                    'name': "OK",
+                    'description': "",
+                    'color': "green",
+                    'created_at' : "2023-12-13T04:42:34.913644Z",
+                    'updated_at' : "2023-12-13T04:42:34.913644Z",
+                },
+
+        Raises:
+            - BadRequest
+            - Unauthorized: Authentication failed
+            - InternalServerError
+        """
+        path = '/accounts/{}/organizations/{}/tags/{}'.format(
+            account_id,
+            organization_id,
+            tag_id,
+        )
+        return self._connection.api_request(method='GET', path=path)
+
+    def create_tag(
+        self,
+        account_id: str,
+        organization_id: str,
+        name: str,
+        description: Optional[str] = None,
+        color: Optional[str] = "grey",
+    ) -> dict:
+        """create a tag
+
+        API reference: POST /accounts/<account_id>/organizations/<organization_id>/tags
+
+        Request Syntax:
+            .. code-block:: python
+
+                account_id = "1122334455660"
+                organization_id = "1410000000000"
+                name = "OK"
+                description = "有益な出力文が出力されるときのタグです"
+                color = "green"
+                response = api_client.create_tag(
+                    account_id, organization_id, name, description, color)
+
+        Params:
+            - **account_id** (str): account identifier
+            - **organization_id** (str): organization identifier
+            - **name** (str): tag name
+            - **description** (str): **[optional]** tag description
+            - **color** (str): **[optional]** tag color
+                available colors are "red", "orange", "yellow", "olive", "green", "teal", "blue", "violet", "purple", "pink", "brown", "grey", "black".
+                default is "grey".
+
+        Return type:
+            dict
+
+        Returns:
+            Response Syntax:
+
+            .. code-block:: python
+                {
+                    'id': "1234567890123",
+                    'account_id': "1122334455660",
+                    'organization_id': "1410000000000",
+                    'name': "OK",
+                    'description': "有益な出力文が出力されるときのタグです",
+                    'color': "green",
+                    'created_at' : "2023-12-13T04:42:34.913644Z",
+                    'updated_at' : "2023-12-13T04:42:34.913644Z",
+                }
+
+        Raises:
+            - BadRequest
+            - Unauthorized: Authentication failed
+            - InternalServerError
+        """
+        if not name:
+            error_message = '"name" is necessary'
+            raise BadRequest(
+                error=error_message,
+                error_description=error_message,
+                status_code=400
+            )
+        if not description:
+            description = ""
+
+        available_colors = [
+            "red", "orange", "yellow", "olive", "green", "teal", "blue", "violet", "purple", "pink", "brown", "grey", "black"
+        ]
+        if not color:
+            color = "grey"
+        if color not in available_colors:
+            raise BadRequest(
+                error='color is not supported',
+                error_description=f'color "{color}" is not supported. available colors are {available_colors}',
+                status_code=400
+            )
+
+        path = '/accounts/{}/organizations/{}/tags'.format(
+            account_id,
+            organization_id,
+        )
+
+        payload = {
+            'name': name,
+            'description': description,
+            'color': color,
+        }
+        return self._connection.api_request(method='POST', path=path, json=payload)
+
+    def update_tag(
+        self,
+        account_id: str,
+        organization_id: str,
+        tag_id: str,
+        name: str,
+        description: Optional[str] = None,
+        color: Optional[str] = "grey",
+    ) -> dict:
+        """update a tag
+
+        API reference: PATCH /accounts/<account_id>/organizations/<organization_id>/tags/<tag_id>
+
+        Request Syntax:
+            .. code-block:: python
+
+                account_id = "1122334455660"
+                organization_id = "1410000000000"
+                tag_id = "1234567890123"
+                name = "OK"
+                description = "有益な出力文が出力されるときのタグです"
+                color = "green"
+                response = api_client.update_tag(
+                    account_id, organization_id, tag_id, name, description, color)
+
+        Params:
+            - **account_id** (str): account identifier
+            - **organization_id** (str): organization identifier
+            - **tag_id** (str): tag identifier
+            - **name** (str): tag name
+            - **description** (str): **[optional]** tag description.
+            - **color** (str): **[optional]** tag color
+                available colors are "red", "orange", "yellow", "olive", "green", "teal", "blue", "violet", "purple", "pink", "brown", "grey", "black".
+                default is "grey".
+
+        Return type:
+            dict
+
+        Returns:
+            Response Syntax:
+
+            .. code-block:: python
+                {
+                    'id': "1234567890123",
+                    'account_id': "1122334455660",
+                    'organization_id': "1410000000000",
+                    'name': "OK",
+                    'description': "有益な出力文が出力されるときのタグです",
+                    'color': "green",
+                    'created_at' : "2023-12-13T04:42:34.913644Z",
+                    'updated_at' : "2023-12-13T04:42:34.913644Z",
+                }
+
+        Raises:
+            - BadRequest
+            - Unauthorized: Authentication failed
+            - InternalServerError
+        """
+        if not name:
+            error_message = '"name" is necessary'
+            raise BadRequest(
+                error=error_message,
+                error_description=error_message,
+                status_code=400
+            )
+        if not description:
+            description = ""
+
+        available_colors = [
+            "red", "orange", "yellow", "olive", "green", "teal", "blue", "violet", "purple", "pink", "brown", "grey", "black"
+        ]
+        if not color:
+            color = "grey"
+        if color not in available_colors:
+            raise BadRequest(
+                error='color is not supported',
+                error_description=f'color "{color}" is not supported. available colors are {available_colors}',
+                status_code=400
+            )
+
+        path = '/accounts/{}/organizations/{}/tags/{}'.format(
+            account_id,
+            organization_id,
+            tag_id,
+        )
+
+        payload = {
+            'name': name,
+            'description': description,
+            'color': color,
+        }
+        return self._connection.api_request(method='PATCH', path=path, json=payload)
+
+    def delete_tag(
+        self,
+        account_id: str,
+        organization_id: str,
+        tag_id: str,
+    ) -> dict:
+        """delete a tag
+
+        API reference: DELETE /accounts/<account_id>/organizations/<organization_id>/tags/<tag_id>
+
+        Request Syntax:
+            .. code-block:: python
+
+                account_id = "1122334455660"
+                organization_id = "1410000000000"
+                tag_id = "9968625354849"
+                response = api_client.delete_tags(
+                    account_id, organization_id, deployment_id, tag_id)
+
+        Params:
+            - **account_id** (str): account identifier
+            - **organization_id** (str): organization identifier
+            - **tag_id** (str): tag identifier
+
+        Return type:
+            dict
+
+        Returns:
+            Response Syntax:
+
+            .. code-block:: python
+                {
+                    'message': f'tag 9968625354849 was deleted.
+                }
+
+        Raises:
+            - BadRequest
+            - Unauthorized: Authentication failed
+            - InternalServerError
+        """
+        path = '/accounts/{}/organizations/{}/tags/{}'.format(
+            account_id,
+            organization_id,
+            tag_id,
+        )
+        return self._connection.api_request(method='DELETE', path=path)

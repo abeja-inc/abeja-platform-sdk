@@ -7,15 +7,37 @@ from abeja.exceptions import BadRequest
 
 ACCOUNT_ID = '1111111111111'
 ORGANIZATION_ID = '2222222222222'
-DEPLOYMENT_ID = '3333333333333'
-DEPLOYMENT_QA_ID = '4444444444444'
-DEPLOYMENT_CHAT_ID = '5555555555555'
-THREAD_ID = '6666666666666'
-HISTORY_ID = '7777777777777'
+TAG_ID = '3333333333333'
+DEPLOYMENT_ID = '4444444444444'
+DEPLOYMENT_QA_ID = '5555555555555'
+DEPLOYMENT_CHAT_ID = '6666666666666'
+THREAD_ID = '7777777777777'
+HISTORY_ID = '8888888888888'
 INPUT_TEXT = 'ABEJAについて教えて'
 OUTPUT_TEXT = 'ABEJAは、スペイン語で「ミツバチ」の意味であり、植物の受粉を手伝い、世界の食料生産を支える存在として社名になっています。'
 INPUT_TOKEN_COUNT = 10
 OUTPUT_TOKEN_COUNT = 10
+
+TAG_RES = {
+    'id': TAG_ID,
+    'account_id': ACCOUNT_ID,
+    'organization_id': ORGANIZATION_ID,
+    'name': "TAG",
+    'description': "tag description",
+    'color': "red",
+    'created_at': "2023-12-14T04:42:34.913644Z",
+    'updated_at': "2023-12-14T04:42:34.913644Z",
+}
+TAGS_RES = {
+    'account_id': ACCOUNT_ID,
+    'organization_id': ORGANIZATION_ID,
+    'tags': [
+        TAG_RES,
+    ],
+    'offset': 0,
+    'limit': 1000,
+    'has_next': False,
+}
 
 DEPLOYMENT_QA_RES = {
     'id': DEPLOYMENT_QA_ID,
@@ -72,7 +94,9 @@ HISTORY_RES = {
     "output_text": OUTPUT_TEXT,
     "input_token_count": INPUT_TOKEN_COUNT,
     "output_token_count": OUTPUT_TOKEN_COUNT,
-    "tags": [],
+    "tags": [
+        TAG_RES,
+    ],
     "matadata": [],
     "created_at": "2023-12-14T04:42:34.913644Z",
     "updated_at": "2018-12-15T04:42:34.913726Z"
@@ -412,7 +436,7 @@ class TestOpsBeeLLMAPIClient(unittest.TestCase):
             'output_text': OUTPUT_TEXT,
             'input_token_count': INPUT_TOKEN_COUNT,
             'output_token_count': OUTPUT_TOKEN_COUNT,
-            'tag_ids': [],
+            'tag_ids': [TAG_ID],
         }
 
         self.assertDictEqual(m.request_history[2].json(), expected_payload)
@@ -651,7 +675,7 @@ class TestOpsBeeLLMAPIClient(unittest.TestCase):
             'output_text': OUTPUT_TEXT,
             'input_token_count': INPUT_TOKEN_COUNT,
             'output_token_count': OUTPUT_TOKEN_COUNT,
-            'tag_ids': [],
+            'tag_ids': [TAG_ID],
         }
 
         self.assertDictEqual(m.request_history[2].json(), expected_payload)
@@ -705,3 +729,159 @@ class TestOpsBeeLLMAPIClient(unittest.TestCase):
             HISTORY_ID,
         )
         self.assertDictEqual(ret, HISTORY_RES)
+
+    @requests_mock.Mocker()
+    def test_get_tags(self, m):
+        # get-tags-api mock
+        path = '/accounts/{}/organizations/{}/tags'.format(
+            ACCOUNT_ID,
+            ORGANIZATION_ID,
+        )
+        m.get(path, json=TAGS_RES)
+
+        # unit test
+        client = APIClient()
+        ret = client.get_tags(
+            ACCOUNT_ID,
+            ORGANIZATION_ID,
+        )
+        self.assertDictEqual(ret, TAGS_RES)
+
+    @requests_mock.Mocker()
+    def test_get_tag(self, m):
+        # get-tag-api mock
+        path = '/accounts/{}/organizations/{}/tags/{}'.format(
+            ACCOUNT_ID,
+            ORGANIZATION_ID,
+            TAG_ID,
+        )
+        m.get(path, json=TAG_RES)
+
+        # unit test
+        client = APIClient()
+        ret = client.get_tag(
+            ACCOUNT_ID,
+            ORGANIZATION_ID,
+            TAG_ID,
+        )
+        self.assertDictEqual(ret, TAG_RES)
+
+    @requests_mock.Mocker()
+    def test_create_tag(self, m):
+        # create-tag-api mock
+        path = '/accounts/{}/organizations/{}/tags'.format(
+            ACCOUNT_ID,
+            ORGANIZATION_ID,
+        )
+        m.post(path, json=TAG_RES)
+
+        # unit test
+        client = APIClient()
+        ret = client.create_tag(
+            ACCOUNT_ID,
+            ORGANIZATION_ID,
+            name=TAG_RES['name'],
+            description=TAG_RES['description'],
+            color=TAG_RES['color'],
+        )
+        expected_payload = {
+            'name': TAG_RES['name'],
+            'description': TAG_RES['description'],
+            'color': TAG_RES['color'],
+        }
+
+        self.assertDictEqual(m.request_history[0].json(), expected_payload)
+        self.assertDictEqual(ret, TAG_RES)
+
+        with self.assertRaises(BadRequest) as e:
+            client.create_tag(
+                ACCOUNT_ID,
+                ORGANIZATION_ID,
+                name=None,
+                description=None,
+                color=None,
+            )
+        self.assertEqual(e.exception.error_description, '"name" is necessary')
+
+        with self.assertRaises(BadRequest) as e:
+            client.create_tag(
+                ACCOUNT_ID,
+                ORGANIZATION_ID,
+                name=TAG_RES['name'],
+                description=None,
+                color="sky blue",
+            )
+        self.assertEqual(e.exception.error, 'color is not supported')
+
+    @requests_mock.Mocker()
+    def test_update_tag(self, m):
+        # update-tag-api mock
+        path = '/accounts/{}/organizations/{}/tags/{}'.format(
+            ACCOUNT_ID,
+            ORGANIZATION_ID,
+            TAG_ID,
+        )
+        m.patch(path, json=TAG_RES)
+
+        # unit test
+        client = APIClient()
+        ret = client.update_tag(
+            ACCOUNT_ID,
+            ORGANIZATION_ID,
+            TAG_ID,
+            name=TAG_RES['name'],
+            description=TAG_RES['description'],
+            color=TAG_RES['color'],
+        )
+        expected_payload = {
+            'name': TAG_RES['name'],
+            'description': TAG_RES['description'],
+            'color': TAG_RES['color'],
+        }
+
+        self.assertDictEqual(m.request_history[0].json(), expected_payload)
+        self.assertDictEqual(ret, TAG_RES)
+
+        with self.assertRaises(BadRequest) as e:
+            client.update_tag(
+                ACCOUNT_ID,
+                ORGANIZATION_ID,
+                TAG_ID,
+                name=None,
+                description=None,
+                color=None,
+            )
+        self.assertEqual(e.exception.error_description, '"name" is necessary')
+
+        with self.assertRaises(BadRequest) as e:
+            client.update_tag(
+                ACCOUNT_ID,
+                ORGANIZATION_ID,
+                TAG_ID,
+                name=TAG_RES['name'],
+                description=None,
+                color="sky blue",
+            )
+        self.assertEqual(e.exception.error, 'color is not supported')
+
+    @requests_mock.Mocker()
+    def test_delete_tag(self, m):
+        # delete-tag-api mock
+        path = '/accounts/{}/organizations/{}/tags/{}'.format(
+            ACCOUNT_ID,
+            ORGANIZATION_ID,
+            TAG_ID,
+        )
+        res = {
+            'message': f'tag {TAG_ID} was deleted.'
+        }
+        m.delete(path, json=res)
+
+        # unit test
+        client = APIClient()
+        ret = client.delete_tag(
+            ACCOUNT_ID,
+            ORGANIZATION_ID,
+            TAG_ID,
+        )
+        self.assertDictEqual(ret, res)
