@@ -353,7 +353,7 @@ class TestOpsBeeLLMAPIClient(unittest.TestCase):
                 inputs=None,
                 outputs=None,
                 tags=None,
-                metadata=None,
+                metadata=DATASET_LLM_ITEM_RES['metadata'],
             )
         self.assertEqual(e.exception.error_description, '"inputs" is necessary')
 
@@ -365,7 +365,7 @@ class TestOpsBeeLLMAPIClient(unittest.TestCase):
                 inputs=[],
                 outputs=None,
                 tags=None,
-                metadata=None,
+                metadata=DATASET_LLM_ITEM_RES['metadata'],
             )
         self.assertEqual(e.exception.error_description, '"inputs" is necessary')
 
@@ -377,7 +377,7 @@ class TestOpsBeeLLMAPIClient(unittest.TestCase):
                 inputs=DATASET_LLM_ITEM_RES['inputs'],
                 outputs=None,
                 tags=None,
-                metadata=None,
+                metadata=DATASET_LLM_ITEM_RES['metadata'],
             )
         self.assertEqual(e.exception.error_description, '"outputs" is necessary')
 
@@ -389,7 +389,7 @@ class TestOpsBeeLLMAPIClient(unittest.TestCase):
                 inputs=DATASET_LLM_ITEM_RES['inputs'],
                 outputs=[],
                 tags=None,
-                metadata=None,
+                metadata=DATASET_LLM_ITEM_RES['metadata'],
             )
         self.assertEqual(e.exception.error_description, '"outputs" is necessary')
 
