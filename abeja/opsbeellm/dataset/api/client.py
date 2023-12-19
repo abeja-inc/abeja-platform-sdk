@@ -1,5 +1,4 @@
-from typing import Optional
-
+from typing import Optional, List, Dict
 from abeja.opsbeellm.common.api_client import OpsBeeLLMBaseAPIClient
 from abeja.exceptions import BadRequest
 
@@ -555,7 +554,7 @@ class APIClient(OpsBeeLLMBaseAPIClient):
         inputs: list[dict],
         outputs: list[dict],
         tags: Optional[list] = None,
-        metadata: Optional[list[dict]] = None,
+        metadata: Optional[List[Dict]] = None,
     ) -> dict:
         """create dataset item
 
