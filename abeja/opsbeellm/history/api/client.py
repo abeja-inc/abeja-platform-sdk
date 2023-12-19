@@ -636,7 +636,7 @@ class APIClient(OpsBeeLLMBaseAPIClient):
         input_token_count: Optional[int] = 0,
         output_token_count: Optional[int] = 0,
         tag_ids: Optional[list] = None,
-        metadata: Optional[list] = None,
+        metadata: Optional[dict] = None,
     ) -> dict:
         """create a qa history
 
@@ -1325,7 +1325,7 @@ class APIClient(OpsBeeLLMBaseAPIClient):
         input_token_count: Optional[int] = 0,
         output_token_count: Optional[int] = 0,
         tag_ids: Optional[list] = None,
-        metadata: Optional[list] = None,
+        metadata: Optional[dict] = None,
     ) -> dict:
         """create a chat history
 
