@@ -13,6 +13,7 @@ DEPLOYMENT_QA_ID = '5555555555555'
 DEPLOYMENT_CHAT_ID = '6666666666666'
 THREAD_ID = '7777777777777'
 HISTORY_ID = '8888888888888'
+METADATA_ID = '9999999999999'
 INPUT_TEXT = 'ABEJAについて教えて'
 OUTPUT_TEXT = 'ABEJAは、スペイン語で「ミツバチ」の意味であり、植物の受粉を手伝い、世界の食料生産を支える存在として社名になっています。'
 INPUT_TOKEN_COUNT = 10
@@ -112,6 +113,18 @@ HISTORIES_RES = {
     'offset': 0,
     'limit': 1000,
     'has_next': False,
+}
+
+METADATA_RES = {
+    "id": METADATA_ID,
+    "account_id": ACCOUNT_ID,
+    "organization_id": ORGANIZATION_ID,
+    "deployment_id": DEPLOYMENT_ID,
+    "history_id": HISTORY_ID,
+    "key": "metadata",
+    "value": "dummy",
+    "created_at": "2023-12-14T04:42:34.913644Z",
+    "updated_at": "2018-12-15T04:42:34.913726Z"
 }
 
 
@@ -885,3 +898,430 @@ class TestOpsBeeLLMAPIClient(unittest.TestCase):
             TAG_ID,
         )
         self.assertDictEqual(ret, res)
+
+    @requests_mock.Mocker()
+    def test_create_qa_history_metadata(self, m):
+        # get-deployment-api mock
+        path = '/accounts/{}/organizations/{}/deployments/{}'.format(
+            ACCOUNT_ID,
+            ORGANIZATION_ID,
+            DEPLOYMENT_QA_ID,
+        )
+        m.get(path, json=DEPLOYMENT_QA_RES)
+
+        # create-history-metadata-api mock
+        path = '/accounts/{}/organizations/{}/deployments/{}/qa_history/{}/metadata'.format(
+            ACCOUNT_ID,
+            ORGANIZATION_ID,
+            DEPLOYMENT_QA_ID,
+            HISTORY_ID,
+        )
+        m.post(path, json=METADATA_RES)
+
+        # unit test
+        client = APIClient()
+        ret = client.create_qa_history_metadata(
+            ACCOUNT_ID,
+            ORGANIZATION_ID,
+            DEPLOYMENT_QA_ID,
+            HISTORY_ID,
+            key=METADATA_RES['key'],
+            value=METADATA_RES['value'],
+        )
+        expected_payload = {
+            'key': METADATA_RES['key'],
+            'value': METADATA_RES['value'],
+        }
+
+        self.assertDictEqual(m.request_history[1].json(), expected_payload)
+        self.assertDictEqual(ret, METADATA_RES)
+
+        with self.assertRaises(BadRequest) as e:
+            client.create_qa_history_metadata(
+                ACCOUNT_ID,
+                ORGANIZATION_ID,
+                DEPLOYMENT_QA_ID,
+                HISTORY_ID,
+                key=None,
+                value=None,
+            )
+        self.assertEqual(e.exception.error_description, '"key" is necessary')
+
+        with self.assertRaises(BadRequest) as e:
+            client.create_qa_history_metadata(
+                ACCOUNT_ID,
+                ORGANIZATION_ID,
+                DEPLOYMENT_QA_ID,
+                HISTORY_ID,
+                key=METADATA_RES['key'],
+                value=None,
+            )
+        self.assertEqual(e.exception.error_description, '"value" is necessary')
+
+        path = '/accounts/{}/organizations/{}/deployments/{}'.format(
+            ACCOUNT_ID,
+            ORGANIZATION_ID,
+            DEPLOYMENT_CHAT_ID,
+        )
+        m.get(path, json=DEPLOYMENT_CHAT_RES)
+        with self.assertRaises(BadRequest) as e:
+            client.create_qa_history_metadata(
+                ACCOUNT_ID,
+                ORGANIZATION_ID,
+                DEPLOYMENT_CHAT_ID,
+                HISTORY_ID,
+                key=METADATA_RES['key'],
+                value=METADATA_RES['value'],
+            )
+        self.assertEqual(e.exception.error, 'deployment type is not supported')
+
+    @requests_mock.Mocker()
+    def test_update_qa_history_metadata(self, m):
+        # get-deployment-api mock
+        path = '/accounts/{}/organizations/{}/deployments/{}'.format(
+            ACCOUNT_ID,
+            ORGANIZATION_ID,
+            DEPLOYMENT_QA_ID,
+        )
+        m.get(path, json=DEPLOYMENT_QA_RES)
+
+        # update-history-metadata-api mock
+        path = '/accounts/{}/organizations/{}/deployments/{}/qa_history/{}/metadata/{}'.format(
+            ACCOUNT_ID,
+            ORGANIZATION_ID,
+            DEPLOYMENT_QA_ID,
+            HISTORY_ID,
+            METADATA_ID,
+        )
+        m.patch(path, json=METADATA_RES)
+
+        # unit test
+        client = APIClient()
+        ret = client.update_qa_history_metadata(
+            ACCOUNT_ID,
+            ORGANIZATION_ID,
+            DEPLOYMENT_QA_ID,
+            HISTORY_ID,
+            METADATA_ID,
+            key=METADATA_RES['key'],
+            value=METADATA_RES['value'],
+        )
+        expected_payload = {
+            'key': METADATA_RES['key'],
+            'value': METADATA_RES['value'],
+        }
+
+        self.assertDictEqual(m.request_history[1].json(), expected_payload)
+        self.assertDictEqual(ret, METADATA_RES)
+
+        with self.assertRaises(BadRequest) as e:
+            client.update_qa_history_metadata(
+                ACCOUNT_ID,
+                ORGANIZATION_ID,
+                DEPLOYMENT_QA_ID,
+                HISTORY_ID,
+                METADATA_ID,
+                key=None,
+                value=None,
+            )
+        self.assertEqual(e.exception.error_description, '"key" is necessary')
+
+        with self.assertRaises(BadRequest) as e:
+            client.update_qa_history_metadata(
+                ACCOUNT_ID,
+                ORGANIZATION_ID,
+                DEPLOYMENT_QA_ID,
+                HISTORY_ID,
+                METADATA_ID,
+                key=METADATA_RES['key'],
+                value=None,
+            )
+        self.assertEqual(e.exception.error_description, '"value" is necessary')
+
+        path = '/accounts/{}/organizations/{}/deployments/{}'.format(
+            ACCOUNT_ID,
+            ORGANIZATION_ID,
+            DEPLOYMENT_CHAT_ID,
+        )
+        m.get(path, json=DEPLOYMENT_CHAT_RES)
+        with self.assertRaises(BadRequest) as e:
+            client.update_qa_history_metadata(
+                ACCOUNT_ID,
+                ORGANIZATION_ID,
+                DEPLOYMENT_CHAT_ID,
+                HISTORY_ID,
+                METADATA_ID,
+                key=METADATA_RES['key'],
+                value=METADATA_RES['value'],
+            )
+        self.assertEqual(e.exception.error, 'deployment type is not supported')
+
+    @requests_mock.Mocker()
+    def test_delete_qa_history_metadata(self, m):
+        # get-deployment-api mock
+        path = '/accounts/{}/organizations/{}/deployments/{}'.format(
+            ACCOUNT_ID,
+            ORGANIZATION_ID,
+            DEPLOYMENT_QA_ID,
+        )
+        m.get(path, json=DEPLOYMENT_QA_RES)
+
+        # delete-history-metadata-api mock
+        path = '/accounts/{}/organizations/{}/deployments/{}/qa_history/{}/metadata/{}'.format(
+            ACCOUNT_ID,
+            ORGANIZATION_ID,
+            DEPLOYMENT_QA_ID,
+            HISTORY_ID,
+            METADATA_ID,
+        )
+        res = {
+            'message': f'metadata {METADATA_ID} was deleted.'
+        }
+        m.delete(path, json=res)
+
+        # unit test
+        client = APIClient()
+        ret = client.delete_qa_history_metadata(
+            ACCOUNT_ID,
+            ORGANIZATION_ID,
+            DEPLOYMENT_QA_ID,
+            HISTORY_ID,
+            METADATA_ID,
+        )
+        self.assertDictEqual(ret, res)
+
+        path = '/accounts/{}/organizations/{}/deployments/{}'.format(
+            ACCOUNT_ID,
+            ORGANIZATION_ID,
+            DEPLOYMENT_CHAT_ID,
+        )
+        m.get(path, json=DEPLOYMENT_CHAT_RES)
+        with self.assertRaises(BadRequest) as e:
+            client.delete_qa_history_metadata(
+                ACCOUNT_ID,
+                ORGANIZATION_ID,
+                DEPLOYMENT_CHAT_ID,
+                HISTORY_ID,
+                METADATA_ID,
+            )
+        self.assertEqual(e.exception.error, 'deployment type is not supported')
+
+    @requests_mock.Mocker()
+    def test_create_chat_history_metadata(self, m):
+        # get-deployment-api mock
+        path = '/accounts/{}/organizations/{}/deployments/{}'.format(
+            ACCOUNT_ID,
+            ORGANIZATION_ID,
+            DEPLOYMENT_CHAT_ID,
+        )
+        m.get(path, json=DEPLOYMENT_CHAT_RES)
+
+        # create-history-metadata-api mock
+        path = '/accounts/{}/organizations/{}/deployments/{}/threads/{}/history/{}/metadata'.format(
+            ACCOUNT_ID,
+            ORGANIZATION_ID,
+            DEPLOYMENT_CHAT_ID,
+            THREAD_ID,
+            HISTORY_ID,
+        )
+        m.post(path, json=METADATA_RES)
+
+        # unit test
+        client = APIClient()
+        ret = client.create_chat_history_metadata(
+            ACCOUNT_ID,
+            ORGANIZATION_ID,
+            DEPLOYMENT_CHAT_ID,
+            THREAD_ID,
+            HISTORY_ID,
+            key=METADATA_RES['key'],
+            value=METADATA_RES['value'],
+        )
+        expected_payload = {
+            'key': METADATA_RES['key'],
+            'value': METADATA_RES['value'],
+        }
+
+        self.assertDictEqual(m.request_history[1].json(), expected_payload)
+        self.assertDictEqual(ret, METADATA_RES)
+
+        with self.assertRaises(BadRequest) as e:
+            client.create_chat_history_metadata(
+                ACCOUNT_ID,
+                ORGANIZATION_ID,
+                DEPLOYMENT_CHAT_ID,
+                THREAD_ID,
+                HISTORY_ID,
+                key=None,
+                value=None,
+            )
+        self.assertEqual(e.exception.error_description, '"key" is necessary')
+
+        with self.assertRaises(BadRequest) as e:
+            client.create_chat_history_metadata(
+                ACCOUNT_ID,
+                ORGANIZATION_ID,
+                DEPLOYMENT_CHAT_ID,
+                THREAD_ID,
+                HISTORY_ID,
+                key=METADATA_RES['key'],
+                value=None,
+            )
+        self.assertEqual(e.exception.error_description, '"value" is necessary')
+
+        path = '/accounts/{}/organizations/{}/deployments/{}'.format(
+            ACCOUNT_ID,
+            ORGANIZATION_ID,
+            DEPLOYMENT_QA_ID,
+        )
+        m.get(path, json=DEPLOYMENT_QA_RES)
+        with self.assertRaises(BadRequest) as e:
+            client.create_chat_history_metadata(
+                ACCOUNT_ID,
+                ORGANIZATION_ID,
+                DEPLOYMENT_QA_ID,
+                THREAD_ID,
+                HISTORY_ID,
+                key=METADATA_RES['key'],
+                value=METADATA_RES['value'],
+            )
+        self.assertEqual(e.exception.error, 'deployment type is not supported')
+
+    @requests_mock.Mocker()
+    def test_update_chat_history_metadata(self, m):
+        # get-deployment-api mock
+        path = '/accounts/{}/organizations/{}/deployments/{}'.format(
+            ACCOUNT_ID,
+            ORGANIZATION_ID,
+            DEPLOYMENT_CHAT_ID,
+        )
+        m.get(path, json=DEPLOYMENT_CHAT_RES)
+
+        # update-history-metadata-api mock
+        path = '/accounts/{}/organizations/{}/deployments/{}/threads/{}/history/{}/metadata/{}'.format(
+            ACCOUNT_ID,
+            ORGANIZATION_ID,
+            DEPLOYMENT_CHAT_ID,
+            THREAD_ID,
+            HISTORY_ID,
+            METADATA_ID,
+        )
+        m.patch(path, json=METADATA_RES)
+
+        # unit test
+        client = APIClient()
+        ret = client.update_chat_history_metadata(
+            ACCOUNT_ID,
+            ORGANIZATION_ID,
+            DEPLOYMENT_CHAT_ID,
+            THREAD_ID,
+            HISTORY_ID,
+            METADATA_ID,
+            key=METADATA_RES['key'],
+            value=METADATA_RES['value'],
+        )
+        expected_payload = {
+            'key': METADATA_RES['key'],
+            'value': METADATA_RES['value'],
+        }
+
+        self.assertDictEqual(m.request_history[1].json(), expected_payload)
+        self.assertDictEqual(ret, METADATA_RES)
+
+        with self.assertRaises(BadRequest) as e:
+            client.update_chat_history_metadata(
+                ACCOUNT_ID,
+                ORGANIZATION_ID,
+                DEPLOYMENT_CHAT_ID,
+                THREAD_ID,
+                HISTORY_ID,
+                METADATA_ID,
+                key=None,
+                value=None,
+            )
+        self.assertEqual(e.exception.error_description, '"key" is necessary')
+
+        with self.assertRaises(BadRequest) as e:
+            client.update_chat_history_metadata(
+                ACCOUNT_ID,
+                ORGANIZATION_ID,
+                DEPLOYMENT_CHAT_ID,
+                THREAD_ID,
+                HISTORY_ID,
+                METADATA_ID,
+                key=METADATA_RES['key'],
+                value=None,
+            )
+        self.assertEqual(e.exception.error_description, '"value" is necessary')
+
+        path = '/accounts/{}/organizations/{}/deployments/{}'.format(
+            ACCOUNT_ID,
+            ORGANIZATION_ID,
+            DEPLOYMENT_QA_ID,
+        )
+        m.get(path, json=DEPLOYMENT_QA_RES)
+        with self.assertRaises(BadRequest) as e:
+            client.update_chat_history_metadata(
+                ACCOUNT_ID,
+                ORGANIZATION_ID,
+                DEPLOYMENT_QA_ID,
+                THREAD_ID,
+                HISTORY_ID,
+                METADATA_ID,
+                key=METADATA_RES['key'],
+                value=METADATA_RES['value'],
+            )
+        self.assertEqual(e.exception.error, 'deployment type is not supported')
+
+    @requests_mock.Mocker()
+    def test_delete_chat_history_metadata(self, m):
+        # get-deployment-api mock
+        path = '/accounts/{}/organizations/{}/deployments/{}'.format(
+            ACCOUNT_ID,
+            ORGANIZATION_ID,
+            DEPLOYMENT_CHAT_ID,
+        )
+        m.get(path, json=DEPLOYMENT_CHAT_RES)
+
+        # delete-history-metadata-api mock
+        path = '/accounts/{}/organizations/{}/deployments/{}/threads/{}/history/{}/metadata/{}'.format(
+            ACCOUNT_ID,
+            ORGANIZATION_ID,
+            DEPLOYMENT_CHAT_ID,
+            THREAD_ID,
+            HISTORY_ID,
+            METADATA_ID,
+        )
+        res = {
+            'message': f'metadata {METADATA_ID} was deleted.'
+        }
+        m.delete(path, json=res)
+
+        # unit test
+        client = APIClient()
+        ret = client.delete_chat_history_metadata(
+            ACCOUNT_ID,
+            ORGANIZATION_ID,
+            DEPLOYMENT_CHAT_ID,
+            THREAD_ID,
+            HISTORY_ID,
+            METADATA_ID,
+        )
+        self.assertDictEqual(ret, res)
+
+        path = '/accounts/{}/organizations/{}/deployments/{}'.format(
+            ACCOUNT_ID,
+            ORGANIZATION_ID,
+            DEPLOYMENT_QA_ID,
+        )
+        m.get(path, json=DEPLOYMENT_QA_RES)
+        with self.assertRaises(BadRequest) as e:
+            client.delete_chat_history_metadata(
+                ACCOUNT_ID,
+                ORGANIZATION_ID,
+                DEPLOYMENT_QA_ID,
+                THREAD_ID,
+                HISTORY_ID,
+                METADATA_ID,
+            )
+        self.assertEqual(e.exception.error, 'deployment type is not supported')
