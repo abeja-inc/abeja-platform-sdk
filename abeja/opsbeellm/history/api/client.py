@@ -652,7 +652,7 @@ class APIClient(OpsBeeLLMBaseAPIClient):
                 input_text = "ABEJAについて教えて"
                 output_text = "ABEJAは、スペイン語で「ミツバチ」の意味であり、植物の受粉を手伝い、世界の食料生産を支える存在として社名になっています。"
                 tag_ids = ['1111111111111', '2222222222222']
-                metadata = [{'key': 'metadata1', 'value': 'dummy1'}, {'key': 'metadata2', 'value': 'dummy2'}]
+                metadata = [{'metadata1': 'value1'}, {'metadata2': 'value2'}]
                 response = api_client.create_qa_history(
                     account_id, organization_id, deployment_id, input_text, output_text, tag_ids, metadata)
 
@@ -1344,7 +1344,7 @@ class APIClient(OpsBeeLLMBaseAPIClient):
                 input_text = "ABEJAについて教えて"
                 output_text = "ABEJAは、スペイン語で「ミツバチ」の意味であり、植物の受粉を手伝い、世界の食料生産を支える存在として社名になっています。"
                 tag_ids = ['1111111111111', '2222222222222']
-                metadata = [{'key': 'metadata1', 'value': 'dummy1'}, {'key': 'metadata2', 'value': 'dummy2'}]
+                metadata = [{'metadata1': 'value1'}, {'metadata2': 'value2'}]
                 response = api_client.create_chat_history(
                     account_id, organization_id, deployment_id, thread_id, input_text, output_text, tag_ids, metadata)
 
