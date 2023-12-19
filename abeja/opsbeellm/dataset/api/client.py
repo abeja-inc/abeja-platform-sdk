@@ -1,3 +1,4 @@
+from __future__ import annotations
 from typing import Optional, List, Dict
 from abeja.opsbeellm.common.api_client import OpsBeeLLMBaseAPIClient
 from abeja.exceptions import BadRequest
