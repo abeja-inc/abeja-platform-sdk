@@ -555,7 +555,7 @@ class APIClient(OpsBeeLLMBaseAPIClient):
         inputs: list[dict],
         outputs: list[dict],
         tags: Optional[list] = None,
-        metadata: Optional[list[dict]] = None,
+        metadata: Optional[list] = None,
     ) -> dict:
         """create dataset item
 
