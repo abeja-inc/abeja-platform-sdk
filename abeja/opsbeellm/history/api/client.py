@@ -174,7 +174,7 @@ class APIClient(OpsBeeLLMBaseAPIClient):
     ) -> dict:
         """create a thread
 
-        API reference: POST /accounts/<account_id>/organizations/<organization_id>/deployments/<deployment_id>/threads/
+        API reference: POST /accounts/<account_id>/organizations/<organization_id>/deployments/<deployment_id>/threads
 
         Request Syntax:
             .. code-block:: python
@@ -236,6 +236,8 @@ class APIClient(OpsBeeLLMBaseAPIClient):
         }
         if description is not None:
             payload['description'] = description
+        else:
+            payload['description'] = ''
 
         return self._connection.api_request(method='POST', path=path, json=payload)
 
@@ -315,6 +317,8 @@ class APIClient(OpsBeeLLMBaseAPIClient):
         }
         if description is not None:
             payload['description'] = description
+        else:
+            payload['description'] = ''
 
         return self._connection.api_request(method='PATCH', path=path, json=payload)
 
@@ -396,8 +400,8 @@ class APIClient(OpsBeeLLMBaseAPIClient):
             - **account_id** (str): account identifier
             - **organization_id** (str): organization identifier
             - **deployment_id** (str): deployment identifier for OpsBee LLM
-            - **offset** (int): **[optional]** offset of threads ( which starts from 0 )
-            - **limit** (int): **[optional]** max number of threads to be returned
+            - **offset** (int): **[optional]** offset of histories ( which starts from 0 )
+            - **limit** (int): **[optional]** max number of histories to be returned
 
         Return type:
             dict
@@ -632,7 +636,7 @@ class APIClient(OpsBeeLLMBaseAPIClient):
         input_token_count: Optional[int] = 0,
         output_token_count: Optional[int] = 0,
         tag_ids: Optional[list] = None,
-        metadata: Optional[dict] = None,
+        metadata: Optional[list[dict]] = None,
     ) -> dict:
         """create a qa history
 
@@ -1080,8 +1084,8 @@ class APIClient(OpsBeeLLMBaseAPIClient):
             - **account_id** (str): account identifier
             - **organization_id** (str): organization identifier
             - **deployment_id** (str): deployment identifier for OpsBee LLM
-            - **offset** (int): **[optional]** offset of threads ( which starts from 0 )
-            - **limit** (int): **[optional]** max number of threads to be returned
+            - **offset** (int): **[optional]** offset of histories ( which starts from 0 )
+            - **limit** (int): **[optional]** max number of histories to be returned
 
         Return type:
             dict
@@ -1321,7 +1325,7 @@ class APIClient(OpsBeeLLMBaseAPIClient):
         input_token_count: Optional[int] = 0,
         output_token_count: Optional[int] = 0,
         tag_ids: Optional[list] = None,
-        metadata: Optional[dict] = None,
+        metadata: Optional[list[dict]] = None,
     ) -> dict:
         """create a chat history
 
@@ -1778,8 +1782,8 @@ class APIClient(OpsBeeLLMBaseAPIClient):
         Params:
             - **account_id** (str): account identifier
             - **organization_id** (str): organization identifier
-            - **offset** (int): **[optional]** offset of threads ( which starts from 0 )
-            - **limit** (int): **[optional]** max number of threads to be returned
+            - **offset** (int): **[optional]** offset of tags ( which starts from 0 )
+            - **limit** (int): **[optional]** max number of tags to be returned
 
         Return type:
             dict

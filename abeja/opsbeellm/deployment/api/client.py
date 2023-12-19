@@ -185,7 +185,7 @@ class APIClient(OpsBeeLLMBaseAPIClient):
             - **organization_id** (str): organization identifier
             - **name** (str): deployment name
             - **description** (str): **[optional]** deployment description
-            - **type** (str): deployment type eg: qa, chat
+            - **type** (str): deployment type. available type are "qa" or "chat".
 
         Return type:
             dict
@@ -243,6 +243,8 @@ class APIClient(OpsBeeLLMBaseAPIClient):
         }
         if description is not None:
             payload['description'] = description
+        else:
+            payload['description'] = ''
 
         return self._connection.api_request(method='POST', path=path, json=payload)
 
@@ -318,6 +320,8 @@ class APIClient(OpsBeeLLMBaseAPIClient):
         }
         if description is not None:
             payload['description'] = description
+        else:
+            payload['description'] = ''
 
         return self._connection.api_request(method='PATCH', path=path, json=payload)
 
