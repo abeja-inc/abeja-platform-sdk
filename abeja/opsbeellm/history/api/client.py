@@ -1,4 +1,5 @@
-from typing import Optional
+from __future__ import annotations
+from typing import Optional, List, Dict
 
 from abeja.opsbeellm.common.api_client import OpsBeeLLMBaseAPIClient
 from abeja.exceptions import BadRequest
@@ -636,7 +637,7 @@ class APIClient(OpsBeeLLMBaseAPIClient):
         input_token_count: Optional[int] = 0,
         output_token_count: Optional[int] = 0,
         tag_ids: Optional[list] = None,
-        metadata: Optional[dict] = None,
+        metadata: Optional[List[Dict]] = None,
     ) -> dict:
         """create a qa history
 
@@ -650,8 +651,10 @@ class APIClient(OpsBeeLLMBaseAPIClient):
                 deployment_id = "1234567890123"
                 input_text = "ABEJAについて教えて"
                 output_text = "ABEJAは、スペイン語で「ミツバチ」の意味であり、植物の受粉を手伝い、世界の食料生産を支える存在として社名になっています。"
+                tag_ids = ['1111111111111', '2222222222222']
+                metadata = [{'key': 'metadata1', 'value': 'dummy1'}, {'key': 'metadata2', 'value': 'dummy2'}]
                 response = api_client.create_qa_history(
-                    account_id, organization_id, deployment_id, input_text, output_text)
+                    account_id, organization_id, deployment_id, input_text, output_text, tag_ids, metadata)
 
         Params:
             - **account_id** (str): account identifier
@@ -1325,7 +1328,7 @@ class APIClient(OpsBeeLLMBaseAPIClient):
         input_token_count: Optional[int] = 0,
         output_token_count: Optional[int] = 0,
         tag_ids: Optional[list] = None,
-        metadata: Optional[dict] = None,
+        metadata: Optional[List[Dict]] = None,
     ) -> dict:
         """create a chat history
 
@@ -1340,8 +1343,10 @@ class APIClient(OpsBeeLLMBaseAPIClient):
                 thread_id = "1234567890123"
                 input_text = "ABEJAについて教えて"
                 output_text = "ABEJAは、スペイン語で「ミツバチ」の意味であり、植物の受粉を手伝い、世界の食料生産を支える存在として社名になっています。"
+                tag_ids = ['1111111111111', '2222222222222']
+                metadata = [{'key': 'metadata1', 'value': 'dummy1'}, {'key': 'metadata2', 'value': 'dummy2'}]
                 response = api_client.create_chat_history(
-                    account_id, organization_id, deployment_id, thread_id, input_text, output_text)
+                    account_id, organization_id, deployment_id, thread_id, input_text, output_text, tag_ids, metadata)
 
         Params:
             - **account_id** (str): account identifier
