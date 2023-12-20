@@ -30,7 +30,7 @@ DEFAULT_CONNECTION_TIMEOUT = 30
 
 class OpsBeeLLMConnection:
     """A connection to ABEJA Platform OpsBeeLLM API."""
-    BASE_URL = os.environ.get('ABEJA_OPSBEELLM_API_URL', 'https://opsbee-llm.dev.abeja.io')
+    BASE_URL = os.environ.get('ABEJA_OPSBEELLM_API_URL', 'https://opsbee-llm.stage.abeja.io')
     API_TOKEN = os.environ.get('ABEJA_OPSBEELLM_API_TOKEN', 'dummy')
 
     def __init__(
