@@ -1,4 +1,3 @@
-import base64
 import json
 import os
 import http
@@ -35,7 +34,6 @@ class OpsBeeLLMConnection:
     """A connection to ABEJA Platform OpsBeeLLM API."""
     BASE_URL = os.environ.get('ABEJA_API_URL', 'https://api.stage.abeja.io')
     OPSBEELLM_BASE_URL = os.environ.get('ABEJA_OPSBEELLM_API_URL', 'https://opsbee-llm.stage.abeja.io')
-    OPSBEELLM_API_TOKEN = os.environ.get('ABEJA_OPSBEELLM_API_TOKEN', 'dummy')
 
     def __init__(
             self,
@@ -46,19 +44,10 @@ class OpsBeeLLMConnection:
             SDK_CONNECTION_TIMEOUT_ENV_KEY) or DEFAULT_CONNECTION_TIMEOUT
         self.max_retry_count = max_retry_count or os.environ.get(
             SDK_MAX_RETRY_COUNT_ENV_KEY) or DEFAULT_MAX_RETRY_COUNT
-
-        # ARMS 用 credential と OpsBeeLLM 用 credential を別々に管理
-        # TODO: OpsBeeLLM API を ARMS の Gateway 経由で呼び出すようにしたあとは、この処理は不要になる。
         if credential is None:
             self.credential = get_credential() or {}
         else:
             self.credential = credential
-        if 'user_id' in self.credential and not self.credential['user_id'].startswith(
-                "user-"):
-            self.credential['user_id'] = 'user-{}'.format(
-                self.credential['user_id'])
-
-        self.opsbee_credential = {"auth_token": self.OPSBEELLM_API_TOKEN}
 
     def api_request(
             self,
@@ -83,28 +72,30 @@ class OpsBeeLLMConnection:
         if headers is None:
             headers = {}
 
-        # ARMS API にリクエストして、user_id と personal_access_token が正しいか確認。
-        # TODO: OpsBeeLLM API を ARMS の Gateway 経由で呼び出すようにしたあとは、この処理は不要になる。
+        # ARMS API から JWT token 取得
+        # TODO: OpsBeeLLM API を ARMS の API Gateway 経由で呼び出すようにしたあとは、この処理は不要になる。
         USER_AUTH_ARMS = strtobool(os.environ.get('USER_AUTH_ARMS', 'True'))
+        jwt_token = "dummy"
         if USER_AUTH_ARMS:
             headers.update(self._set_user_agent())
             headers.update(self._get_auth_header(self.credential))
             try:
                 res = self.request(
-                    'GET',
-                    '{}{}'.format(self.BASE_URL, "/users/me"),
+                    'POST',
+                    f'{self.BASE_URL}/users/auth?email={self.credential["email"]}&password={self.credential["password"]}',
                     data=data,
                     json=json,
                     headers=headers,
                     **kwargs
                 )
+                jwt_token = res.json()["token"]
             except RequestsHTTPError as e:
                 http_error_handler(e)
 
         # OpsBeeLLM API へのリクエスト
         headers = {}
         headers.update(self._set_user_agent())
-        headers.update(self._get_auth_header(self.opsbee_credential))
+        headers.update(self._get_auth_header({"auth_token": jwt_token}))
         try:
             res = self.request(
                 method,
@@ -221,15 +212,6 @@ class OpsBeeLLMConnection:
             return {
                 'Authorization': 'Bearer {}'.format(
                     credential['auth_token'])}
-        if credential.get('user_id') and credential.get(
-                'personal_access_token'):
-            user_id = credential['user_id']
-            personal_access_token = credential['personal_access_token']
-            base = '{}:{}'.format(user_id, personal_access_token)
-            encoded = base64.b64encode(base.encode('utf-8'))
-            return {
-                'Authorization': 'Basic {}'.format(encoded.decode('utf-8'))
-            }
         return {}
 
     def _set_user_agent(self):
