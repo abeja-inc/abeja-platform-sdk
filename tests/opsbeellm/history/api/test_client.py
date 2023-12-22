@@ -1,3 +1,4 @@
+import os
 import unittest
 
 import requests_mock
@@ -5,6 +6,7 @@ import requests_mock
 from abeja.opsbeellm.history import APIClient
 from abeja.exceptions import BadRequest
 
+os.environ['USER_AUTH_ARMS'] = 'False'
 ACCOUNT_ID = '1111111111111'
 ORGANIZATION_ID = '2222222222222'
 TAG_ID = '3333333333333'
@@ -129,7 +131,6 @@ METADATA_RES = {
 
 
 class TestOpsBeeLLMAPIClient(unittest.TestCase):
-
     @requests_mock.Mocker()
     def test_get_threads(self, m):
         # get-threads-api mock
