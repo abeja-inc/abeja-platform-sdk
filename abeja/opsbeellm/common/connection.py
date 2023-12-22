@@ -3,6 +3,7 @@ import os
 import http
 from typing import Optional, Union, Text, IO, MutableMapping, Any
 from urllib.parse import urlparse
+from distutils.util import strtobool
 
 from requests import Session
 from requests.adapters import HTTPAdapter
@@ -10,6 +11,7 @@ from requests.exceptions import HTTPError as RequestsHTTPError
 from requests.packages.urllib3.util.retry import Retry
 
 from abeja import VERSION
+from abeja.common.auth import get_credential
 from abeja.exceptions import (
     HttpError,
     BadRequest,
@@ -30,8 +32,8 @@ DEFAULT_CONNECTION_TIMEOUT = 30
 
 class OpsBeeLLMConnection:
     """A connection to ABEJA Platform OpsBeeLLM API."""
-    BASE_URL = os.environ.get('ABEJA_OPSBEELLM_API_URL', 'https://opsbee-llm.stage.abeja.io')
-    API_TOKEN = os.environ.get('ABEJA_OPSBEELLM_API_TOKEN', 'dummy')
+    OPSBEELLM_BASE_URL = os.environ.get('ABEJA_OPSBEELLM_API_URL', 'https://opsbee-llm.abeja.io')
+    OPSBEELLM_AUTH_BASE_URL = os.environ.get('ABEJA_OPSBEELLM_AUTH_API_URL', 'https://api.abeja.io')
 
     def __init__(
             self,
@@ -42,13 +44,10 @@ class OpsBeeLLMConnection:
             SDK_CONNECTION_TIMEOUT_ENV_KEY) or DEFAULT_CONNECTION_TIMEOUT
         self.max_retry_count = max_retry_count or os.environ.get(
             SDK_MAX_RETRY_COUNT_ENV_KEY) or DEFAULT_MAX_RETRY_COUNT
-
-        # TODO: MVP 版ではユーザーが設定した basic 認証の credential ではなく、JTW token での認証でアクセス
-        self.credential = {"auth_token": self.API_TOKEN}
-        # if credential is None:
-        #     self.credential = {"auth_token": self.API_TOKEN}
-        # else:
-        #     self.credential = credential
+        if credential is None:
+            self.credential = get_credential() or {}
+        else:
+            self.credential = credential
 
     def api_request(
             self,
@@ -72,16 +71,41 @@ class OpsBeeLLMConnection:
         """
         if headers is None:
             headers = {}
+
+        # ARMS API から JWT token 取得
+        # TODO: OpsBeeLLM API を ARMS の API Gateway 経由で呼び出すようにしたあとは、この処理は不要になる。
+        USER_AUTH_ARMS = strtobool(os.environ.get('USER_AUTH_ARMS', 'True'))
+        jwt_token = "dummy"
+        if USER_AUTH_ARMS:
+            headers.update(self._set_user_agent())
+            headers.update(self._get_auth_header(self.credential))
+            try:
+                res = self.request(
+                    'POST',
+                    f'{self.OPSBEELLM_AUTH_BASE_URL}/users/auth?email={self.credential["email"]}&password={self.credential["password"]}',
+                    data=data,
+                    json=json,
+                    headers=headers,
+                    **kwargs
+                )
+                jwt_token = res.json()["token"]
+            except RequestsHTTPError as e:
+                http_error_handler(e)
+
+        # OpsBeeLLM API へのリクエスト
+        headers = {}
         headers.update(self._set_user_agent())
-        headers.update(self._get_auth_header())
+        headers.update(self._get_auth_header({"auth_token": jwt_token}))
         try:
-            res = self.request(method,
-                               '{}{}'.format(self.BASE_URL, path),
-                               data=data,
-                               json=json,
-                               headers=headers,
-                               params=params,
-                               **kwargs)
+            res = self.request(
+                method,
+                '{}{}'.format(self.OPSBEELLM_BASE_URL, path),
+                data=data,
+                json=json,
+                headers=headers,
+                params=params,
+                **kwargs
+            )
             return res.json()
         except RequestsHTTPError as e:
             http_error_handler(e)
@@ -183,11 +207,11 @@ class OpsBeeLLMConnection:
         session.mount('https://', HTTPAdapter(max_retries=retries))
         return session
 
-    def _get_auth_header(self):
-        if self.credential.get('auth_token'):
+    def _get_auth_header(self, credential):
+        if credential.get('auth_token'):
             return {
                 'Authorization': 'Bearer {}'.format(
-                    self.credential['auth_token'])}
+                    credential['auth_token'])}
         return {}
 
     def _set_user_agent(self):
