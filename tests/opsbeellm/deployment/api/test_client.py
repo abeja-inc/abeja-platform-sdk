@@ -7,7 +7,6 @@ from abeja.opsbeellm.deployment import APIClient
 from abeja.exceptions import BadRequest
 
 os.environ['USER_AUTH_ARMS'] = 'False'
-ACCOUNT_ID = '1111111111111'
 ORGANIZATION_ID = '2222222222222'
 DEPLOYMENT_ID = '3333333333333'
 DEPLOYMENT_NAME = 'deployment A'
@@ -15,7 +14,6 @@ DEPLOYMENT_DESCRIPTION = 'deployment A'
 
 DEPLOYMENT_QA_RES = {
     'id': DEPLOYMENT_ID,
-    'account_id': ACCOUNT_ID,
     'organization_id': ORGANIZATION_ID,
     'name': DEPLOYMENT_NAME,
     'description': DEPLOYMENT_DESCRIPTION,
@@ -25,7 +23,6 @@ DEPLOYMENT_QA_RES = {
 }
 DEPLOYMENT_CHAT_RES = {
     'id': DEPLOYMENT_ID,
-    'account_id': ACCOUNT_ID,
     'organization_id': ORGANIZATION_ID,
     'name': DEPLOYMENT_NAME,
     'description': DEPLOYMENT_DESCRIPTION,
@@ -34,7 +31,6 @@ DEPLOYMENT_CHAT_RES = {
     'updated_at': "2023-12-14T04:42:34.913644Z",
 }
 DEPLOYMENTS_RES = {
-    'account_id': ACCOUNT_ID,
     'organization_id': ORGANIZATION_ID,
     'deployments': [
         DEPLOYMENT_QA_RES,
@@ -48,8 +44,7 @@ class TestOpsBeeLLMAPIClient(unittest.TestCase):
     @requests_mock.Mocker()
     def test_get_deployments(self, m):
         # get-deployments-api mock
-        path = '/accounts/{}/organizations/{}/deployments'.format(
-            ACCOUNT_ID,
+        path = '/opsbee-llm/organizations/{}/deployments'.format(
             ORGANIZATION_ID,
         )
         m.get(path, json=DEPLOYMENTS_RES)
@@ -57,7 +52,6 @@ class TestOpsBeeLLMAPIClient(unittest.TestCase):
         # unit test
         client = APIClient()
         ret = client.get_deployments(
-            ACCOUNT_ID,
             ORGANIZATION_ID,
         )
         self.assertDictEqual(ret, DEPLOYMENTS_RES)
@@ -65,8 +59,7 @@ class TestOpsBeeLLMAPIClient(unittest.TestCase):
     @requests_mock.Mocker()
     def test_get_deployment(self, m):
         # get-deployment-api mock
-        path = '/accounts/{}/organizations/{}/deployments/{}'.format(
-            ACCOUNT_ID,
+        path = '/opsbee-llm/organizations/{}/deployments/{}'.format(
             ORGANIZATION_ID,
             DEPLOYMENT_ID,
         )
@@ -75,7 +68,6 @@ class TestOpsBeeLLMAPIClient(unittest.TestCase):
         # unit test
         client = APIClient()
         ret = client.get_deployment(
-            ACCOUNT_ID,
             ORGANIZATION_ID,
             DEPLOYMENT_ID
         )
@@ -84,8 +76,7 @@ class TestOpsBeeLLMAPIClient(unittest.TestCase):
     @requests_mock.Mocker()
     def test_create_deployment(self, m):
         # create-deployment-api mock
-        path = '/accounts/{}/organizations/{}/deployments'.format(
-            ACCOUNT_ID,
+        path = '/opsbee-llm/organizations/{}/deployments'.format(
             ORGANIZATION_ID,
         )
         m.post(path, json=DEPLOYMENT_QA_RES)
@@ -93,7 +84,6 @@ class TestOpsBeeLLMAPIClient(unittest.TestCase):
         # unit test
         client = APIClient()
         ret = client.create_deployment(
-            ACCOUNT_ID,
             ORGANIZATION_ID,
             name=DEPLOYMENT_NAME,
             description=DEPLOYMENT_DESCRIPTION,
@@ -110,7 +100,6 @@ class TestOpsBeeLLMAPIClient(unittest.TestCase):
 
         with self.assertRaises(BadRequest) as e:
             client.create_deployment(
-                ACCOUNT_ID,
                 ORGANIZATION_ID,
                 name=None,
                 description=None,
@@ -120,7 +109,6 @@ class TestOpsBeeLLMAPIClient(unittest.TestCase):
 
         with self.assertRaises(BadRequest) as e:
             client.create_deployment(
-                ACCOUNT_ID,
                 ORGANIZATION_ID,
                 name=DEPLOYMENT_NAME,
                 description=None,
@@ -130,7 +118,6 @@ class TestOpsBeeLLMAPIClient(unittest.TestCase):
 
         with self.assertRaises(BadRequest) as e:
             client.create_deployment(
-                ACCOUNT_ID,
                 ORGANIZATION_ID,
                 name=DEPLOYMENT_NAME,
                 description=None,
@@ -141,8 +128,7 @@ class TestOpsBeeLLMAPIClient(unittest.TestCase):
     @requests_mock.Mocker()
     def test_update_deployment(self, m):
         # update-deployment-api mock
-        path = '/accounts/{}/organizations/{}/deployments/{}'.format(
-            ACCOUNT_ID,
+        path = '/opsbee-llm/organizations/{}/deployments/{}'.format(
             ORGANIZATION_ID,
             DEPLOYMENT_ID,
         )
@@ -151,7 +137,6 @@ class TestOpsBeeLLMAPIClient(unittest.TestCase):
         # unit test
         client = APIClient()
         ret = client.update_deployment(
-            ACCOUNT_ID,
             ORGANIZATION_ID,
             DEPLOYMENT_ID,
             name=DEPLOYMENT_NAME,
@@ -167,7 +152,6 @@ class TestOpsBeeLLMAPIClient(unittest.TestCase):
 
         with self.assertRaises(BadRequest) as e:
             client.update_deployment(
-                ACCOUNT_ID,
                 ORGANIZATION_ID,
                 DEPLOYMENT_ID,
                 name=None,
@@ -178,8 +162,7 @@ class TestOpsBeeLLMAPIClient(unittest.TestCase):
     @requests_mock.Mocker()
     def test_delete_deployment(self, m):
         # delete-deployment-api mock
-        path = '/accounts/{}/organizations/{}/deployments/{}'.format(
-            ACCOUNT_ID,
+        path = '/opsbee-llm/organizations/{}/deployments/{}'.format(
             ORGANIZATION_ID,
             DEPLOYMENT_ID
         )
@@ -191,7 +174,6 @@ class TestOpsBeeLLMAPIClient(unittest.TestCase):
         # unit test
         client = APIClient()
         ret = client.delete_deployment(
-            ACCOUNT_ID,
             ORGANIZATION_ID,
             DEPLOYMENT_ID
         )
