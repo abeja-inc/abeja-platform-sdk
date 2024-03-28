@@ -1,10 +1,10 @@
 from __future__ import annotations
 from typing import Optional, List, Dict
-from abeja.opsbeellm.common.api_client import OpsBeeLLMBaseAPIClient
+from abeja.common.api_client import BaseAPIClient
 from abeja.exceptions import BadRequest
 
 
-class APIClient(OpsBeeLLMBaseAPIClient):
+class APIClient(BaseAPIClient):
     """A Low-Level client for OpsBee LLM Dataset API
 
     .. code-block:: python
@@ -16,27 +16,24 @@ class APIClient(OpsBeeLLMBaseAPIClient):
 
     def get_datasets(
         self,
-        account_id: str,
         organization_id: str,
         offset: Optional[int] = 0,
         limit: Optional[int] = 1000,
     ) -> dict:
         """get datasets
 
-        API reference: GET /accounts/<account_id>/organizations/<organization_id>/datasets
+        API reference: GET /opsbee-llm/organizations/<organization_id>/datasets
 
         Request Syntax:
             .. code-block:: python
 
-                account_id = "1122334455660"
                 organization_id = "1410000000000"
                 offset = 0
                 limit = 1000
                 response = api_client.get_datatsets(
-                    account_id, organization_id, offset, limit)
+                    organization_id, offset, limit)
 
         Params:
-            - **account_id** (str): account identifier
             - **organization_id** (str): organization identifier
             - **offset** (int): **[optional]** offset of datasets ( which starts from 0 )
             - **limit** (int): **[optional]** max number of datasets to be returned
@@ -49,12 +46,10 @@ class APIClient(OpsBeeLLMBaseAPIClient):
 
             .. code-block:: python
                 {
-                    'account_id': '1122334455660',
                     'organization_id': '1410000000000'
                     'datasets': [
                         {
                             'id': '3053595942757',
-                            'account_id': '1122334455660',
                             'organization_id': '1410000000000',
                             'name': 'datasetA',
                             'description': 'datasetAの説明',
@@ -65,7 +60,6 @@ class APIClient(OpsBeeLLMBaseAPIClient):
                         },
                         {
                             'id': '9968625354849',
-                            'account_id': '1122334455660',
                             'organization_id': '1410000000000',
                             'name': 'datasetB',
                             'description': 'datasetBの説明',
@@ -94,8 +88,7 @@ class APIClient(OpsBeeLLMBaseAPIClient):
         params['offset'] = offset
         params['limit'] = limit
 
-        path = '/accounts/{}/organizations/{}/datasets?offset={}&limit={}'.format(
-            account_id,
+        path = '/opsbee-llm/organizations/{}/datasets?offset={}&limit={}'.format(
             organization_id,
             offset,
             limit,
@@ -104,25 +97,22 @@ class APIClient(OpsBeeLLMBaseAPIClient):
 
     def get_dataset(
         self,
-        account_id: str,
         organization_id: str,
         dataset_id: str,
     ) -> dict:
         """get dataset
 
-        API reference: GET /accounts/<account_id>/organizations/<organization_id>/datasets/<dataset_id>
+        API reference: GET /opsbee-llm/organizations/<organization_id>/datasets/<dataset_id>
 
         Request Syntax:
             .. code-block:: python
 
-                account_id = "1122334455660"
                 organization_id = "1410000000000"
                 dataset_id = "3053595942757"
                 response = api_client.get_datatset(
-                    account_id, organization_id, dataset_id)
+                    organization_id, dataset_id)
 
         Params:
-            - **account_id** (str): account identifier
             - **organization_id** (str): organization identifier
             - **dataset_id** (str): dataset identifier
 
@@ -135,7 +125,6 @@ class APIClient(OpsBeeLLMBaseAPIClient):
             .. code-block:: python
                 {
                     'id': '3053595942757',
-                    'account_id': '1122334455660',
                     'organization_id': '1410000000000',
                     'name': 'datasetA',
                     'description': 'datasetAの説明',
@@ -150,8 +139,7 @@ class APIClient(OpsBeeLLMBaseAPIClient):
             - Unauthorized: Authentication failed
             - InternalServerError
         """
-        path = '/accounts/{}/organizations/{}/datasets/{}'.format(
-            account_id,
+        path = '/opsbee-llm/organizations/{}/datasets/{}'.format(
             organization_id,
             dataset_id,
         )
@@ -159,7 +147,6 @@ class APIClient(OpsBeeLLMBaseAPIClient):
 
     def create_dataset(
         self,
-        account_id: str,
         organization_id: str,
         name: str,
         type: str,
@@ -167,21 +154,19 @@ class APIClient(OpsBeeLLMBaseAPIClient):
     ) -> dict:
         """create a dataset
 
-        API reference: POST /accounts/<account_id>/organizations/<organization_id>/datasets
+        API reference: POST /opsbee-llm/organizations/<organization_id>/datasets
 
         Request Syntax:
             .. code-block:: python
 
-                account_id = "1122334455660"
                 organization_id = "1410000000000"
                 name = "datasetA"
                 description = "datasetA description"
                 type = "qa"
                 response = api_client.create_dataset(
-                    account_id, organization_id, name, type, description)
+                    organization_id, name, type, description)
 
         Params:
-            - **account_id** (str): account identifier
             - **organization_id** (str): organization identifier
             - **name** (str): dataset name
             - **type** (str): dataset type. available type are "qa" or "llm".
@@ -196,7 +181,6 @@ class APIClient(OpsBeeLLMBaseAPIClient):
             .. code-block:: python
                 {
                     'id': "1234567890123",
-                    'account_id': "1122334455660",
                     'organization_id': "1410000000000",
                     'name': "datasetA",
                     'description': "datasetA description",
@@ -233,8 +217,7 @@ class APIClient(OpsBeeLLMBaseAPIClient):
                 status_code=400
             )
 
-        path = '/accounts/{}/organizations/{}/datasets'.format(
-            account_id,
+        path = '/opsbee-llm/organizations/{}/datasets'.format(
             organization_id,
         )
         payload = {
@@ -250,7 +233,6 @@ class APIClient(OpsBeeLLMBaseAPIClient):
 
     def update_dataset(
         self,
-        account_id: str,
         organization_id: str,
         dataset_id: str,
         name: str,
@@ -258,21 +240,19 @@ class APIClient(OpsBeeLLMBaseAPIClient):
     ) -> dict:
         """update a dataset
 
-        API reference: PATCH /accounts/<account_id>/organizations/<organization_id>/datasets/<dataset_id>
+        API reference: PATCH /opsbee-llm/organizations/<organization_id>/datasets/<dataset_id>
 
         Request Syntax:
             .. code-block:: python
 
-                account_id = "1122334455660"
                 organization_id = "1410000000000"
                 dataset_id = "1234567890123"
                 name = "datasetA"
                 description = "datasetA description"
                 response = api_client.update_dataset(
-                    account_id, organization_id, dataset_id, name, description)
+                    organization_id, dataset_id, name, description)
 
         Params:
-            - **account_id** (str): account identifier
             - **organization_id** (str): organization identifier
             - **dataset_id** (str): dataset identifier
             - **name** (str): dataset name
@@ -287,7 +267,6 @@ class APIClient(OpsBeeLLMBaseAPIClient):
             .. code-block:: python
                 {
                     'id': "1234567890123",
-                    'account_id': "1122334455660",
                     'organization_id': "1410000000000",
                     'name': "datasetA",
                     'description': "datasetA description",
@@ -310,8 +289,7 @@ class APIClient(OpsBeeLLMBaseAPIClient):
                 status_code=400
             )
 
-        path = '/accounts/{}/organizations/{}/datasets/{}'.format(
-            account_id,
+        path = '/opsbee-llm/organizations/{}/datasets/{}'.format(
             organization_id,
             dataset_id,
         )
@@ -327,25 +305,22 @@ class APIClient(OpsBeeLLMBaseAPIClient):
 
     def delete_dataset(
         self,
-        account_id: str,
         organization_id: str,
         dataset_id: str,
     ) -> dict:
         """delete a dataset
 
-        API reference: DELETE /accounts/<account_id>/organizations/<organization_id>/datasets/<dataset_id>
+        API reference: DELETE /opsbee-llm/organizations/<organization_id>/datasets/<dataset_id>
 
         Request Syntax:
             .. code-block:: python
 
-                account_id = "1122334455660"
                 organization_id = "1410000000000"
                 dataset_id = "1234567890123"
                 response = api_client.delete_dataset(
-                    account_id, organization_id, dataset_id)
+                    organization_id, dataset_id)
 
         Params:
-            - **account_id** (str): account identifier
             - **organization_id** (str): organization identifier
             - **dataset_id** (str): dataset identifier
 
@@ -358,7 +333,6 @@ class APIClient(OpsBeeLLMBaseAPIClient):
             .. code-block:: python
                 {
                     'id': "1234567890123",
-                    'account_id': "1122334455660",
                     'organization_id': "1410000000000",
                     'name': "datasetA",
                     'description': "datasetA description",
@@ -373,8 +347,7 @@ class APIClient(OpsBeeLLMBaseAPIClient):
             - Unauthorized: Authentication failed
             - InternalServerError
         """
-        path = '/accounts/{}/organizations/{}/datasets/{}'.format(
-            account_id,
+        path = '/opsbee-llm/organizations/{}/datasets/{}'.format(
             organization_id,
             dataset_id,
         )
@@ -382,7 +355,6 @@ class APIClient(OpsBeeLLMBaseAPIClient):
 
     def get_dataset_items(
         self,
-        account_id: str,
         organization_id: str,
         dataset_id: str,
         offset: Optional[int] = 0,
@@ -390,21 +362,19 @@ class APIClient(OpsBeeLLMBaseAPIClient):
     ) -> dict:
         """get dataset items
 
-        API reference: GET /accounts/<account_id>/organizations/<organization_id>/datasets/<dataset_id>/items
+        API reference: GET /opsbee-llm/organizations/<organization_id>/datasets/<dataset_id>/items
 
         Request Syntax:
             .. code-block:: python
 
-                account_id = "1122334455660"
                 organization_id = "1410000000000"
                 dataset_id = "1234567890123"
                 offset = 0
                 limit = 1000
                 response = api_client.get_datatset_items(
-                    account_id, organization_id, dataset_id, offset, limit)
+                    organization_id, dataset_id, offset, limit)
 
         Params:
-            - **account_id** (str): account identifier
             - **organization_id** (str): organization identifier
             - **dataset_id** (str): dataset identifier
             - **offset** (int): **[optional]** offset of datasets ( which starts from 0 )
@@ -418,13 +388,11 @@ class APIClient(OpsBeeLLMBaseAPIClient):
 
             .. code-block:: python
                 {
-                    'account_id': '1122334455660',
                     'organization_id': '1410000000000'
                     'dataset_id': '1234567890123',
                     'items': [
                         {
                             'id': '3053595942757',
-                            'account_id': '1122334455660',
                             'organization_id': '1410000000000',
                             'dataset_id': '1234567890123',
                             'inputs': [
@@ -466,8 +434,7 @@ class APIClient(OpsBeeLLMBaseAPIClient):
         params['offset'] = offset
         params['limit'] = limit
 
-        path = '/accounts/{}/organizations/{}/datasets/{}/items?offset={}&limit={}'.format(
-            account_id,
+        path = '/opsbee-llm/organizations/{}/datasets/{}/items?offset={}&limit={}'.format(
             organization_id,
             dataset_id,
             offset,
@@ -477,27 +444,24 @@ class APIClient(OpsBeeLLMBaseAPIClient):
 
     def get_dataset_item(
         self,
-        account_id: str,
         organization_id: str,
         dataset_id: str,
         item_id: str,
     ) -> dict:
         """get dataset item
 
-        API reference: GET /accounts/<account_id>/organizations/<organization_id>/datasets/<dataset_id>/items/<item_id>
+        API reference: GET /opsbee-llm/organizations/<organization_id>/datasets/<dataset_id>/items/<item_id>
 
         Request Syntax:
             .. code-block:: python
 
-                account_id = "1122334455660"
                 organization_id = "1410000000000"
                 dataset_id = "1234567890123"
                 item_id = "3053595942757"
                 response = api_client.get_datatset_item(
-                    account_id, organization_id, dataset_id, item_id)
+                    organization_id, dataset_id, item_id)
 
         Params:
-            - **account_id** (str): account identifier
             - **organization_id** (str): organization identifier
             - **dataset_id** (str): dataset identifier
             - **item_id** (str): item identifier
@@ -511,7 +475,6 @@ class APIClient(OpsBeeLLMBaseAPIClient):
             .. code-block:: python
                 {
                     'id': '3053595942757',
-                    'account_id': '1122334455660',
                     'organization_id': '1410000000000',
                     'dataset_id': '1234567890123',
                     'inputs': [
@@ -539,8 +502,7 @@ class APIClient(OpsBeeLLMBaseAPIClient):
             - Unauthorized: Authentication failed
             - InternalServerError
         """
-        path = '/accounts/{}/organizations/{}/datasets/{}/items/{}'.format(
-            account_id,
+        path = '/opsbee-llm/organizations/{}/datasets/{}/items/{}'.format(
             organization_id,
             dataset_id,
             item_id,
@@ -549,7 +511,6 @@ class APIClient(OpsBeeLLMBaseAPIClient):
 
     def create_dataset_item(
         self,
-        account_id: str,
         organization_id: str,
         dataset_id: str,
         inputs: list[dict],
@@ -559,12 +520,11 @@ class APIClient(OpsBeeLLMBaseAPIClient):
     ) -> dict:
         """create dataset item
 
-        API reference: POST /accounts/<account_id>/organizations/<organization_id>/datasets/<dataset_id>/items
+        API reference: POST /opsbee-llm/organizations/<organization_id>/datasets/<dataset_id>/items
 
         Request Syntax:
             .. code-block:: python
 
-                account_id = "1122334455660"
                 organization_id = "1410000000000"
                 dataset_id = "1234567890123"
                 inputs = [{"thread_name": "スレッドA"}, {"input_text": "ABEJAについて教えて"}]
@@ -572,10 +532,9 @@ class APIClient(OpsBeeLLMBaseAPIClient):
                 tags = ["OK1", "OK2"]
                 metadata = [{"metadata1": "value1"}, {"metadata2": "value2"}]
                 response = api_client.create_datatset_item(
-                    account_id, organization_id, dataset_id, inputs, outputs, tags, metadata)
+                    organization_id, dataset_id, inputs, outputs, tags, metadata)
 
         Params:
-            - **account_id** (str): account identifier
             - **organization_id** (str): organization identifier
             - **dataset_id** (str): dataset identifier
             - **item_id** (str): item identifier
@@ -593,7 +552,6 @@ class APIClient(OpsBeeLLMBaseAPIClient):
             .. code-block:: python
                 {
                     'id': '3053595942757',
-                    'account_id': '1122334455660',
                     'organization_id': '1410000000000',
                     'dataset_id': '1234567890123',
                     'inputs': [
@@ -654,8 +612,7 @@ class APIClient(OpsBeeLLMBaseAPIClient):
                         status_code=400
                     )
 
-        path = '/accounts/{}/organizations/{}/datasets/{}/items'.format(
-            account_id,
+        path = '/opsbee-llm/organizations/{}/datasets/{}/items'.format(
             organization_id,
             dataset_id,
         )
@@ -677,27 +634,24 @@ class APIClient(OpsBeeLLMBaseAPIClient):
 
     def delete_dataset_item(
         self,
-        account_id: str,
         organization_id: str,
         dataset_id: str,
         item_id: str,
     ) -> dict:
         """delete dataset item
 
-        API reference: DELETE /accounts/<account_id>/organizations/<organization_id>/datasets/<dataset_id>/items/<item_id>
+        API reference: DELETE /opsbee-llm/organizations/<organization_id>/datasets/<dataset_id>/items/<item_id>
 
         Request Syntax:
             .. code-block:: python
 
-                account_id = "1122334455660"
                 organization_id = "1410000000000"
                 dataset_id = "1234567890123"
                 item_id = "3053595942757"
                 response = api_client.delete_datatset_item(
-                    account_id, organization_id, dataset_id, item_id)
+                    organization_id, dataset_id, item_id)
 
         Params:
-            - **account_id** (str): account identifier
             - **organization_id** (str): organization identifier
             - **dataset_id** (str): dataset identifier
             - **item_id** (str): item identifier
@@ -711,7 +665,6 @@ class APIClient(OpsBeeLLMBaseAPIClient):
             .. code-block:: python
                 {
                     'id': '3053595942757',
-                    'account_id': '1122334455660',
                     'organization_id': '1410000000000',
                     'dataset_id': '1234567890123',
                     'inputs': [
@@ -739,8 +692,7 @@ class APIClient(OpsBeeLLMBaseAPIClient):
             - Unauthorized: Authentication failed
             - InternalServerError
         """
-        path = '/accounts/{}/organizations/{}/datasets/{}/items/{}'.format(
-            account_id,
+        path = '/opsbee-llm/organizations/{}/datasets/{}/items/{}'.format(
             organization_id,
             dataset_id,
             item_id,
