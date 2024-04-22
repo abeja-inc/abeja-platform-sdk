@@ -1,10 +1,10 @@
 from typing import Optional
 
-from abeja.common.api_client import BaseAPIClient
+from abeja.opsbeellm.common.api_client import OpsBeeLLMBaseAPIClient
 from abeja.exceptions import BadRequest
 
 
-class APIClient(BaseAPIClient):
+class APIClient(OpsBeeLLMBaseAPIClient):
     """A Low-Level client for OpsBee LLM Deployment API
 
     .. code-block:: python

@@ -1,10 +1,10 @@
 from __future__ import annotations
 from typing import Optional, List, Dict
-from abeja.common.api_client import BaseAPIClient
+from abeja.opsbeellm.common.api_client import OpsBeeLLMBaseAPIClient
 from abeja.exceptions import BadRequest
 
 
-class APIClient(BaseAPIClient):
+class APIClient(OpsBeeLLMBaseAPIClient):
     """A Low-Level client for OpsBee LLM Dataset API
 
     .. code-block:: python
