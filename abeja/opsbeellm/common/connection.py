@@ -2,6 +2,8 @@ import base64
 import json
 import os
 import http
+import time
+import jwt
 from typing import Optional, Union, Text, IO, MutableMapping, Any
 from urllib.parse import urlparse
 
@@ -22,6 +24,7 @@ from abeja.exceptions import (
     Conflict,
     InternalServerError
 )
+from abeja.opsbeellm.common.constants import OperationMode
 
 SDK_CONNECTION_TIMEOUT_ENV_KEY = 'ABEJA_SDK_CONNECTION_TIMEOUT'
 SDK_MAX_RETRY_COUNT_ENV_KEY = 'ABEJA_SDK_MAX_RETRY_COUNT'
@@ -32,7 +35,7 @@ DEFAULT_CONNECTION_TIMEOUT = 30
 
 class OpsBeeLLMConnection:
     """A connection to ABEJA Platform OpsBeeLLM API."""
-    OPSBEELLM_API_URL = os.environ.get('OPSBEELLM_API_URL', 'https://api.abeja.io')
+    ABEJA_API_URL = os.environ.get('ABEJA_API_URL', 'https://api.abeja.io')
 
     def __init__(
             self,
@@ -53,6 +56,11 @@ class OpsBeeLLMConnection:
                 "user-"):
             self.credential['user_id'] = 'user-{}'.format(
                 self.credential['user_id'])
+
+        self.jwt_token = None
+        # auth API を呼び出し、JWT トークンを取得
+        # if OperationMode.is_edge(self._get_operation_mode()):
+        #     self.jwt_token = self.auth_request()
 
     def api_request(
             self,
@@ -77,17 +85,13 @@ class OpsBeeLLMConnection:
         if headers is None:
             headers = {}
 
-        # ABEJA Platform OpsBeeLLM API へのリクエスト
-        if self.OPSBEELLM_API_URL in [
-            'https://api.dev.abeja.io',
-            'https://api.stage.abeja.io',
-            'https://api.abeja.io'
-        ]:
+        # ABEJA Platform OpsBeeLLM API の場合
+        if self._get_operation_mode() == OperationMode.ABEJA.value:
             headers.update(self._set_user_agent())
             headers.update(self._get_auth_header())
             try:
                 res = self.request(method,
-                                   '{}{}'.format(self.OPSBEELLM_API_URL, path),
+                                   '{}{}'.format(self.ABEJA_API_URL, path),
                                    data=data,
                                    json=json,
                                    headers=headers,
@@ -96,35 +100,26 @@ class OpsBeeLLMConnection:
                 return res.json()
             except RequestsHTTPError as e:
                 http_error_handler(e)
-        # Customer OpsBeeLLM API へのリクエスト
-        else:
-            # auth API を呼び出し、JWT トークンを取得
+        # Customer OpsBeeLLM API の場合
+        elif OperationMode.is_edge(self._get_operation_mode()):
+            # JWT トークン未取得の場合は、再取得
+            if not self.jwt_token:
+                self.jwt_token = self.auth_request()
+
+            # 有効期限切れの場合は、JWT トークン再取得
             try:
-                auth_headers = {}
-                auth_headers.update(self._set_user_agent())
-                auth_headers.update(self._get_auth_header())
-                auth_body = {
-                    'email': self.credential['email'],
-                    'password': self.credential['password']
-                }
-                res = self.request(
-                    'POST',
-                    f'{self.OPSBEELLM_API_URL}/auth',
-                    json=auth_body,
-                    headers=auth_headers,
-                    **kwargs
-                )
-                jwt_token = res.json()["token"]
-            except RequestsHTTPError as e:
-                http_error_handler(e)
+                if self.is_jwt_expired(self.jwt_token):
+                    self.jwt_token = self.auth_request()
+            except Exception as e:
+                raise Exception(f'Failed to refresh JWT token! | {e}')
 
             # JWT トークンで OpsBeeLLM API へリクエスト
             headers.update(self._set_user_agent())
-            headers.update({'Authorization': f'Bearer {jwt_token}'})
+            headers.update({'Authorization': f'Bearer {self.jwt_token}'})
             try:
                 res = self.request(
                     method,
-                    '{}{}'.format(self.OPSBEELLM_API_URL, path),
+                    '{}{}'.format(self.ABEJA_API_URL, path),
                     data=data,
                     json=json,
                     headers=headers,
@@ -134,6 +129,37 @@ class OpsBeeLLMConnection:
                 return res.json()
             except RequestsHTTPError as e:
                 http_error_handler(e)
+        else:
+            raise ValueError(
+                'Invalid OPERATION_MODE: {}'.format(self._get_operation_mode()))
+
+    def auth_request(self):
+        jwt_token = None
+        try:
+            auth_headers = {}
+            auth_headers.update(self._set_user_agent())
+            auth_headers.update(self._get_auth_header())
+            auth_body = {
+                'email': self.credential['email'],
+                'password': self.credential['password']
+            }
+            res = self.request(
+                'POST',
+                f'{self.ABEJA_API_URL}/api/v1/token',
+                json=auth_body,
+                headers=auth_headers
+            )
+            jwt_token = res.json()["token"]
+        except RequestsHTTPError as e:
+            http_error_handler(e)
+
+        return jwt_token
+
+    def is_jwt_expired(self, token: str) -> bool:
+        current_unix_time = int(time.time())
+        payload = jwt.decode(token, options={"verify_signature": False})
+        expiration = payload['exp']
+        return expiration < current_unix_time
 
     def service_request(
             self,
@@ -253,6 +279,9 @@ class OpsBeeLLMConnection:
 
     def _set_user_agent(self):
         return {'User-Agent': 'abeja-platform-sdk/{}'.format(VERSION)}
+
+    def _get_operation_mode(self):
+        return os.environ.get('OPERATION_MODE', OperationMode.ABEJA.value)
 
 
 STATUS_CODE_EXCEPTION_CLASS_MAP = {

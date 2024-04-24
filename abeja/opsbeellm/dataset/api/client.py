@@ -22,7 +22,7 @@ class APIClient(OpsBeeLLMBaseAPIClient):
     ) -> dict:
         """get datasets
 
-        API reference: GET /opsbee-llm/organizations/<organization_id>/datasets
+        API reference: GET /opsbee-llm/v1/organizations/<organization_id>/datasets
 
         Request Syntax:
             .. code-block:: python
@@ -88,7 +88,7 @@ class APIClient(OpsBeeLLMBaseAPIClient):
         params['offset'] = offset
         params['limit'] = limit
 
-        path = '/opsbee-llm/organizations/{}/datasets?offset={}&limit={}'.format(
+        path = '/opsbee-llm/v1/organizations/{}/datasets?offset={}&limit={}'.format(
             organization_id,
             offset,
             limit,
@@ -102,7 +102,7 @@ class APIClient(OpsBeeLLMBaseAPIClient):
     ) -> dict:
         """get dataset
 
-        API reference: GET /opsbee-llm/organizations/<organization_id>/datasets/<dataset_id>
+        API reference: GET /opsbee-llm/v1/organizations/<organization_id>/datasets/<dataset_id>
 
         Request Syntax:
             .. code-block:: python
@@ -139,7 +139,7 @@ class APIClient(OpsBeeLLMBaseAPIClient):
             - Unauthorized: Authentication failed
             - InternalServerError
         """
-        path = '/opsbee-llm/organizations/{}/datasets/{}'.format(
+        path = '/opsbee-llm/v1/organizations/{}/datasets/{}'.format(
             organization_id,
             dataset_id,
         )
@@ -154,7 +154,7 @@ class APIClient(OpsBeeLLMBaseAPIClient):
     ) -> dict:
         """create a dataset
 
-        API reference: POST /opsbee-llm/organizations/<organization_id>/datasets
+        API reference: POST /opsbee-llm/v1/organizations/<organization_id>/datasets
 
         Request Syntax:
             .. code-block:: python
@@ -217,7 +217,7 @@ class APIClient(OpsBeeLLMBaseAPIClient):
                 status_code=400
             )
 
-        path = '/opsbee-llm/organizations/{}/datasets'.format(
+        path = '/opsbee-llm/v1/organizations/{}/datasets'.format(
             organization_id,
         )
         payload = {
@@ -240,7 +240,7 @@ class APIClient(OpsBeeLLMBaseAPIClient):
     ) -> dict:
         """update a dataset
 
-        API reference: PATCH /opsbee-llm/organizations/<organization_id>/datasets/<dataset_id>
+        API reference: PATCH /opsbee-llm/v1/organizations/<organization_id>/datasets/<dataset_id>
 
         Request Syntax:
             .. code-block:: python
@@ -289,7 +289,7 @@ class APIClient(OpsBeeLLMBaseAPIClient):
                 status_code=400
             )
 
-        path = '/opsbee-llm/organizations/{}/datasets/{}'.format(
+        path = '/opsbee-llm/v1/organizations/{}/datasets/{}'.format(
             organization_id,
             dataset_id,
         )
@@ -310,7 +310,7 @@ class APIClient(OpsBeeLLMBaseAPIClient):
     ) -> dict:
         """delete a dataset
 
-        API reference: DELETE /opsbee-llm/organizations/<organization_id>/datasets/<dataset_id>
+        API reference: DELETE /opsbee-llm/v1/organizations/<organization_id>/datasets/<dataset_id>
 
         Request Syntax:
             .. code-block:: python
@@ -347,7 +347,7 @@ class APIClient(OpsBeeLLMBaseAPIClient):
             - Unauthorized: Authentication failed
             - InternalServerError
         """
-        path = '/opsbee-llm/organizations/{}/datasets/{}'.format(
+        path = '/opsbee-llm/v1/organizations/{}/datasets/{}'.format(
             organization_id,
             dataset_id,
         )
@@ -362,7 +362,7 @@ class APIClient(OpsBeeLLMBaseAPIClient):
     ) -> dict:
         """get dataset items
 
-        API reference: GET /opsbee-llm/organizations/<organization_id>/datasets/<dataset_id>/items
+        API reference: GET /opsbee-llm/v1/organizations/<organization_id>/datasets/<dataset_id>/items
 
         Request Syntax:
             .. code-block:: python
@@ -434,7 +434,7 @@ class APIClient(OpsBeeLLMBaseAPIClient):
         params['offset'] = offset
         params['limit'] = limit
 
-        path = '/opsbee-llm/organizations/{}/datasets/{}/items?offset={}&limit={}'.format(
+        path = '/opsbee-llm/v1/organizations/{}/datasets/{}/items?offset={}&limit={}'.format(
             organization_id,
             dataset_id,
             offset,
@@ -450,7 +450,7 @@ class APIClient(OpsBeeLLMBaseAPIClient):
     ) -> dict:
         """get dataset item
 
-        API reference: GET /opsbee-llm/organizations/<organization_id>/datasets/<dataset_id>/items/<item_id>
+        API reference: GET /opsbee-llm/v1/organizations/<organization_id>/datasets/<dataset_id>/items/<item_id>
 
         Request Syntax:
             .. code-block:: python
@@ -502,7 +502,7 @@ class APIClient(OpsBeeLLMBaseAPIClient):
             - Unauthorized: Authentication failed
             - InternalServerError
         """
-        path = '/opsbee-llm/organizations/{}/datasets/{}/items/{}'.format(
+        path = '/opsbee-llm/v1/organizations/{}/datasets/{}/items/{}'.format(
             organization_id,
             dataset_id,
             item_id,
@@ -520,7 +520,7 @@ class APIClient(OpsBeeLLMBaseAPIClient):
     ) -> dict:
         """create dataset item
 
-        API reference: POST /opsbee-llm/organizations/<organization_id>/datasets/<dataset_id>/items
+        API reference: POST /opsbee-llm/v1/organizations/<organization_id>/datasets/<dataset_id>/items
 
         Request Syntax:
             .. code-block:: python
@@ -612,7 +612,7 @@ class APIClient(OpsBeeLLMBaseAPIClient):
                         status_code=400
                     )
 
-        path = '/opsbee-llm/organizations/{}/datasets/{}/items'.format(
+        path = '/opsbee-llm/v1/organizations/{}/datasets/{}/items'.format(
             organization_id,
             dataset_id,
         )
@@ -640,7 +640,7 @@ class APIClient(OpsBeeLLMBaseAPIClient):
     ) -> dict:
         """delete dataset item
 
-        API reference: DELETE /opsbee-llm/organizations/<organization_id>/datasets/<dataset_id>/items/<item_id>
+        API reference: DELETE /opsbee-llm/v1/organizations/<organization_id>/datasets/<dataset_id>/items/<item_id>
 
         Request Syntax:
             .. code-block:: python
@@ -692,7 +692,7 @@ class APIClient(OpsBeeLLMBaseAPIClient):
             - Unauthorized: Authentication failed
             - InternalServerError
         """
-        path = '/opsbee-llm/organizations/{}/datasets/{}/items/{}'.format(
+        path = '/opsbee-llm/v1/organizations/{}/datasets/{}/items/{}'.format(
             organization_id,
             dataset_id,
             item_id,

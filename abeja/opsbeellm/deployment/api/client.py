@@ -22,7 +22,7 @@ class APIClient(OpsBeeLLMBaseAPIClient):
     ) -> dict:
         """get deployments
 
-        API reference: GET /opsbee-llm/organizations/<organization_id>/deployments
+        API reference: GET /opsbee-llm/v1/organizations/<organization_id>/deployments
 
         Request Syntax:
             .. code-block:: python
@@ -88,7 +88,7 @@ class APIClient(OpsBeeLLMBaseAPIClient):
         params['offset'] = offset
         params['limit'] = limit
 
-        path = '/opsbee-llm/organizations/{}/deployments?offset={}&limit={}'.format(
+        path = '/opsbee-llm/v1/organizations/{}/deployments?offset={}&limit={}'.format(
             organization_id,
             offset,
             limit,
@@ -102,7 +102,7 @@ class APIClient(OpsBeeLLMBaseAPIClient):
     ) -> dict:
         """get deployments
 
-        API reference: GET /opsbee-llm/organizations/<organization_id>/deployments
+        API reference: GET /opsbee-llm/v1/organizations/<organization_id>/deployments
 
         Request Syntax:
             .. code-block:: python
@@ -139,7 +139,7 @@ class APIClient(OpsBeeLLMBaseAPIClient):
             - Unauthorized: Authentication failed
             - InternalServerError
         """
-        path = '/opsbee-llm/organizations/{}/deployments/{}'.format(
+        path = '/opsbee-llm/v1/organizations/{}/deployments/{}'.format(
             organization_id,
             deployment_id,
         )
@@ -154,7 +154,7 @@ class APIClient(OpsBeeLLMBaseAPIClient):
     ) -> dict:
         """create a deployment
 
-        API reference: POST /opsbee-llm/organizations/<organization_id>/deployments/
+        API reference: POST /opsbee-llm/v1/organizations/<organization_id>/deployments/
 
         Request Syntax:
             .. code-block:: python
@@ -216,7 +216,7 @@ class APIClient(OpsBeeLLMBaseAPIClient):
                 status_code=400
             )
 
-        path = '/opsbee-llm/organizations/{}/deployments'.format(
+        path = '/opsbee-llm/v1/organizations/{}/deployments'.format(
             organization_id,
         )
 
@@ -240,7 +240,7 @@ class APIClient(OpsBeeLLMBaseAPIClient):
     ) -> dict:
         """update a deployment
 
-        API reference: PATCH /opsbee-llm/organizations/<organization_id>/deployments/<deployment_id>
+        API reference: PATCH /opsbee-llm/v1/organizations/<organization_id>/deployments/<deployment_id>
 
         Request Syntax:
             .. code-block:: python
@@ -288,7 +288,7 @@ class APIClient(OpsBeeLLMBaseAPIClient):
                 status_code=400
             )
 
-        path = '/opsbee-llm/organizations/{}/deployments/{}'.format(
+        path = '/opsbee-llm/v1/organizations/{}/deployments/{}'.format(
             organization_id,
             deployment_id,
         )
@@ -310,7 +310,7 @@ class APIClient(OpsBeeLLMBaseAPIClient):
     ) -> dict:
         """delete a deployment
 
-        API reference: DELETE /opsbee-llm/organizations/<organization_id>/deployments/<deployment_id>
+        API reference: DELETE /opsbee-llm/v1/organizations/<organization_id>/deployments/<deployment_id>
 
         Request Syntax:
             .. code-block:: python
@@ -340,7 +340,7 @@ class APIClient(OpsBeeLLMBaseAPIClient):
             - Unauthorized: Authentication failed
             - InternalServerError
         """
-        path = '/opsbee-llm/organizations/{}/deployments/{}'.format(
+        path = '/opsbee-llm/v1/organizations/{}/deployments/{}'.format(
             organization_id,
             deployment_id,
         )

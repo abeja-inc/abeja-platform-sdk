@@ -3,10 +3,12 @@ import unittest
 
 import requests_mock
 
-from abeja.opsbeellm.dataset import APIClient
 from abeja.exceptions import BadRequest
+from abeja.opsbeellm.dataset import APIClient
+from abeja.opsbeellm.common.constants import OperationMode
 
-os.environ['USER_AUTH_ARMS'] = 'False'
+
+os.environ['OPERATION_MODE'] = OperationMode.ABEJA.value
 ORGANIZATION_ID = '2222222222222'
 DATASET_ID = '3333333333333'
 DATASET_QA_ID = '4444444444444'
@@ -97,7 +99,7 @@ class TestOpsBeeLLMAPIClient(unittest.TestCase):
     @requests_mock.Mocker()
     def test_get_datasets(self, m):
         # get-datasets-api mock
-        path = '/opsbee-llm/organizations/{}/datasets'.format(
+        path = '/opsbee-llm/v1/organizations/{}/datasets'.format(
             ORGANIZATION_ID,
         )
         m.get(path, json=DATASETS_RES)
@@ -112,7 +114,7 @@ class TestOpsBeeLLMAPIClient(unittest.TestCase):
     @requests_mock.Mocker()
     def test_get_dataset(self, m):
         # get-dataset-api mock
-        path = '/opsbee-llm/organizations/{}/datasets/{}'.format(
+        path = '/opsbee-llm/v1/organizations/{}/datasets/{}'.format(
             ORGANIZATION_ID,
             DATASET_ID,
         )
@@ -129,7 +131,7 @@ class TestOpsBeeLLMAPIClient(unittest.TestCase):
     @requests_mock.Mocker()
     def test_create_dataset(self, m):
         # create-dataset-api mock
-        path = '/opsbee-llm/organizations/{}/datasets'.format(
+        path = '/opsbee-llm/v1/organizations/{}/datasets'.format(
             ORGANIZATION_ID,
         )
         m.post(path, json=DATASET_RES)
@@ -181,7 +183,7 @@ class TestOpsBeeLLMAPIClient(unittest.TestCase):
     @requests_mock.Mocker()
     def test_update_dataset(self, m):
         # update-dataset-api mock
-        path = '/opsbee-llm/organizations/{}/datasets/{}'.format(
+        path = '/opsbee-llm/v1/organizations/{}/datasets/{}'.format(
             ORGANIZATION_ID,
             DATASET_ID,
         )
@@ -215,7 +217,7 @@ class TestOpsBeeLLMAPIClient(unittest.TestCase):
     @requests_mock.Mocker()
     def test_delete_dataset(self, m):
         # delete-dataset-api mock
-        path = '/opsbee-llm/organizations/{}/datasets/{}'.format(
+        path = '/opsbee-llm/v1/organizations/{}/datasets/{}'.format(
             ORGANIZATION_ID,
             DATASET_ID,
         )
@@ -232,7 +234,7 @@ class TestOpsBeeLLMAPIClient(unittest.TestCase):
     @requests_mock.Mocker()
     def test_get_dataset_items(self, m):
         # get-dataset-items-api mock
-        path = '/opsbee-llm/organizations/{}/datasets/{}/items'.format(
+        path = '/opsbee-llm/v1/organizations/{}/datasets/{}/items'.format(
             ORGANIZATION_ID,
             DATASET_QA_ID,
         )
@@ -245,7 +247,7 @@ class TestOpsBeeLLMAPIClient(unittest.TestCase):
         )
         self.assertDictEqual(ret, DATASET_QA_ITEMS_RES)
 
-        path = '/opsbee-llm/organizations/{}/datasets/{}/items'.format(
+        path = '/opsbee-llm/v1/organizations/{}/datasets/{}/items'.format(
             ORGANIZATION_ID,
             DATASET_LLM_ID,
         )
@@ -259,7 +261,7 @@ class TestOpsBeeLLMAPIClient(unittest.TestCase):
     @requests_mock.Mocker()
     def test_get_dataset_item(self, m):
         # get-dataset-item-api mock
-        path = '/opsbee-llm/organizations/{}/datasets/{}/items/{}'.format(
+        path = '/opsbee-llm/v1/organizations/{}/datasets/{}/items/{}'.format(
             ORGANIZATION_ID,
             DATASET_QA_ID,
             DATASET_ITEM_ID,
@@ -274,7 +276,7 @@ class TestOpsBeeLLMAPIClient(unittest.TestCase):
         )
         self.assertDictEqual(ret, DATASET_QA_ITEM_RES)
 
-        path = '/opsbee-llm/organizations/{}/datasets/{}/items/{}'.format(
+        path = '/opsbee-llm/v1/organizations/{}/datasets/{}/items/{}'.format(
             ORGANIZATION_ID,
             DATASET_LLM_ID,
             DATASET_ITEM_ID,
@@ -290,7 +292,7 @@ class TestOpsBeeLLMAPIClient(unittest.TestCase):
     @requests_mock.Mocker()
     def test_create_dataset_item(self, m):
         # create-dataset-item-api mock
-        path = '/opsbee-llm/organizations/{}/datasets/{}/items'.format(
+        path = '/opsbee-llm/v1/organizations/{}/datasets/{}/items'.format(
             ORGANIZATION_ID,
             DATASET_ID,
         )
@@ -363,7 +365,7 @@ class TestOpsBeeLLMAPIClient(unittest.TestCase):
     @requests_mock.Mocker()
     def test_delete_dataset_item(self, m):
         # delete-dataset-item-api mock
-        path = '/opsbee-llm/organizations/{}/datasets/{}/items/{}'.format(
+        path = '/opsbee-llm/v1/organizations/{}/datasets/{}/items/{}'.format(
             ORGANIZATION_ID,
             DATASET_QA_ID,
             DATASET_ITEM_ID,
@@ -378,7 +380,7 @@ class TestOpsBeeLLMAPIClient(unittest.TestCase):
         )
         self.assertDictEqual(ret, DATASET_QA_ITEM_RES)
 
-        path = '/opsbee-llm/organizations/{}/datasets/{}/items/{}'.format(
+        path = '/opsbee-llm/v1/organizations/{}/datasets/{}/items/{}'.format(
             ORGANIZATION_ID,
             DATASET_LLM_ID,
             DATASET_ITEM_ID,
