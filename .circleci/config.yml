@@ -15,12 +15,7 @@ test_step: &test_step
         sudo pip install pip -U
         sudo pip install poetry==1.2.2
         poetry config --local virtualenvs.in-project false
-        poetry add PyJWT@^2.8.0
         poetry install
-  - run:
-      name: Echo poetry.lock
-      command: |
-        cat poetry.lock
   - save_cache:
       key: v1-dependencies-{{ checksum "poetry.lock" }}
       paths:
