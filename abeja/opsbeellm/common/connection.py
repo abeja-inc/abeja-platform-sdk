@@ -145,7 +145,7 @@ class OpsBeeLLMConnection:
             }
             res = self.request(
                 'POST',
-                f'{self.ABEJA_API_URL}/api/v1/token',
+                f'{self.ABEJA_API_URL}/authnz/v1/token',
                 json=auth_body,
                 headers=auth_headers
             )
