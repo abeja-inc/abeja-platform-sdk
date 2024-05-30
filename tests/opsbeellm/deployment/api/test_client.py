@@ -3,10 +3,12 @@ import unittest
 
 import requests_mock
 
-from abeja.opsbeellm.deployment import APIClient
 from abeja.exceptions import BadRequest
+from abeja.opsbeellm.deployment import APIClient
+from abeja.opsbeellm.common.constants import OperationMode
 
-os.environ['USER_AUTH_ARMS'] = 'False'
+
+os.environ['OPERATION_MODE'] = OperationMode.ABEJA.value
 ORGANIZATION_ID = '2222222222222'
 DEPLOYMENT_ID = '3333333333333'
 DEPLOYMENT_NAME = 'deployment A'
@@ -43,8 +45,10 @@ DEPLOYMENTS_RES = {
 class TestOpsBeeLLMAPIClient(unittest.TestCase):
     @requests_mock.Mocker()
     def test_get_deployments(self, m):
+        operation_mode = os.environ['OPERATION_MODE']
+        print(f"operation_mode: {operation_mode}")      # NOQA
         # get-deployments-api mock
-        path = '/opsbee-llm/organizations/{}/deployments'.format(
+        path = '/opsbee-llm/v1/organizations/{}/deployments'.format(
             ORGANIZATION_ID,
         )
         m.get(path, json=DEPLOYMENTS_RES)
@@ -59,7 +63,7 @@ class TestOpsBeeLLMAPIClient(unittest.TestCase):
     @requests_mock.Mocker()
     def test_get_deployment(self, m):
         # get-deployment-api mock
-        path = '/opsbee-llm/organizations/{}/deployments/{}'.format(
+        path = '/opsbee-llm/v1/organizations/{}/deployments/{}'.format(
             ORGANIZATION_ID,
             DEPLOYMENT_ID,
         )
@@ -76,7 +80,7 @@ class TestOpsBeeLLMAPIClient(unittest.TestCase):
     @requests_mock.Mocker()
     def test_create_deployment(self, m):
         # create-deployment-api mock
-        path = '/opsbee-llm/organizations/{}/deployments'.format(
+        path = '/opsbee-llm/v1/organizations/{}/deployments'.format(
             ORGANIZATION_ID,
         )
         m.post(path, json=DEPLOYMENT_QA_RES)
@@ -128,7 +132,7 @@ class TestOpsBeeLLMAPIClient(unittest.TestCase):
     @requests_mock.Mocker()
     def test_update_deployment(self, m):
         # update-deployment-api mock
-        path = '/opsbee-llm/organizations/{}/deployments/{}'.format(
+        path = '/opsbee-llm/v1/organizations/{}/deployments/{}'.format(
             ORGANIZATION_ID,
             DEPLOYMENT_ID,
         )
@@ -162,7 +166,7 @@ class TestOpsBeeLLMAPIClient(unittest.TestCase):
     @requests_mock.Mocker()
     def test_delete_deployment(self, m):
         # delete-deployment-api mock
-        path = '/opsbee-llm/organizations/{}/deployments/{}'.format(
+        path = '/opsbee-llm/v1/organizations/{}/deployments/{}'.format(
             ORGANIZATION_ID,
             DEPLOYMENT_ID
         )

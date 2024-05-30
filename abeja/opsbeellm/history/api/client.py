@@ -1,11 +1,11 @@
 from __future__ import annotations
 from typing import Optional, List, Dict
 
-from abeja.common.api_client import BaseAPIClient
+from abeja.opsbeellm.common.api_client import OpsBeeLLMBaseAPIClient
 from abeja.exceptions import BadRequest
 
 
-class APIClient(BaseAPIClient):
+class APIClient(OpsBeeLLMBaseAPIClient):
     """A Low-Level client for OpsBee LLM History API
 
     .. code-block:: python
@@ -24,7 +24,7 @@ class APIClient(BaseAPIClient):
     ) -> dict:
         """get threads
 
-        API reference: GET /opsbee-llm/organizations/<organization_id>/deployments/<deployment_id>/threads
+        API reference: GET /opsbee-llm/v1/organizations/<organization_id>/deployments/<deployment_id>/threads
 
         Request Syntax:
             .. code-block:: python
@@ -91,7 +91,7 @@ class APIClient(BaseAPIClient):
         params['offset'] = offset
         params['limit'] = limit
 
-        path = '/opsbee-llm/organizations/{}/deployments/{}/threads?offset={}&limit={}'.format(
+        path = '/opsbee-llm/v1/organizations/{}/deployments/{}/threads?offset={}&limit={}'.format(
             organization_id,
             deployment_id,
             offset,
@@ -107,7 +107,7 @@ class APIClient(BaseAPIClient):
     ) -> dict:
         """get thread
 
-        API reference: GET /opsbee-llm/organizations/<organization_id>/deployments/<deployment_id>/threads/<thread_id>
+        API reference: GET /opsbee-llm/v1/organizations/<organization_id>/deployments/<deployment_id>/threads/<thread_id>
 
         Request Syntax:
             .. code-block:: python
@@ -146,7 +146,7 @@ class APIClient(BaseAPIClient):
             - InternalServerError
         """
 
-        path = '/opsbee-llm/organizations/{}/deployments/{}/threads/{}'.format(
+        path = '/opsbee-llm/v1/organizations/{}/deployments/{}/threads/{}'.format(
             organization_id,
             deployment_id,
             thread_id,
@@ -162,7 +162,7 @@ class APIClient(BaseAPIClient):
     ) -> dict:
         """create a thread
 
-        API reference: POST /opsbee-llm/organizations/<organization_id>/deployments/<deployment_id>/threads
+        API reference: POST /opsbee-llm/v1/organizations/<organization_id>/deployments/<deployment_id>/threads
 
         Request Syntax:
             .. code-block:: python
@@ -210,7 +210,7 @@ class APIClient(BaseAPIClient):
                 status_code=400
             )
 
-        path = '/opsbee-llm/organizations/{}/deployments/{}/threads'.format(
+        path = '/opsbee-llm/v1/organizations/{}/deployments/{}/threads'.format(
             organization_id,
             deployment_id,
         )
@@ -235,7 +235,7 @@ class APIClient(BaseAPIClient):
     ) -> dict:
         """update a thread
 
-        API reference: PATCH /opsbee-llm/organizations/<organization_id>/deployments/<deployment_id>/threads/<thread_id>
+        API reference: PATCH /opsbee-llm/v1/organizations/<organization_id>/deployments/<deployment_id>/threads/<thread_id>
 
         Request Syntax:
             .. code-block:: python
@@ -285,7 +285,7 @@ class APIClient(BaseAPIClient):
                 status_code=400
             )
 
-        path = '/opsbee-llm/organizations/{}/deployments/{}/threads/{}'.format(
+        path = '/opsbee-llm/v1/organizations/{}/deployments/{}/threads/{}'.format(
             organization_id,
             deployment_id,
             thread_id
@@ -309,7 +309,7 @@ class APIClient(BaseAPIClient):
     ) -> dict:
         """delete a thread
 
-        API reference: DELETE /opsbee-llm/organizations/<organization_id>/deployments/<deployment_id>/threads/<thread_id>
+        API reference: DELETE /opsbee-llm/v1/organizations/<organization_id>/deployments/<deployment_id>/threads/<thread_id>
 
         Request Syntax:
             .. code-block:: python
@@ -341,7 +341,7 @@ class APIClient(BaseAPIClient):
             - Unauthorized: Authentication failed
             - InternalServerError
         """
-        path = '/opsbee-llm/organizations/{}/deployments/{}/threads/{}'.format(
+        path = '/opsbee-llm/v1/organizations/{}/deployments/{}/threads/{}'.format(
             organization_id,
             deployment_id,
             thread_id
@@ -357,7 +357,7 @@ class APIClient(BaseAPIClient):
     ) -> dict:
         """get qa histories
 
-        API reference: GET /opsbee-llm/organizations/<organization_id>/deployments/<deployment_id>/qa_histories
+        API reference: GET /opsbee-llm/v1/organizations/<organization_id>/deployments/<deployment_id>/qa_histories
 
         Request Syntax:
             .. code-block:: python
@@ -450,7 +450,7 @@ class APIClient(BaseAPIClient):
         params['limit'] = limit
 
         # verify deployment type
-        path = '/opsbee-llm/organizations/{}/deployments/{}'.format(
+        path = '/opsbee-llm/v1/organizations/{}/deployments/{}'.format(
             organization_id,
             deployment_id,
         )
@@ -472,7 +472,7 @@ class APIClient(BaseAPIClient):
             )
 
         # get qa histories
-        path = '/opsbee-llm/organizations/{}/deployments/{}/qa_histories?offset={}&limit={}'.format(
+        path = '/opsbee-llm/v1/organizations/{}/deployments/{}/qa_histories?offset={}&limit={}'.format(
             organization_id,
             deployment_id,
             offset,
@@ -488,7 +488,7 @@ class APIClient(BaseAPIClient):
     ) -> dict:
         """get qa histories
 
-        API reference: GET /opsbee-llm/organizations/<organization_id>/deployments/<deployment_id>/qa_histories/<history_id>
+        API reference: GET /opsbee-llm/v1/organizations/<organization_id>/deployments/<deployment_id>/qa_histories/<history_id>
 
         Request Syntax:
             .. code-block:: python
@@ -559,7 +559,7 @@ class APIClient(BaseAPIClient):
             - InternalServerError
         """
         # verify deployment type
-        path = '/opsbee-llm/organizations/{}/deployments/{}'.format(
+        path = '/opsbee-llm/v1/organizations/{}/deployments/{}'.format(
             organization_id,
             deployment_id,
         )
@@ -581,7 +581,7 @@ class APIClient(BaseAPIClient):
             )
 
         # get qa histories
-        path = '/opsbee-llm/organizations/{}/deployments/{}/qa_histories/{}'.format(
+        path = '/opsbee-llm/v1/organizations/{}/deployments/{}/qa_histories/{}'.format(
             organization_id,
             deployment_id,
             history_id,
@@ -601,7 +601,7 @@ class APIClient(BaseAPIClient):
     ) -> dict:
         """create a qa history
 
-        API reference: POST /opsbee-llm/organizations/<organization_id>/deployments/<deployment_id>/qa_histories
+        API reference: POST /opsbee-llm/v1/organizations/<organization_id>/deployments/<deployment_id>/qa_histories
 
         Request Syntax:
             .. code-block:: python
@@ -696,7 +696,7 @@ class APIClient(BaseAPIClient):
             )
 
         # verify deployment type
-        path = '/opsbee-llm/organizations/{}/deployments/{}'.format(
+        path = '/opsbee-llm/v1/organizations/{}/deployments/{}'.format(
             organization_id,
             deployment_id,
         )
@@ -718,7 +718,7 @@ class APIClient(BaseAPIClient):
             )
 
         # create history
-        path = '/opsbee-llm/organizations/{}/deployments/{}/qa_histories'.format(
+        path = '/opsbee-llm/v1/organizations/{}/deployments/{}/qa_histories'.format(
             organization_id,
             deployment_id,
         )
@@ -754,7 +754,7 @@ class APIClient(BaseAPIClient):
     ) -> dict:
         """update a qa history
 
-        API reference: PATCH /opsbee-llm/organizations/<organization_id>/deployments/<deployment_id>/qa_histories/<history_id>
+        API reference: PATCH /opsbee-llm/v1/organizations/<organization_id>/deployments/<deployment_id>/qa_histories/<history_id>
 
         Request Syntax:
             .. code-block:: python
@@ -832,7 +832,7 @@ class APIClient(BaseAPIClient):
             - InternalServerError
         """
         # verify deployment type
-        path = '/opsbee-llm/organizations/{}/deployments/{}'.format(
+        path = '/opsbee-llm/v1/organizations/{}/deployments/{}'.format(
             organization_id,
             deployment_id,
         )
@@ -854,7 +854,7 @@ class APIClient(BaseAPIClient):
             )
 
         # get qa history
-        path = '/opsbee-llm/organizations/{}/deployments/{}/qa_histories/{}'.format(
+        path = '/opsbee-llm/v1/organizations/{}/deployments/{}/qa_histories/{}'.format(
             organization_id,
             deployment_id,
             history_id,
@@ -862,7 +862,7 @@ class APIClient(BaseAPIClient):
         resp_history = self._connection.api_request(method='GET', path=path)
 
         # update history
-        path = '/opsbee-llm/organizations/{}/deployments/{}/qa_histories/{}'.format(
+        path = '/opsbee-llm/v1/organizations/{}/deployments/{}/qa_histories/{}'.format(
             organization_id,
             deployment_id,
             history_id,
@@ -902,7 +902,7 @@ class APIClient(BaseAPIClient):
     ) -> dict:
         """delete a qa history
 
-        API reference: DELETE /opsbee-llm/organizations/<organization_id>/deployments/<deployment_id>/qa_histories/<history_id>
+        API reference: DELETE /opsbee-llm/v1/organizations/<organization_id>/deployments/<deployment_id>/qa_histories/<history_id>
 
         Request Syntax:
             .. code-block:: python
@@ -973,7 +973,7 @@ class APIClient(BaseAPIClient):
             - InternalServerError
         """
         # verify deployment type
-        path = '/opsbee-llm/organizations/{}/deployments/{}'.format(
+        path = '/opsbee-llm/v1/organizations/{}/deployments/{}'.format(
             organization_id,
             deployment_id,
         )
@@ -995,7 +995,7 @@ class APIClient(BaseAPIClient):
             )
 
         # delete history
-        path = '/opsbee-llm/organizations/{}/deployments/{}/qa_histories/{}'.format(
+        path = '/opsbee-llm/v1/organizations/{}/deployments/{}/qa_histories/{}'.format(
             organization_id,
             deployment_id,
             history_id,
@@ -1011,7 +1011,7 @@ class APIClient(BaseAPIClient):
     ) -> dict:
         """get chat histories
 
-        API reference: GET /opsbee-llm/organizations/<organization_id>/deployments/<deployment_id>/histories
+        API reference: GET /opsbee-llm/v1/organizations/<organization_id>/deployments/<deployment_id>/histories
 
         Request Syntax:
             .. code-block:: python
@@ -1104,7 +1104,7 @@ class APIClient(BaseAPIClient):
         params['limit'] = limit
 
         # verify deployment type
-        path = '/opsbee-llm/organizations/{}/deployments/{}'.format(
+        path = '/opsbee-llm/v1/organizations/{}/deployments/{}'.format(
             organization_id,
             deployment_id,
         )
@@ -1126,7 +1126,7 @@ class APIClient(BaseAPIClient):
             )
 
         # get chat histories
-        path = '/opsbee-llm/organizations/{}/deployments/{}/histories?offset={}&limit={}'.format(
+        path = '/opsbee-llm/v1/organizations/{}/deployments/{}/histories?offset={}&limit={}'.format(
             organization_id,
             deployment_id,
             offset,
@@ -1143,7 +1143,7 @@ class APIClient(BaseAPIClient):
     ) -> dict:
         """get chat history
 
-        API reference: GET /opsbee-llm/organizations/<organization_id>/deployments/<deployment_id>/threads/<thread_id>/histories/<history_id>
+        API reference: GET /opsbee-llm/v1/organizations/<organization_id>/deployments/<deployment_id>/threads/<thread_id>/histories/<history_id>
 
         Request Syntax:
             .. code-block:: python
@@ -1216,7 +1216,7 @@ class APIClient(BaseAPIClient):
             - InternalServerError
         """
         # verify deployment type
-        path = '/opsbee-llm/organizations/{}/deployments/{}'.format(
+        path = '/opsbee-llm/v1/organizations/{}/deployments/{}'.format(
             organization_id,
             deployment_id,
         )
@@ -1238,7 +1238,7 @@ class APIClient(BaseAPIClient):
             )
 
         # get chat history
-        path = '/opsbee-llm/organizations/{}/deployments/{}/threads/{}/histories/{}'.format(
+        path = '/opsbee-llm/v1/organizations/{}/deployments/{}/threads/{}/histories/{}'.format(
             organization_id,
             deployment_id,
             thread_id,
@@ -1260,7 +1260,7 @@ class APIClient(BaseAPIClient):
     ) -> dict:
         """create a chat history
 
-        API reference: POST /opsbee-llm/organizations/<organization_id>/deployments/<deployment_id>/threads/<thread_id>/histories
+        API reference: POST /opsbee-llm/v1/organizations/<organization_id>/deployments/<deployment_id>/threads/<thread_id>/histories
 
         Request Syntax:
             .. code-block:: python
@@ -1357,7 +1357,7 @@ class APIClient(BaseAPIClient):
             )
 
         # verify deployment type
-        path = '/opsbee-llm/organizations/{}/deployments/{}'.format(
+        path = '/opsbee-llm/v1/organizations/{}/deployments/{}'.format(
             organization_id,
             deployment_id,
         )
@@ -1379,7 +1379,7 @@ class APIClient(BaseAPIClient):
             )
 
         # create history
-        path = '/opsbee-llm/organizations/{}/deployments/{}/threads/{}/histories'.format(
+        path = '/opsbee-llm/v1/organizations/{}/deployments/{}/threads/{}/histories'.format(
             organization_id,
             deployment_id,
             thread_id,
@@ -1417,7 +1417,7 @@ class APIClient(BaseAPIClient):
     ) -> dict:
         """update a chat history
 
-        API reference: PATCH /opsbee-llm/organizations/<organization_id>/deployments/<deployment_id>/threads/<thread_id>/histories/<history_id>
+        API reference: PATCH /opsbee-llm/v1/organizations/<organization_id>/deployments/<deployment_id>/threads/<thread_id>/histories/<history_id>
 
         Request Syntax:
             .. code-block:: python
@@ -1497,7 +1497,7 @@ class APIClient(BaseAPIClient):
             - InternalServerError
         """
         # verify deployment type
-        path = '/opsbee-llm/organizations/{}/deployments/{}'.format(
+        path = '/opsbee-llm/v1/organizations/{}/deployments/{}'.format(
             organization_id,
             deployment_id,
         )
@@ -1519,7 +1519,7 @@ class APIClient(BaseAPIClient):
             )
 
         # get chat history
-        path = '/opsbee-llm/organizations/{}/deployments/{}/threads/{}/histories/{}'.format(
+        path = '/opsbee-llm/v1/organizations/{}/deployments/{}/threads/{}/histories/{}'.format(
             organization_id,
             deployment_id,
             thread_id,
@@ -1528,7 +1528,7 @@ class APIClient(BaseAPIClient):
         resp_history = self._connection.api_request(method='GET', path=path)
 
         # update history
-        path = '/opsbee-llm/organizations/{}/deployments/{}/threads/{}/histories/{}'.format(
+        path = '/opsbee-llm/v1/organizations/{}/deployments/{}/threads/{}/histories/{}'.format(
             organization_id,
             deployment_id,
             thread_id,
@@ -1570,7 +1570,7 @@ class APIClient(BaseAPIClient):
     ) -> dict:
         """delete a chat history
 
-        API reference: DELETE /opsbee-llm/organizations/<organization_id>/deployments/<deployment_id>/threads/<thread_id>/histories/<history_id>
+        API reference: DELETE /opsbee-llm/v1/organizations/<organization_id>/deployments/<deployment_id>/threads/<thread_id>/histories/<history_id>
 
         Request Syntax:
             .. code-block:: python
@@ -1643,7 +1643,7 @@ class APIClient(BaseAPIClient):
             - InternalServerError
         """
         # verify deployment type
-        path = '/opsbee-llm/organizations/{}/deployments/{}'.format(
+        path = '/opsbee-llm/v1/organizations/{}/deployments/{}'.format(
             organization_id,
             deployment_id,
         )
@@ -1665,7 +1665,7 @@ class APIClient(BaseAPIClient):
             )
 
         # delete history
-        path = '/opsbee-llm/organizations/{}/deployments/{}/threads/{}/histories/{}'.format(
+        path = '/opsbee-llm/v1/organizations/{}/deployments/{}/threads/{}/histories/{}'.format(
             organization_id,
             deployment_id,
             thread_id,
@@ -1681,7 +1681,7 @@ class APIClient(BaseAPIClient):
     ) -> dict:
         """get history tags
 
-        API reference: GET /opsbee-llm/organizations/<organization_id>/tags
+        API reference: GET /opsbee-llm/v1/organizations/<organization_id>/tags
 
         Request Syntax:
             .. code-block:: python
@@ -1743,7 +1743,7 @@ class APIClient(BaseAPIClient):
         params['offset'] = offset
         params['limit'] = limit
 
-        path = '/opsbee-llm/organizations/{}/tags?offset={}&limit={}'.format(
+        path = '/opsbee-llm/v1/organizations/{}/tags?offset={}&limit={}'.format(
             organization_id,
             offset,
             limit,
@@ -1757,7 +1757,7 @@ class APIClient(BaseAPIClient):
     ) -> dict:
         """get tags
 
-        API reference: GET /opsbee-llm/organizations/<organization_id>/tags/<tag_id>
+        API reference: GET /opsbee-llm/v1/organizations/<organization_id>/tags/<tag_id>
 
         Request Syntax:
             .. code-block:: python
@@ -1792,7 +1792,7 @@ class APIClient(BaseAPIClient):
             - Unauthorized: Authentication failed
             - InternalServerError
         """
-        path = '/opsbee-llm/organizations/{}/tags/{}'.format(
+        path = '/opsbee-llm/v1/organizations/{}/tags/{}'.format(
             organization_id,
             tag_id,
         )
@@ -1807,7 +1807,7 @@ class APIClient(BaseAPIClient):
     ) -> dict:
         """create a tag
 
-        API reference: POST /opsbee-llm/organizations/<organization_id>/tags
+        API reference: POST /opsbee-llm/v1/organizations/<organization_id>/tags
 
         Request Syntax:
             .. code-block:: python
@@ -1871,7 +1871,7 @@ class APIClient(BaseAPIClient):
                 status_code=400
             )
 
-        path = '/opsbee-llm/organizations/{}/tags'.format(
+        path = '/opsbee-llm/v1/organizations/{}/tags'.format(
             organization_id,
         )
 
@@ -1892,7 +1892,7 @@ class APIClient(BaseAPIClient):
     ) -> dict:
         """update a tag
 
-        API reference: PATCH /opsbee-llm/organizations/<organization_id>/tags/<tag_id>
+        API reference: PATCH /opsbee-llm/v1/organizations/<organization_id>/tags/<tag_id>
 
         Request Syntax:
             .. code-block:: python
@@ -1958,7 +1958,7 @@ class APIClient(BaseAPIClient):
                 status_code=400
             )
 
-        path = '/opsbee-llm/organizations/{}/tags/{}'.format(
+        path = '/opsbee-llm/v1/organizations/{}/tags/{}'.format(
             organization_id,
             tag_id,
         )
@@ -1977,7 +1977,7 @@ class APIClient(BaseAPIClient):
     ) -> dict:
         """delete a tag
 
-        API reference: DELETE /opsbee-llm/organizations/<organization_id>/tags/<tag_id>
+        API reference: DELETE /opsbee-llm/v1/organizations/<organization_id>/tags/<tag_id>
 
         Request Syntax:
             .. code-block:: python
@@ -2007,7 +2007,7 @@ class APIClient(BaseAPIClient):
             - Unauthorized: Authentication failed
             - InternalServerError
         """
-        path = '/opsbee-llm/organizations/{}/tags/{}'.format(
+        path = '/opsbee-llm/v1/organizations/{}/tags/{}'.format(
             organization_id,
             tag_id,
         )
@@ -2023,7 +2023,7 @@ class APIClient(BaseAPIClient):
     ) -> dict:
         """create a chat history metadata
 
-        API reference: POST /opsbee-llm/organizations/<organization_id>/deployments/<deployment_id>/qa_histories/<history_id>/metadata
+        API reference: POST /opsbee-llm/v1/organizations/<organization_id>/deployments/<deployment_id>/qa_histories/<history_id>/metadata
 
         Request Syntax:
             .. code-block:: python
@@ -2082,7 +2082,7 @@ class APIClient(BaseAPIClient):
             )
 
         # verify deployment type
-        path = '/opsbee-llm/organizations/{}/deployments/{}'.format(
+        path = '/opsbee-llm/v1/organizations/{}/deployments/{}'.format(
             organization_id,
             deployment_id,
         )
@@ -2104,7 +2104,7 @@ class APIClient(BaseAPIClient):
             )
 
         # create metadata
-        path = '/opsbee-llm/organizations/{}/deployments/{}/qa_histories/{}/metadata'.format(
+        path = '/opsbee-llm/v1/organizations/{}/deployments/{}/qa_histories/{}/metadata'.format(
             organization_id,
             deployment_id,
             history_id,
@@ -2127,7 +2127,7 @@ class APIClient(BaseAPIClient):
     ) -> dict:
         """update a qa history metadata
 
-        API reference: PATCH /opsbee-llm/organizations/<organization_id>/deployments/<deployment_id>/qa_histories/<history_id>/metadata/<metadata_id>
+        API reference: PATCH /opsbee-llm/v1/organizations/<organization_id>/deployments/<deployment_id>/qa_histories/<history_id>/metadata/<metadata_id>
 
         Request Syntax:
             .. code-block:: python
@@ -2188,7 +2188,7 @@ class APIClient(BaseAPIClient):
             )
 
         # verify deployment type
-        path = '/opsbee-llm/organizations/{}/deployments/{}'.format(
+        path = '/opsbee-llm/v1/organizations/{}/deployments/{}'.format(
             organization_id,
             deployment_id,
         )
@@ -2210,7 +2210,7 @@ class APIClient(BaseAPIClient):
             )
 
         # update metadata
-        path = '/opsbee-llm/organizations/{}/deployments/{}/qa_histories/{}/metadata/{}'.format(
+        path = '/opsbee-llm/v1/organizations/{}/deployments/{}/qa_histories/{}/metadata/{}'.format(
             organization_id,
             deployment_id,
             history_id,
@@ -2232,7 +2232,7 @@ class APIClient(BaseAPIClient):
     ) -> dict:
         """delete a qa history metadata
 
-        API reference: DELETE /opsbee-llm/organizations/<organization_id>/deployments/<deployment_id>/qa_histories/<history_id>/metadata/<metadata_id>
+        API reference: DELETE /opsbee-llm/v1/organizations/<organization_id>/deployments/<deployment_id>/qa_histories/<history_id>/metadata/<metadata_id>
 
         Request Syntax:
             .. code-block:: python
@@ -2267,7 +2267,7 @@ class APIClient(BaseAPIClient):
             - InternalServerError
         """
         # verify deployment type
-        path = '/opsbee-llm/organizations/{}/deployments/{}'.format(
+        path = '/opsbee-llm/v1/organizations/{}/deployments/{}'.format(
             organization_id,
             deployment_id,
         )
@@ -2289,7 +2289,7 @@ class APIClient(BaseAPIClient):
             )
 
         # delete metadata
-        path = '/opsbee-llm/organizations/{}/deployments/{}/qa_histories/{}/metadata/{}'.format(
+        path = '/opsbee-llm/v1/organizations/{}/deployments/{}/qa_histories/{}/metadata/{}'.format(
             organization_id,
             deployment_id,
             history_id,
@@ -2308,7 +2308,7 @@ class APIClient(BaseAPIClient):
     ) -> dict:
         """create a chat history metadata
 
-        API reference: POST /opsbee-llm/organizations/<organization_id>/deployments/<deployment_id>/threads/<thread_id>/histories/<history_id>/metadata
+        API reference: POST /opsbee-llm/v1/organizations/<organization_id>/deployments/<deployment_id>/threads/<thread_id>/histories/<history_id>/metadata
 
         Request Syntax:
             .. code-block:: python
@@ -2369,7 +2369,7 @@ class APIClient(BaseAPIClient):
             )
 
         # verify deployment type
-        path = '/opsbee-llm/organizations/{}/deployments/{}'.format(
+        path = '/opsbee-llm/v1/organizations/{}/deployments/{}'.format(
             organization_id,
             deployment_id,
         )
@@ -2391,7 +2391,7 @@ class APIClient(BaseAPIClient):
             )
 
         # create metadata
-        path = '/opsbee-llm/organizations/{}/deployments/{}/threads/{}/histories/{}/metadata'.format(
+        path = '/opsbee-llm/v1/organizations/{}/deployments/{}/threads/{}/histories/{}/metadata'.format(
             organization_id,
             deployment_id,
             thread_id,
@@ -2416,7 +2416,7 @@ class APIClient(BaseAPIClient):
     ) -> dict:
         """update a chat history metadata
 
-        API reference: PATCH /opsbee-llm/organizations/<organization_id>/deployments/<deployment_id>/threads/<thread_id>
+        API reference: PATCH /opsbee-llm/v1/organizations/<organization_id>/deployments/<deployment_id>/threads/<thread_id>
             /histories/<history_id>/metadata/<metadata_id>
 
         Request Syntax:
@@ -2480,7 +2480,7 @@ class APIClient(BaseAPIClient):
             )
 
         # verify deployment type
-        path = '/opsbee-llm/organizations/{}/deployments/{}'.format(
+        path = '/opsbee-llm/v1/organizations/{}/deployments/{}'.format(
             organization_id,
             deployment_id,
         )
@@ -2502,7 +2502,7 @@ class APIClient(BaseAPIClient):
             )
 
         # update metadata
-        path = '/opsbee-llm/organizations/{}/deployments/{}/threads/{}/histories/{}/metadata/{}'.format(
+        path = '/opsbee-llm/v1/organizations/{}/deployments/{}/threads/{}/histories/{}/metadata/{}'.format(
             organization_id,
             deployment_id,
             thread_id,
@@ -2526,7 +2526,7 @@ class APIClient(BaseAPIClient):
     ) -> dict:
         """delete a chat history metadata
 
-        API reference: DELETE /opsbee-llm/organizations/<organization_id>/deployments/<deployment_id>/threads/<thread_id>
+        API reference: DELETE /opsbee-llm/v1/organizations/<organization_id>/deployments/<deployment_id>/threads/<thread_id>
             /histories/<history_id>/metadata/<metadata_id>
 
         Request Syntax:
@@ -2564,7 +2564,7 @@ class APIClient(BaseAPIClient):
             - InternalServerError
         """
         # verify deployment type
-        path = '/opsbee-llm/organizations/{}/deployments/{}'.format(
+        path = '/opsbee-llm/v1/organizations/{}/deployments/{}'.format(
             organization_id,
             deployment_id,
         )
@@ -2586,7 +2586,7 @@ class APIClient(BaseAPIClient):
             )
 
         # delete metadata
-        path = '/opsbee-llm/organizations/{}/deployments/{}/threads/{}/histories/{}/metadata/{}'.format(
+        path = '/opsbee-llm/v1/organizations/{}/deployments/{}/threads/{}/histories/{}/metadata/{}'.format(
             organization_id,
             deployment_id,
             thread_id,

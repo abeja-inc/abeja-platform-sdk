@@ -3,10 +3,12 @@ import unittest
 
 import requests_mock
 
-from abeja.opsbeellm.history import APIClient
 from abeja.exceptions import BadRequest
+from abeja.opsbeellm.history import APIClient
+from abeja.opsbeellm.common.constants import OperationMode
 
-os.environ['USER_AUTH_ARMS'] = 'False'
+
+os.environ['OPERATION_MODE'] = OperationMode.ABEJA.value
 ORGANIZATION_ID = '2222222222222'
 TAG_ID = '3333333333333'
 DEPLOYMENT_ID = '4444444444444'
@@ -124,7 +126,7 @@ class TestOpsBeeLLMAPIClient(unittest.TestCase):
     @requests_mock.Mocker()
     def test_get_threads(self, m):
         # get-threads-api mock
-        path = '/opsbee-llm/organizations/{}/deployments/{}/threads'.format(
+        path = '/opsbee-llm/v1/organizations/{}/deployments/{}/threads'.format(
             ORGANIZATION_ID,
             DEPLOYMENT_ID,
         )
@@ -141,7 +143,7 @@ class TestOpsBeeLLMAPIClient(unittest.TestCase):
     @requests_mock.Mocker()
     def test_get_thread(self, m):
         # get-thread-api mock
-        path = '/opsbee-llm/organizations/{}/deployments/{}/threads/{}'.format(
+        path = '/opsbee-llm/v1/organizations/{}/deployments/{}/threads/{}'.format(
             ORGANIZATION_ID,
             DEPLOYMENT_ID,
             THREAD_ID
@@ -160,7 +162,7 @@ class TestOpsBeeLLMAPIClient(unittest.TestCase):
     @requests_mock.Mocker()
     def test_create_thread(self, m):
         # create-thread-api mock
-        path = '/opsbee-llm/organizations/{}/deployments/{}/threads'.format(
+        path = '/opsbee-llm/v1/organizations/{}/deployments/{}/threads'.format(
             ORGANIZATION_ID,
             DEPLOYMENT_ID
         )
@@ -194,7 +196,7 @@ class TestOpsBeeLLMAPIClient(unittest.TestCase):
     @requests_mock.Mocker()
     def test_update_thread(self, m):
         # update-thread-api mock
-        path = '/opsbee-llm/organizations/{}/deployments/{}/threads/{}'.format(
+        path = '/opsbee-llm/v1/organizations/{}/deployments/{}/threads/{}'.format(
             ORGANIZATION_ID,
             DEPLOYMENT_ID,
             THREAD_ID
@@ -231,7 +233,7 @@ class TestOpsBeeLLMAPIClient(unittest.TestCase):
     @requests_mock.Mocker()
     def test_delete_thread(self, m):
         # delete-thread-api mock
-        path = '/opsbee-llm/organizations/{}/deployments/{}/threads/{}'.format(
+        path = '/opsbee-llm/v1/organizations/{}/deployments/{}/threads/{}'.format(
             ORGANIZATION_ID,
             DEPLOYMENT_ID,
             THREAD_ID
@@ -253,14 +255,14 @@ class TestOpsBeeLLMAPIClient(unittest.TestCase):
     @requests_mock.Mocker()
     def test_get_qa_histories(self, m):
         # get-deployment-api mock
-        path = '/opsbee-llm/organizations/{}/deployments/{}'.format(
+        path = '/opsbee-llm/v1/organizations/{}/deployments/{}'.format(
             ORGANIZATION_ID,
             DEPLOYMENT_QA_ID,
         )
         m.get(path, json=DEPLOYMENT_QA_RES)
 
         # get-historyies-api mock
-        path = '/opsbee-llm/organizations/{}/deployments/{}/qa_histories'.format(
+        path = '/opsbee-llm/v1/organizations/{}/deployments/{}/qa_histories'.format(
             ORGANIZATION_ID,
             DEPLOYMENT_QA_ID,
         )
@@ -277,14 +279,14 @@ class TestOpsBeeLLMAPIClient(unittest.TestCase):
     @requests_mock.Mocker()
     def test_get_qa_history(self, m):
         # get-deployment-api mock
-        path = '/opsbee-llm/organizations/{}/deployments/{}'.format(
+        path = '/opsbee-llm/v1/organizations/{}/deployments/{}'.format(
             ORGANIZATION_ID,
             DEPLOYMENT_QA_ID,
         )
         m.get(path, json=DEPLOYMENT_QA_RES)
 
         # get-history-api mock
-        path = '/opsbee-llm/organizations/{}/deployments/{}/qa_histories/{}'.format(
+        path = '/opsbee-llm/v1/organizations/{}/deployments/{}/qa_histories/{}'.format(
             ORGANIZATION_ID,
             DEPLOYMENT_QA_ID,
             HISTORY_ID,
@@ -303,14 +305,14 @@ class TestOpsBeeLLMAPIClient(unittest.TestCase):
     @requests_mock.Mocker()
     def test_create_qa_history(self, m):
         # get-deployment-api mock
-        path = '/opsbee-llm/organizations/{}/deployments/{}'.format(
+        path = '/opsbee-llm/v1/organizations/{}/deployments/{}'.format(
             ORGANIZATION_ID,
             DEPLOYMENT_QA_ID,
         )
         m.get(path, json=DEPLOYMENT_QA_RES)
 
         # create-history-api mock
-        path = '/opsbee-llm/organizations/{}/deployments/{}/qa_histories'.format(
+        path = '/opsbee-llm/v1/organizations/{}/deployments/{}/qa_histories'.format(
             ORGANIZATION_ID,
             DEPLOYMENT_QA_ID,
         )
@@ -356,7 +358,7 @@ class TestOpsBeeLLMAPIClient(unittest.TestCase):
             )
         self.assertEqual(e.exception.error_description, '"output_text" is necessary')
 
-        path = '/opsbee-llm/organizations/{}/deployments/{}'.format(
+        path = '/opsbee-llm/v1/organizations/{}/deployments/{}'.format(
             ORGANIZATION_ID,
             DEPLOYMENT_CHAT_ID,
         )
@@ -373,14 +375,14 @@ class TestOpsBeeLLMAPIClient(unittest.TestCase):
     @requests_mock.Mocker()
     def test_update_qa_history(self, m):
         # get-deployment-api mock
-        path = '/opsbee-llm/organizations/{}/deployments/{}'.format(
+        path = '/opsbee-llm/v1/organizations/{}/deployments/{}'.format(
             ORGANIZATION_ID,
             DEPLOYMENT_QA_ID,
         )
         m.get(path, json=DEPLOYMENT_QA_RES)
 
         # get-history-api mock
-        path = '/opsbee-llm/organizations/{}/deployments/{}/qa_histories/{}'.format(
+        path = '/opsbee-llm/v1/organizations/{}/deployments/{}/qa_histories/{}'.format(
             ORGANIZATION_ID,
             DEPLOYMENT_QA_ID,
             HISTORY_ID,
@@ -388,7 +390,7 @@ class TestOpsBeeLLMAPIClient(unittest.TestCase):
         m.get(path, json=HISTORY_RES)
 
         # update-history-api mock
-        path = '/opsbee-llm/organizations/{}/deployments/{}/qa_histories/{}'.format(
+        path = '/opsbee-llm/v1/organizations/{}/deployments/{}/qa_histories/{}'.format(
             ORGANIZATION_ID,
             DEPLOYMENT_QA_ID,
             HISTORY_ID,
@@ -417,7 +419,7 @@ class TestOpsBeeLLMAPIClient(unittest.TestCase):
         self.assertDictEqual(m.request_history[2].json(), expected_payload)
         self.assertDictEqual(ret, HISTORY_RES)
 
-        path = '/opsbee-llm/organizations/{}/deployments/{}'.format(
+        path = '/opsbee-llm/v1/organizations/{}/deployments/{}'.format(
             ORGANIZATION_ID,
             DEPLOYMENT_CHAT_ID,
         )
@@ -435,14 +437,14 @@ class TestOpsBeeLLMAPIClient(unittest.TestCase):
     @requests_mock.Mocker()
     def test_delete_qa_history(self, m):
         # get-deployment-api mock
-        path = '/opsbee-llm/organizations/{}/deployments/{}'.format(
+        path = '/opsbee-llm/v1/organizations/{}/deployments/{}'.format(
             ORGANIZATION_ID,
             DEPLOYMENT_QA_ID,
         )
         m.get(path, json=DEPLOYMENT_QA_RES)
 
         # delete-history-api mock
-        path = '/opsbee-llm/organizations/{}/deployments/{}/qa_histories/{}'.format(
+        path = '/opsbee-llm/v1/organizations/{}/deployments/{}/qa_histories/{}'.format(
             ORGANIZATION_ID,
             DEPLOYMENT_QA_ID,
             HISTORY_ID,
@@ -461,14 +463,14 @@ class TestOpsBeeLLMAPIClient(unittest.TestCase):
     @requests_mock.Mocker()
     def test_get_chat_histories(self, m):
         # get-deployment-api mock
-        path = '/opsbee-llm/organizations/{}/deployments/{}'.format(
+        path = '/opsbee-llm/v1/organizations/{}/deployments/{}'.format(
             ORGANIZATION_ID,
             DEPLOYMENT_CHAT_ID,
         )
         m.get(path, json=DEPLOYMENT_CHAT_RES)
 
         # get-histories-api mock
-        path = '/opsbee-llm/organizations/{}/deployments/{}/histories'.format(
+        path = '/opsbee-llm/v1/organizations/{}/deployments/{}/histories'.format(
             ORGANIZATION_ID,
             DEPLOYMENT_CHAT_ID,
         )
@@ -485,14 +487,14 @@ class TestOpsBeeLLMAPIClient(unittest.TestCase):
     @requests_mock.Mocker()
     def test_get_chat_history(self, m):
         # get-deployment-api mock
-        path = '/opsbee-llm/organizations/{}/deployments/{}'.format(
+        path = '/opsbee-llm/v1/organizations/{}/deployments/{}'.format(
             ORGANIZATION_ID,
             DEPLOYMENT_CHAT_ID,
         )
         m.get(path, json=DEPLOYMENT_CHAT_RES)
 
         # get-history-api mock
-        path = '/opsbee-llm/organizations/{}/deployments/{}/threads/{}/histories/{}'.format(
+        path = '/opsbee-llm/v1/organizations/{}/deployments/{}/threads/{}/histories/{}'.format(
             ORGANIZATION_ID,
             DEPLOYMENT_CHAT_ID,
             THREAD_ID,
@@ -513,14 +515,14 @@ class TestOpsBeeLLMAPIClient(unittest.TestCase):
     @requests_mock.Mocker()
     def test_create_chat_history(self, m):
         # get-deployment-api mock
-        path = '/opsbee-llm/organizations/{}/deployments/{}'.format(
+        path = '/opsbee-llm/v1/organizations/{}/deployments/{}'.format(
             ORGANIZATION_ID,
             DEPLOYMENT_CHAT_ID,
         )
         m.get(path, json=DEPLOYMENT_CHAT_RES)
 
         # create-history-api mock
-        path = '/opsbee-llm/organizations/{}/deployments/{}/threads/{}/histories'.format(
+        path = '/opsbee-llm/v1/organizations/{}/deployments/{}/threads/{}/histories'.format(
             ORGANIZATION_ID,
             DEPLOYMENT_CHAT_ID,
             THREAD_ID,
@@ -570,7 +572,7 @@ class TestOpsBeeLLMAPIClient(unittest.TestCase):
             )
         self.assertEqual(e.exception.error_description, '"output_text" is necessary')
 
-        path = '/opsbee-llm/organizations/{}/deployments/{}'.format(
+        path = '/opsbee-llm/v1/organizations/{}/deployments/{}'.format(
             ORGANIZATION_ID,
             DEPLOYMENT_QA_ID,
         )
@@ -587,14 +589,14 @@ class TestOpsBeeLLMAPIClient(unittest.TestCase):
     @requests_mock.Mocker()
     def test_update_chat_history(self, m):
         # get-deployment-api mock
-        path = '/opsbee-llm/organizations/{}/deployments/{}'.format(
+        path = '/opsbee-llm/v1/organizations/{}/deployments/{}'.format(
             ORGANIZATION_ID,
             DEPLOYMENT_CHAT_ID,
         )
         m.get(path, json=DEPLOYMENT_CHAT_RES)
 
         # get-history-api mock
-        path = '/opsbee-llm/organizations/{}/deployments/{}/threads/{}/histories/{}'.format(
+        path = '/opsbee-llm/v1/organizations/{}/deployments/{}/threads/{}/histories/{}'.format(
             ORGANIZATION_ID,
             DEPLOYMENT_CHAT_ID,
             THREAD_ID,
@@ -603,7 +605,7 @@ class TestOpsBeeLLMAPIClient(unittest.TestCase):
         m.get(path, json=HISTORY_RES)
 
         # update-history-api mock
-        path = '/opsbee-llm/organizations/{}/deployments/{}/threads/{}/histories/{}'.format(
+        path = '/opsbee-llm/v1/organizations/{}/deployments/{}/threads/{}/histories/{}'.format(
             ORGANIZATION_ID,
             DEPLOYMENT_CHAT_ID,
             THREAD_ID,
@@ -634,7 +636,7 @@ class TestOpsBeeLLMAPIClient(unittest.TestCase):
         self.assertDictEqual(m.request_history[2].json(), expected_payload)
         self.assertDictEqual(ret, HISTORY_RES)
 
-        path = '/opsbee-llm/organizations/{}/deployments/{}'.format(
+        path = '/opsbee-llm/v1/organizations/{}/deployments/{}'.format(
             ORGANIZATION_ID,
             DEPLOYMENT_QA_ID,
         )
@@ -653,14 +655,14 @@ class TestOpsBeeLLMAPIClient(unittest.TestCase):
     @requests_mock.Mocker()
     def test_delete_chat_history(self, m):
         # get-deployment-api mock
-        path = '/opsbee-llm/organizations/{}/deployments/{}'.format(
+        path = '/opsbee-llm/v1/organizations/{}/deployments/{}'.format(
             ORGANIZATION_ID,
             DEPLOYMENT_CHAT_ID,
         )
         m.get(path, json=DEPLOYMENT_CHAT_RES)
 
         # delete-history-api mock
-        path = '/opsbee-llm/organizations/{}/deployments/{}/threads/{}/histories/{}'.format(
+        path = '/opsbee-llm/v1/organizations/{}/deployments/{}/threads/{}/histories/{}'.format(
             ORGANIZATION_ID,
             DEPLOYMENT_CHAT_ID,
             THREAD_ID,
@@ -681,7 +683,7 @@ class TestOpsBeeLLMAPIClient(unittest.TestCase):
     @requests_mock.Mocker()
     def test_get_tags(self, m):
         # get-tags-api mock
-        path = '/opsbee-llm/organizations/{}/tags'.format(
+        path = '/opsbee-llm/v1/organizations/{}/tags'.format(
             ORGANIZATION_ID,
         )
         m.get(path, json=TAGS_RES)
@@ -696,7 +698,7 @@ class TestOpsBeeLLMAPIClient(unittest.TestCase):
     @requests_mock.Mocker()
     def test_get_tag(self, m):
         # get-tag-api mock
-        path = '/opsbee-llm/organizations/{}/tags/{}'.format(
+        path = '/opsbee-llm/v1/organizations/{}/tags/{}'.format(
             ORGANIZATION_ID,
             TAG_ID,
         )
@@ -713,7 +715,7 @@ class TestOpsBeeLLMAPIClient(unittest.TestCase):
     @requests_mock.Mocker()
     def test_create_tag(self, m):
         # create-tag-api mock
-        path = '/opsbee-llm/organizations/{}/tags'.format(
+        path = '/opsbee-llm/v1/organizations/{}/tags'.format(
             ORGANIZATION_ID,
         )
         m.post(path, json=TAG_RES)
@@ -756,7 +758,7 @@ class TestOpsBeeLLMAPIClient(unittest.TestCase):
     @requests_mock.Mocker()
     def test_update_tag(self, m):
         # update-tag-api mock
-        path = '/opsbee-llm/organizations/{}/tags/{}'.format(
+        path = '/opsbee-llm/v1/organizations/{}/tags/{}'.format(
             ORGANIZATION_ID,
             TAG_ID,
         )
@@ -803,7 +805,7 @@ class TestOpsBeeLLMAPIClient(unittest.TestCase):
     @requests_mock.Mocker()
     def test_delete_tag(self, m):
         # delete-tag-api mock
-        path = '/opsbee-llm/organizations/{}/tags/{}'.format(
+        path = '/opsbee-llm/v1/organizations/{}/tags/{}'.format(
             ORGANIZATION_ID,
             TAG_ID,
         )
@@ -823,14 +825,14 @@ class TestOpsBeeLLMAPIClient(unittest.TestCase):
     @requests_mock.Mocker()
     def test_create_qa_history_metadata(self, m):
         # get-deployment-api mock
-        path = '/opsbee-llm/organizations/{}/deployments/{}'.format(
+        path = '/opsbee-llm/v1/organizations/{}/deployments/{}'.format(
             ORGANIZATION_ID,
             DEPLOYMENT_QA_ID,
         )
         m.get(path, json=DEPLOYMENT_QA_RES)
 
         # create-history-metadata-api mock
-        path = '/opsbee-llm/organizations/{}/deployments/{}/qa_histories/{}/metadata'.format(
+        path = '/opsbee-llm/v1/organizations/{}/deployments/{}/qa_histories/{}/metadata'.format(
             ORGANIZATION_ID,
             DEPLOYMENT_QA_ID,
             HISTORY_ID,
@@ -874,7 +876,7 @@ class TestOpsBeeLLMAPIClient(unittest.TestCase):
             )
         self.assertEqual(e.exception.error_description, '"value" is necessary')
 
-        path = '/opsbee-llm/organizations/{}/deployments/{}'.format(
+        path = '/opsbee-llm/v1/organizations/{}/deployments/{}'.format(
             ORGANIZATION_ID,
             DEPLOYMENT_CHAT_ID,
         )
@@ -892,14 +894,14 @@ class TestOpsBeeLLMAPIClient(unittest.TestCase):
     @requests_mock.Mocker()
     def test_update_qa_history_metadata(self, m):
         # get-deployment-api mock
-        path = '/opsbee-llm/organizations/{}/deployments/{}'.format(
+        path = '/opsbee-llm/v1/organizations/{}/deployments/{}'.format(
             ORGANIZATION_ID,
             DEPLOYMENT_QA_ID,
         )
         m.get(path, json=DEPLOYMENT_QA_RES)
 
         # update-history-metadata-api mock
-        path = '/opsbee-llm/organizations/{}/deployments/{}/qa_histories/{}/metadata/{}'.format(
+        path = '/opsbee-llm/v1/organizations/{}/deployments/{}/qa_histories/{}/metadata/{}'.format(
             ORGANIZATION_ID,
             DEPLOYMENT_QA_ID,
             HISTORY_ID,
@@ -947,7 +949,7 @@ class TestOpsBeeLLMAPIClient(unittest.TestCase):
             )
         self.assertEqual(e.exception.error_description, '"value" is necessary')
 
-        path = '/opsbee-llm/organizations/{}/deployments/{}'.format(
+        path = '/opsbee-llm/v1/organizations/{}/deployments/{}'.format(
             ORGANIZATION_ID,
             DEPLOYMENT_CHAT_ID,
         )
@@ -966,14 +968,14 @@ class TestOpsBeeLLMAPIClient(unittest.TestCase):
     @requests_mock.Mocker()
     def test_delete_qa_history_metadata(self, m):
         # get-deployment-api mock
-        path = '/opsbee-llm/organizations/{}/deployments/{}'.format(
+        path = '/opsbee-llm/v1/organizations/{}/deployments/{}'.format(
             ORGANIZATION_ID,
             DEPLOYMENT_QA_ID,
         )
         m.get(path, json=DEPLOYMENT_QA_RES)
 
         # delete-history-metadata-api mock
-        path = '/opsbee-llm/organizations/{}/deployments/{}/qa_histories/{}/metadata/{}'.format(
+        path = '/opsbee-llm/v1/organizations/{}/deployments/{}/qa_histories/{}/metadata/{}'.format(
             ORGANIZATION_ID,
             DEPLOYMENT_QA_ID,
             HISTORY_ID,
@@ -994,7 +996,7 @@ class TestOpsBeeLLMAPIClient(unittest.TestCase):
         )
         self.assertDictEqual(ret, res)
 
-        path = '/opsbee-llm/organizations/{}/deployments/{}'.format(
+        path = '/opsbee-llm/v1/organizations/{}/deployments/{}'.format(
             ORGANIZATION_ID,
             DEPLOYMENT_CHAT_ID,
         )
@@ -1011,14 +1013,14 @@ class TestOpsBeeLLMAPIClient(unittest.TestCase):
     @requests_mock.Mocker()
     def test_create_chat_history_metadata(self, m):
         # get-deployment-api mock
-        path = '/opsbee-llm/organizations/{}/deployments/{}'.format(
+        path = '/opsbee-llm/v1/organizations/{}/deployments/{}'.format(
             ORGANIZATION_ID,
             DEPLOYMENT_CHAT_ID,
         )
         m.get(path, json=DEPLOYMENT_CHAT_RES)
 
         # create-history-metadata-api mock
-        path = '/opsbee-llm/organizations/{}/deployments/{}/threads/{}/histories/{}/metadata'.format(
+        path = '/opsbee-llm/v1/organizations/{}/deployments/{}/threads/{}/histories/{}/metadata'.format(
             ORGANIZATION_ID,
             DEPLOYMENT_CHAT_ID,
             THREAD_ID,
@@ -1066,7 +1068,7 @@ class TestOpsBeeLLMAPIClient(unittest.TestCase):
             )
         self.assertEqual(e.exception.error_description, '"value" is necessary')
 
-        path = '/opsbee-llm/organizations/{}/deployments/{}'.format(
+        path = '/opsbee-llm/v1/organizations/{}/deployments/{}'.format(
             ORGANIZATION_ID,
             DEPLOYMENT_QA_ID,
         )
@@ -1085,14 +1087,14 @@ class TestOpsBeeLLMAPIClient(unittest.TestCase):
     @requests_mock.Mocker()
     def test_update_chat_history_metadata(self, m):
         # get-deployment-api mock
-        path = '/opsbee-llm/organizations/{}/deployments/{}'.format(
+        path = '/opsbee-llm/v1/organizations/{}/deployments/{}'.format(
             ORGANIZATION_ID,
             DEPLOYMENT_CHAT_ID,
         )
         m.get(path, json=DEPLOYMENT_CHAT_RES)
 
         # update-history-metadata-api mock
-        path = '/opsbee-llm/organizations/{}/deployments/{}/threads/{}/histories/{}/metadata/{}'.format(
+        path = '/opsbee-llm/v1/organizations/{}/deployments/{}/threads/{}/histories/{}/metadata/{}'.format(
             ORGANIZATION_ID,
             DEPLOYMENT_CHAT_ID,
             THREAD_ID,
@@ -1144,7 +1146,7 @@ class TestOpsBeeLLMAPIClient(unittest.TestCase):
             )
         self.assertEqual(e.exception.error_description, '"value" is necessary')
 
-        path = '/opsbee-llm/organizations/{}/deployments/{}'.format(
+        path = '/opsbee-llm/v1/organizations/{}/deployments/{}'.format(
             ORGANIZATION_ID,
             DEPLOYMENT_QA_ID,
         )
@@ -1164,14 +1166,14 @@ class TestOpsBeeLLMAPIClient(unittest.TestCase):
     @requests_mock.Mocker()
     def test_delete_chat_history_metadata(self, m):
         # get-deployment-api mock
-        path = '/opsbee-llm/organizations/{}/deployments/{}'.format(
+        path = '/opsbee-llm/v1/organizations/{}/deployments/{}'.format(
             ORGANIZATION_ID,
             DEPLOYMENT_CHAT_ID,
         )
         m.get(path, json=DEPLOYMENT_CHAT_RES)
 
         # delete-history-metadata-api mock
-        path = '/opsbee-llm/organizations/{}/deployments/{}/threads/{}/histories/{}/metadata/{}'.format(
+        path = '/opsbee-llm/v1/organizations/{}/deployments/{}/threads/{}/histories/{}/metadata/{}'.format(
             ORGANIZATION_ID,
             DEPLOYMENT_CHAT_ID,
             THREAD_ID,
@@ -1194,7 +1196,7 @@ class TestOpsBeeLLMAPIClient(unittest.TestCase):
         )
         self.assertDictEqual(ret, res)
 
-        path = '/opsbee-llm/organizations/{}/deployments/{}'.format(
+        path = '/opsbee-llm/v1/organizations/{}/deployments/{}'.format(
             ORGANIZATION_ID,
             DEPLOYMENT_QA_ID,
         )

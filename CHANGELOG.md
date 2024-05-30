@@ -1,5 +1,5 @@
 # 2.3.0
-- Add OpsBeeLLM (α version) SDK (#92)
+- Add OpsBeeLLM SDK (#92, #93, #94, #95, #96)
 
 # 2.2.4
 - Add lifetime "1year" of datalake channel files (#89)
