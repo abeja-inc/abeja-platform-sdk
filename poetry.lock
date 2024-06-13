@@ -1978,4 +1978,4 @@ docs = ["Sphinx", "guzzle_sphinx_theme", "importlib-metadata", "virtualenv"]
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.7,<3.12"
-content-hash = "2d076570d75de01e77dec689b3ef80d388c897ee6af41f95fcefb2fbf88d276b"
+content-hash = "3ab2825754d802eee43727b0374ced9d20c680a5ad1c1c605bcca8abac4ed921"
