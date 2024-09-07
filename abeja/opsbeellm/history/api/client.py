@@ -48,7 +48,8 @@ class APIClient(BaseAPIClient):
         Returns:
             Response Syntax:
 
-            .. code-block:: python
+            .. code-block:: json
+
                 {
                     'organization_id': '1410000000000'
                     'deployment_id': '1234567890123',
@@ -57,8 +58,8 @@ class APIClient(BaseAPIClient):
                             'id': "1234567890124",
                             'organization_id': "1410000000000",
                             'deployment_id': "1234567890123",
-                            'name': "threadA name",
-                            'description': "threadA description",
+                            'name': "thread A to B",
+                            'description': "A さんと B さんのチャット",
                             'created_at' : 2023-12-13T04:42:34.913644Z,
                             'updated_at' : 2023-12-13T04:42:34.913644Z,
                         },
@@ -66,8 +67,8 @@ class APIClient(BaseAPIClient):
                             'id': "1234567890125",
                             'organization_id': "1410000000000",
                             'deployment_id': "1234567890123",
-                            'name': "threadB name",
-                            'description': "threadB description",
+                            'name': "thread A to C",
+                            'description': "A さんと C さんのチャット",
                             'created_at' : "2023-12-13T04:42:34.913644Z",
                             'updated_at' : "2023-12-13T04:42:34.913644Z",
                         },
@@ -75,6 +76,7 @@ class APIClient(BaseAPIClient):
                     ],
                     'offset': 0,
                     'limit': 1000,
+                    'total': 10,
                     'has_next': False,
                 }
 
@@ -129,12 +131,13 @@ class APIClient(BaseAPIClient):
         Returns:
             Response Syntax:
 
-            .. code-block:: python
+            .. code-block:: json
+
                 {
                     'id': "1234567890125",
                     'organization_id': "1410000000000",
                     'deployment_id': "1234567890123",
-                    'name': "threadA name",
+                    'name': "thread A to B",
                     'description': "threadA description",
                     'created_at' : 2023-12-13T04:42:34.913644Z,
                     'updated_at' : 2023-12-13T04:42:34.913644Z,
@@ -169,8 +172,8 @@ class APIClient(BaseAPIClient):
 
                 organization_id = "1410000000000"
                 deployment_id = "1234567890123"
-                name = "thread name"
-                description = "thread description"
+                name = "thread A to B"
+                description = "A さんと B さんのチャット"
                 response = api_client.create_thread(
                     organization_id, deployment_id, name, description)
 
@@ -186,13 +189,14 @@ class APIClient(BaseAPIClient):
         Returns:
             Response Syntax:
 
-            .. code-block:: python
+            .. code-block:: json
+
                 {
                     'id': "1234567890123",
                     'organization_id': "1410000000000",
                     'deployment_id': "1234567890123",
-                    'name': "thread name",
-                    'description': "thread description",
+                    'name': "thread A to B",
+                    'description': "A さんと B さんのチャット",
                     'created_at' : "2023-12-13T04:42:34.913644Z",
                     'updated_at' : "2023-12-13T04:42:34.913644Z",
                 }
@@ -243,8 +247,8 @@ class APIClient(BaseAPIClient):
                 organization_id = "1410000000000"
                 deployment_id = "1234567890123"
                 thread_id = "1234567890125"
-                name = "thread name"
-                description = "thread description"
+                name = "thread A to B"
+                description = "A さんと B さんのチャット"
                 response = api_client.update_thread(
                     organization_id, deployment_id, thread_id, name, description)
 
@@ -261,13 +265,14 @@ class APIClient(BaseAPIClient):
         Returns:
             Response Syntax:
 
-            .. code-block:: python
+            .. code-block:: json
+
                 {
                     'id': "1234567890125",
                     'organization_id': "1410000000000",
                     'deployment_id': "1234567890123",
-                    'name': "thread name",
-                    'description': "thread description",
+                    'name': "thread A to B",
+                    'description': "A さんと B さんのチャット",
                     'created_at' : "2023-12-13T04:42:34.913644Z",
                     'updated_at' : "2023-12-15T04:42:34.913644Z",
                 }
@@ -331,9 +336,10 @@ class APIClient(BaseAPIClient):
         Returns:
             Response Syntax:
 
-            .. code-block:: python
+            .. code-block:: json
+
                 {
-                    'message': f'thread 9968625354849 was deleted.
+                    'message': 'thread 9968625354849 was deleted.
                 }
 
         Raises:
@@ -381,7 +387,8 @@ class APIClient(BaseAPIClient):
         Returns:
             Response Syntax:
 
-            .. code-block:: python
+            .. code-block:: json
+
                 {
                     'organization_id': '1410000000000'
                     'deployment_id': '1234567890123',
@@ -394,8 +401,8 @@ class APIClient(BaseAPIClient):
                             'deployment_id': "1234567890123",
                             'thread_id': "1234567890126",
                             'thread_name': "QA用スレッド",
-                            'input_text': "今日の天気は？",
-                            'output_text': "今日は晴れです",
+                            'input_text': "ABEJAについて教えて",
+                            'output_text': "ABEJAは、スペイン語で「ミツバチ」の意味であり、植物の受粉を手伝い、世界の食料生産を支える存在として社名になっています。",
                             'input_token_count': 10,
                             'output_token_count': 10,
                             'tags': [
@@ -433,6 +440,7 @@ class APIClient(BaseAPIClient):
                     ],
                     'offset': 0,
                     'limit': 1000,
+                    'total': 10,
                     'has_next': False,
                 }
 
@@ -510,15 +518,16 @@ class APIClient(BaseAPIClient):
         Returns:
             Response Syntax:
 
-            .. code-block:: python
+            .. code-block:: json
+
                 {
                     'id': "1234567890123",
                     'organization_id': "1410000000000",
                     'deployment_id': "1234567890123",
                     'thread_id': "1234567890126",
                     'thread_name': "QA用スレッド",
-                    'input_text': "今日の天気は？",
-                    'output_text': "今日は晴れです",
+                    'input_text': "ABEJAについて教えて",
+                    'output_text': "ABEJAは、スペイン語で「ミツバチ」の意味であり、植物の受粉を手伝い、世界の食料生産を支える存在として社名になっています。",
                     'input_token_count': 10,
                     'output_token_count': 10,
                     'tags': [
@@ -632,15 +641,16 @@ class APIClient(BaseAPIClient):
         Returns:
             Response Syntax:
 
-            .. code-block:: python
+            .. code-block:: json
+
                 {
                     'id': "1234567890123",
                     'organization_id': "1410000000000",
                     'deployment_id': "1234567890123",
                     'thread_id': "1234567890126",
                     'thread_name': "QA用スレッド",
-                    'input_text': "今日の天気は？",
-                    'output_text': "今日は晴れです",
+                    'input_text': "ABEJAについて教えて",
+                    'output_text': "ABEJAは、スペイン語で「ミツバチ」の意味であり、植物の受粉を手伝い、世界の食料生産を支える存在として社名になっています。",
                     'input_token_count': 10,
                     'output_token_count': 10,
                     'tags': [
@@ -783,15 +793,16 @@ class APIClient(BaseAPIClient):
         Returns:
             Response Syntax:
 
-            .. code-block:: python
+            .. code-block:: json
+
                 {
                     'id': "1234567890123",
                     'organization_id': "1410000000000",
                     'deployment_id': "1234567890123",
                     'thread_id': "1234567890126",
                     'thread_name': "QA用スレッド",
-                    'input_text': "今日の天気は？",
-                    'output_text': "今日は晴れです",
+                    'input_text': "ABEJAについて教えて",
+                    'output_text': "ABEJAは、スペイン語で「ミツバチ」の意味であり、植物の受粉を手伝い、世界の食料生産を支える存在として社名になっています。",
                     'input_token_count': 10,
                     'output_token_count': 10,
                     'tags': [
@@ -924,15 +935,16 @@ class APIClient(BaseAPIClient):
         Returns:
             Response Syntax:
 
-            .. code-block:: python
+            .. code-block:: json
+
                 {
                     'id': "1234567890123",
                     'organization_id': "1410000000000",
                     'deployment_id': "1234567890123",
                     'thread_id': "1234567890126",
                     'thread_name': "QA用スレッド",
-                    'input_text': "今日の天気は？",
-                    'output_text': "今日は晴れです",
+                    'input_text': "ABEJAについて教えて",
+                    'output_text': "ABEJAは、スペイン語で「ミツバチ」の意味であり、植物の受粉を手伝い、世界の食料生産を支える存在として社名になっています。",
                     'input_token_count': 10,
                     'output_token_count': 10,
                     'tags': [
@@ -1035,7 +1047,8 @@ class APIClient(BaseAPIClient):
         Returns:
             Response Syntax:
 
-            .. code-block:: python
+            .. code-block:: json
+
                 {
                     'organization_id': '1410000000000'
                     'deployment_id': '1234567890123',
@@ -1048,8 +1061,8 @@ class APIClient(BaseAPIClient):
                             'deployment_id': "1234567890123",
                             'thread_id': "1234567890126",
                             'thread_name': "thread name",
-                            'input_text': "今日の天気は？",
-                            'output_text': "今日は晴れです",
+                            'input_text': "ABEJAについて教えて",
+                            'output_text': "ABEJAは、スペイン語で「ミツバチ」の意味であり、植物の受粉を手伝い、世界の食料生産を支える存在として社名になっています。",
                             'input_token_count': 10,
                             'output_token_count': 10,
                             'tags': [
@@ -1087,6 +1100,7 @@ class APIClient(BaseAPIClient):
                     ],
                     'offset': 0,
                     'limit': 1000,
+                    'total': 10,
                     'has_next': False,
                 }
 
@@ -1167,15 +1181,16 @@ class APIClient(BaseAPIClient):
         Returns:
             Response Syntax:
 
-            .. code-block:: python
+            .. code-block:: json
+
                 {
                     'id': "1234567890123",
                     'organization_id': "1410000000000",
                     'deployment_id': "1234567890123",
                     'thread_id': "1234567890126",
                     'thread_name': "thread name",
-                    'input_text': "今日の天気は？",
-                    'output_text': "今日は晴れです",
+                    'input_text': "ABEJAについて教えて",
+                    'output_text': "ABEJAは、スペイン語で「ミツバチ」の意味であり、植物の受粉を手伝い、世界の食料生産を支える存在として社名になっています。",
                     'input_token_count': 10,
                     'output_token_count': 10,
                     'tags': [
@@ -1293,15 +1308,16 @@ class APIClient(BaseAPIClient):
         Returns:
             Response Syntax:
 
-            .. code-block:: python
+            .. code-block:: json
+
                 {
                     'id': "1234567890123",
                     'organization_id': "1410000000000",
                     'deployment_id': "1234567890123",
                     'thread_id': "1234567890126",
                     'thread_name': "スレッドA",
-                    'input_text': "今日の天気は？",
-                    'output_text': "今日は晴れです",
+                    'input_text': "ABEJAについて教えて",
+                    'output_text': "ABEJAは、スペイン語で「ミツバチ」の意味であり、植物の受粉を手伝い、世界の食料生産を支える存在として社名になっています。",
                     'input_token_count': 10,
                     'output_token_count': 10,
                     'tags': [
@@ -1448,15 +1464,16 @@ class APIClient(BaseAPIClient):
         Returns:
             Response Syntax:
 
-            .. code-block:: python
+            .. code-block:: json
+
                 {
                     'id': "1234567890123",
                     'organization_id': "1410000000000",
                     'deployment_id': "1234567890123",
                     'thread_id': "1234567890126",
                     'thread_name': "チャット用スレッド",
-                    'input_text': "今日の天気は？",
-                    'output_text': "今日は晴れです",
+                    'input_text': "ABEJAについて教えて",
+                    'output_text': "ABEJAは、スペイン語で「ミツバチ」の意味であり、植物の受粉を手伝い、世界の食料生産を支える存在として社名になっています。",
                     'input_token_count': 10,
                     'output_token_count': 10,
                     'tags': [
@@ -1594,15 +1611,16 @@ class APIClient(BaseAPIClient):
         Returns:
             Response Syntax:
 
-            .. code-block:: python
+            .. code-block:: json
+
                 {
                     'id': "1234567890125",
                     'organization_id': "1410000000000",
                     'deployment_id': "1234567890123",
                     'thread_id': "1234567890124",
                     'thread_name': "チャット用スレッド",
-                    'input_text': "今日の天気は？",
-                    'output_text': "今日は晴れです",
+                    'input_text': "ABEJAについて教えて",
+                    'output_text': "ABEJAは、スペイン語で「ミツバチ」の意味であり、植物の受粉を手伝い、世界の食料生産を支える存在として社名になっています。",
                     'input_token_count': 10,
                     'output_token_count': 10,
                     'tags': [
@@ -1703,7 +1721,8 @@ class APIClient(BaseAPIClient):
         Returns:
             Response Syntax:
 
-            .. code-block:: python
+            .. code-block:: json
+
                 {
                     'organization_id': '1410000000000'
                     'tags': [
@@ -1777,7 +1796,8 @@ class APIClient(BaseAPIClient):
         Returns:
             Response Syntax:
 
-            .. code-block:: python
+            .. code-block:: json
+
                 {
                     'id': "1234567890125",
                     'name': "OK",
@@ -1833,7 +1853,8 @@ class APIClient(BaseAPIClient):
         Returns:
             Response Syntax:
 
-            .. code-block:: python
+            .. code-block:: json
+
                 {
                     'id': "1234567890123",
                     'organization_id': "1410000000000",
@@ -1920,7 +1941,8 @@ class APIClient(BaseAPIClient):
         Returns:
             Response Syntax:
 
-            .. code-block:: python
+            .. code-block:: json
+
                 {
                     'id': "1234567890123",
                     'organization_id': "1410000000000",
@@ -1997,9 +2019,10 @@ class APIClient(BaseAPIClient):
         Returns:
             Response Syntax:
 
-            .. code-block:: python
+            .. code-block:: json
+
                 {
-                    'message': f'tag 9968625354849 was deleted.
+                    'message': 'tag 9968625354849 was deleted.
                 }
 
         Raises:
@@ -2049,7 +2072,8 @@ class APIClient(BaseAPIClient):
         Returns:
             Response Syntax:
 
-            .. code-block:: python
+            .. code-block:: json
+
                 {
                     'id': "1234567890130",
                     'organization_id': "1410000000000",
@@ -2155,7 +2179,8 @@ class APIClient(BaseAPIClient):
         Returns:
             Response Syntax:
 
-            .. code-block:: python
+            .. code-block:: json
+
                 {
                     'id': "1234567890130",
                     'organization_id': "1410000000000",
@@ -2256,7 +2281,8 @@ class APIClient(BaseAPIClient):
         Returns:
             Response Syntax:
 
-            .. code-block:: python
+            .. code-block:: json
+
                 {
                     'message': 'metadata 1234567890130 was deleted.'
                 }
@@ -2336,7 +2362,8 @@ class APIClient(BaseAPIClient):
         Returns:
             Response Syntax:
 
-            .. code-block:: python
+            .. code-block:: json
+
                 {
                     'id': "1234567890130",
                     'organization_id': "1410000000000",
@@ -2447,7 +2474,8 @@ class APIClient(BaseAPIClient):
         Returns:
             Response Syntax:
 
-            .. code-block:: python
+            .. code-block:: json
+
                 {
                     'id': "1234567890130",
                     'organization_id': "1410000000000",
@@ -2553,7 +2581,8 @@ class APIClient(BaseAPIClient):
         Returns:
             Response Syntax:
 
-            .. code-block:: python
+            .. code-block:: json
+
                 {
                     'message': 'metadata 1234567890130 was deleted.'
                 }

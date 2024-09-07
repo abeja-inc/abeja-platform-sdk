@@ -44,7 +44,8 @@ class APIClient(BaseAPIClient):
         Returns:
             Response Syntax:
 
-            .. code-block:: python
+            .. code-block:: json
+
                 {
                     'organization_id': '3208401525829'
                     'deployments': [
@@ -100,9 +101,9 @@ class APIClient(BaseAPIClient):
         organization_id: str,
         deployment_id: str,
     ) -> dict:
-        """get deployments
+        """get deployment
 
-        API reference: GET /opsbee-llm/organizations/<organization_id>/deployments
+        API reference: GET /opsbee-llm/organizations/<organization_id>/deployments/<deployment_id>
 
         Request Syntax:
             .. code-block:: python
@@ -122,7 +123,8 @@ class APIClient(BaseAPIClient):
         Returns:
             Response Syntax:
 
-            .. code-block:: python
+            .. code-block:: json
+
                 {
                     'id': '9968625354849',
                     'organization_id': '3208401525829',
@@ -154,7 +156,7 @@ class APIClient(BaseAPIClient):
     ) -> dict:
         """create a deployment
 
-        API reference: POST /opsbee-llm/organizations/<organization_id>/deployments/
+        API reference: POST /opsbee-llm/organizations/<organization_id>/deployments
 
         Request Syntax:
             .. code-block:: python
@@ -178,7 +180,8 @@ class APIClient(BaseAPIClient):
         Returns:
             Response Syntax:
 
-            .. code-block:: python
+            .. code-block:: json
+
                 {
                     'id': "1234567890123",
                     'organization_id': "1410000000000",
@@ -264,7 +267,8 @@ class APIClient(BaseAPIClient):
         Returns:
             Response Syntax:
 
-            .. code-block:: python
+            .. code-block:: json
+
                 {
                     'id': "1234567890123",
                     'organization_id': "1410000000000",
@@ -330,9 +334,10 @@ class APIClient(BaseAPIClient):
         Returns:
             Response Syntax:
 
-            .. code-block:: python
+            .. code-block:: json
+
                 {
-                    'message': f'deployment 9968625354849 was deleted.
+                    'message': 'deployment 9968625354849 was deleted.
                 }
 
         Raises:
