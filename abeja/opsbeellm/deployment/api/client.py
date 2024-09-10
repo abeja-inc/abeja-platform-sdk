@@ -188,8 +188,8 @@ class APIClient(BaseAPIClient):
                     'name': "deployment name",
                     'description': "deployment description",
                     'type': "qa",
-                    'created_at' : "2023-12-13T04:42:34.913644Z",
-                    'updated_at' : "2023-12-13T04:42:34.913644Z",
+                    'created_at' : "2023-12-04T16:01:52+09:00",
+                    'updated_at' : "2023-12-04T16:01:52+09:00",
                 }
 
         Raises:
@@ -275,8 +275,8 @@ class APIClient(BaseAPIClient):
                     'name': "deployment name",
                     'description': "deployment description",
                     'type': "qa",
-                    'created_at' : "2023-12-13T04:42:34.913644Z",
-                    'updated_at' : "2023-12-14T04:42:34.913644Z",
+                    'created_at' : "2023-12-04T16:01:52+09:00",
+                    'updated_at' : "2023-12-04T16:01:52+09:00",
                 }
 
         Raises:

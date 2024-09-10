@@ -60,8 +60,8 @@ class APIClient(BaseAPIClient):
                             'deployment_id': "1234567890123",
                             'name': "thread A to B",
                             'description': "A さんと B さんのチャット",
-                            'created_at' : 2023-12-13T04:42:34.913644Z,
-                            'updated_at' : 2023-12-13T04:42:34.913644Z,
+                            'created_at' : 2023-12-04T16:01:52+09:00,
+                            'updated_at' : 2023-12-04T16:01:52+09:00,
                         },
                         {
                             'id': "1234567890125",
@@ -69,8 +69,8 @@ class APIClient(BaseAPIClient):
                             'deployment_id': "1234567890123",
                             'name': "thread A to C",
                             'description': "A さんと C さんのチャット",
-                            'created_at' : "2023-12-13T04:42:34.913644Z",
-                            'updated_at' : "2023-12-13T04:42:34.913644Z",
+                            'created_at' : "2023-12-04T16:01:52+09:00",
+                            'updated_at' : "2023-12-04T16:01:52+09:00",
                         },
                         ...
                     ],
@@ -197,8 +197,8 @@ class APIClient(BaseAPIClient):
                     'deployment_id': "1234567890123",
                     'name': "thread A to B",
                     'description': "A さんと B さんのチャット",
-                    'created_at' : "2023-12-13T04:42:34.913644Z",
-                    'updated_at' : "2023-12-13T04:42:34.913644Z",
+                    'created_at' : "2023-12-04T16:01:52+09:00",
+                    'updated_at' : "2023-12-04T16:01:52+09:00",
                 }
 
         Raises:
@@ -273,8 +273,8 @@ class APIClient(BaseAPIClient):
                     'deployment_id': "1234567890123",
                     'name': "thread A to B",
                     'description': "A さんと B さんのチャット",
-                    'created_at' : "2023-12-13T04:42:34.913644Z",
-                    'updated_at' : "2023-12-15T04:42:34.913644Z",
+                    'created_at' : "2023-12-04T16:01:52+09:00",
+                    'updated_at' : "2023-12-04T16:01:52+09:00",
                 }
 
         Raises:
@@ -433,8 +433,8 @@ class APIClient(BaseAPIClient):
                                 },
                                 ...
                             ],
-                            'created_at' : "2023-12-13T04:42:34.913644Z",
-                            'updated_at' : "2023-12-13T04:42:34.913644Z",
+                            'created_at' : "2023-12-04T16:01:52+09:00",
+                            'updated_at' : "2023-12-04T16:01:52+09:00",
                         },
                         ...
                     ],
@@ -558,8 +558,8 @@ class APIClient(BaseAPIClient):
                         },
                         ...
                     ],
-                    'created_at' : "2023-12-13T04:42:34.913644Z",
-                    'updated_at' : "2023-12-13T04:42:34.913644Z",
+                    'created_at' : "2023-12-04T16:01:52+09:00",
+                    'updated_at' : "2023-12-04T16:01:52+09:00",
                 }
 
         Raises:
@@ -681,8 +681,8 @@ class APIClient(BaseAPIClient):
                         },
                         ...
                     ],
-                    'created_at' : "2023-12-13T04:42:34.913644Z",
-                    'updated_at' : "2023-12-13T04:42:34.913644Z",
+                    'created_at' : "2023-12-04T16:01:52+09:00",
+                    'updated_at' : "2023-12-04T16:01:52+09:00",
                 }
 
         Raises:
@@ -833,8 +833,8 @@ class APIClient(BaseAPIClient):
                         },
                         ...
                     ],
-                    'created_at' : "2023-12-13T04:42:34.913644Z",
-                    'updated_at' : "2023-12-13T04:42:34.913644Z",
+                    'created_at' : "2023-12-04T16:01:52+09:00",
+                    'updated_at' : "2023-12-04T16:01:52+09:00",
                 }
 
         Raises:
@@ -975,8 +975,8 @@ class APIClient(BaseAPIClient):
                         },
                         ...
                     ],
-                    'created_at' : "2023-12-13T04:42:34.913644Z",
-                    'updated_at' : "2023-12-13T04:42:34.913644Z",
+                    'created_at' : "2023-12-04T16:01:52+09:00",
+                    'updated_at' : "2023-12-04T16:01:52+09:00",
                 }
 
         Raises:
@@ -1093,8 +1093,8 @@ class APIClient(BaseAPIClient):
                                 },
                                 ...
                             ],
-                            'created_at' : "2023-12-13T04:42:34.913644Z",
-                            'updated_at' : "2023-12-13T04:42:34.913644Z",
+                            'created_at' : "2023-12-04T16:01:52+09:00",
+                            'updated_at' : "2023-12-04T16:01:52+09:00",
                         },
                         ...
                     ],
@@ -1221,8 +1221,8 @@ class APIClient(BaseAPIClient):
                         },
                         ...
                     ],
-                    'created_at' : "2023-12-13T04:42:34.913644Z",
-                    'updated_at' : "2023-12-13T04:42:34.913644Z",
+                    'created_at' : "2023-12-04T16:01:52+09:00",
+                    'updated_at' : "2023-12-04T16:01:52+09:00",
                 }
 
         Raises:
@@ -1348,8 +1348,8 @@ class APIClient(BaseAPIClient):
                         },
                         ...
                     ],
-                    'created_at' : "2023-12-13T04:42:34.913644Z",
-                    'updated_at' : "2023-12-13T04:42:34.913644Z",
+                    'created_at' : "2023-12-04T16:01:52+09:00",
+                    'updated_at' : "2023-12-04T16:01:52+09:00",
                 }
 
         Raises:
@@ -1504,8 +1504,8 @@ class APIClient(BaseAPIClient):
                         },
                         ...
                     ],
-                    'created_at' : "2023-12-13T04:42:34.913644Z",
-                    'updated_at' : "2023-12-13T04:42:34.913644Z",
+                    'created_at' : "2023-12-04T16:01:52+09:00",
+                    'updated_at' : "2023-12-04T16:01:52+09:00",
                 }
 
         Raises:
@@ -1651,8 +1651,8 @@ class APIClient(BaseAPIClient):
                         },
                         ...
                     ],
-                    'created_at' : "2023-12-13T04:42:34.913644Z",
-                    'updated_at' : "2023-12-13T04:42:34.913644Z",
+                    'created_at' : "2023-12-04T16:01:52+09:00",
+                    'updated_at' : "2023-12-04T16:01:52+09:00",
                 }
 
         Raises:
@@ -1731,16 +1731,16 @@ class APIClient(BaseAPIClient):
                             'name': "OK",
                             'description': "",
                             'color': "green",
-                            'created_at' : "2023-12-13T04:42:34.913644Z",
-                            'updated_at' : "2023-12-13T04:42:34.913644Z",
+                            'created_at' : "2023-12-04T16:01:52+09:00",
+                            'updated_at' : "2023-12-04T16:01:52+09:00",
                         },
                         {
                             'id': "1345667887931",
                             'name': "NG",
                             'description': "",
                             'color': "red",
-                            'created_at' : "2023-12-13T04:42:34.913644Z",
-                            'updated_at' : "2023-12-13T04:42:34.913644Z",
+                            'created_at' : "2023-12-04T16:01:52+09:00",
+                            'updated_at' : "2023-12-04T16:01:52+09:00",
                         },
                         ...
                     ],
@@ -1803,8 +1803,8 @@ class APIClient(BaseAPIClient):
                     'name': "OK",
                     'description': "",
                     'color': "green",
-                    'created_at' : "2023-12-13T04:42:34.913644Z",
-                    'updated_at' : "2023-12-13T04:42:34.913644Z",
+                    'created_at' : "2023-12-04T16:01:52+09:00",
+                    'updated_at' : "2023-12-04T16:01:52+09:00",
                 },
 
         Raises:
@@ -1861,8 +1861,8 @@ class APIClient(BaseAPIClient):
                     'name': "OK",
                     'description': "有益な出力文が出力されるときのタグです",
                     'color': "green",
-                    'created_at' : "2023-12-13T04:42:34.913644Z",
-                    'updated_at' : "2023-12-13T04:42:34.913644Z",
+                    'created_at' : "2023-12-04T16:01:52+09:00",
+                    'updated_at' : "2023-12-04T16:01:52+09:00",
                 }
 
         Raises:
@@ -1949,8 +1949,8 @@ class APIClient(BaseAPIClient):
                     'name': "OK",
                     'description': "有益な出力文が出力されるときのタグです",
                     'color': "green",
-                    'created_at' : "2023-12-13T04:42:34.913644Z",
-                    'updated_at' : "2023-12-13T04:42:34.913644Z",
+                    'created_at' : "2023-12-04T16:01:52+09:00",
+                    'updated_at' : "2023-12-04T16:01:52+09:00",
                 }
 
         Raises:
@@ -2081,8 +2081,8 @@ class APIClient(BaseAPIClient):
                     'history_id': "1234567890125",
                     'key': "metadata1",
                     'value': "dummy1",
-                    'created_at' : "2023-12-13T04:42:34.913644Z",
-                    'updated_at' : "2023-12-13T04:42:34.913644Z",
+                    'created_at' : "2023-12-04T16:01:52+09:00",
+                    'updated_at' : "2023-12-04T16:01:52+09:00",
                 }
 
         Raises:
@@ -2188,8 +2188,8 @@ class APIClient(BaseAPIClient):
                     'history_id': "1234567890125",
                     'key': "metadata1",
                     'value': "dummy1",
-                    'created_at' : "2023-12-13T04:42:34.913644Z",
-                    'updated_at' : "2023-12-13T04:42:34.913644Z",
+                    'created_at' : "2023-12-04T16:01:52+09:00",
+                    'updated_at' : "2023-12-04T16:01:52+09:00",
                 }
 
         Raises:
@@ -2371,8 +2371,8 @@ class APIClient(BaseAPIClient):
                     'history_id': "1234567890125",
                     'key': "metadata1",
                     'value': "dummy1",
-                    'created_at' : "2023-12-13T04:42:34.913644Z",
-                    'updated_at' : "2023-12-13T04:42:34.913644Z",
+                    'created_at' : "2023-12-04T16:01:52+09:00",
+                    'updated_at' : "2023-12-04T16:01:52+09:00",
                 }
 
         Raises:
@@ -2483,8 +2483,8 @@ class APIClient(BaseAPIClient):
                     'history_id': "1234567890125",
                     'key': "metadata1",
                     'value': "dummy1",
-                    'created_at' : "2023-12-13T04:42:34.913644Z",
-                    'updated_at' : "2023-12-13T04:42:34.913644Z",
+                    'created_at' : "2023-12-04T16:01:52+09:00",
+                    'updated_at' : "2023-12-04T16:01:52+09:00",
                 }
 
         Raises:
