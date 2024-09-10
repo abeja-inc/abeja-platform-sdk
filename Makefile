@@ -38,7 +38,7 @@ format:
 
 .PHONY: docs
 docs:
-	poetry run sphinx-build -M html doc/source doc/build
+	PYTHONWARNINGS=ignore poetry run sphinx-build -M html doc/source doc/build -v
 
 .PHONY: release
 release: dist
