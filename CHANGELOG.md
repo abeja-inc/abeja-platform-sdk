@@ -1,5 +1,6 @@
 # 2.3.0
 - Add OpsBeeLLM (α version) SDK (#92)
+- [ABEJA Platform OpsBeeLLM] Add OpsBeeLLM SDK doc #98
 
 # 2.2.4
 - Add lifetime "1year" of datalake channel files (#89)
