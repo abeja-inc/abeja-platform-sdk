@@ -26,6 +26,7 @@ Contents:
    runs/index
    triggers/index
    registry/index
+   opsbeellm/index
 
 ==============
 Authentication

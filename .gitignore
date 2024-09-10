@@ -268,5 +268,6 @@ logs
 .mypy_cache
 
 # for debug
+.debug
 Dockerfile.local
 docker-compose.yml
