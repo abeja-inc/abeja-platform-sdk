@@ -690,15 +690,8 @@ class APIClient(BaseAPIClient):
             - Unauthorized: Authentication failed
             - InternalServerError
         """
-        if not input_text:
-            error_message = '"input_text" is necessary'
-            raise BadRequest(
-                error=error_message,
-                error_description=error_message,
-                status_code=400
-            )
-        if not output_text:
-            error_message = '"output_text" is necessary'
+        if not input_text and not output_text:
+            error_message = '"input_text" or "output_text" is necessary'
             raise BadRequest(
                 error=error_message,
                 error_description=error_message,
@@ -1357,15 +1350,8 @@ class APIClient(BaseAPIClient):
             - Unauthorized: Authentication failed
             - InternalServerError
         """
-        if not input_text:
-            error_message = '"input_text" is necessary'
-            raise BadRequest(
-                error=error_message,
-                error_description=error_message,
-                status_code=400
-            )
-        if not output_text:
-            error_message = '"output_text" is necessary'
+        if not input_text and not output_text:
+            error_message = '"input_text" or "output_text" is necessary'
             raise BadRequest(
                 error=error_message,
                 error_description=error_message,
