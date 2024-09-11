@@ -334,10 +334,10 @@ class TestOpsBeeLLMAPIClient(unittest.TestCase):
             'tag_ids': [],
             'metadata': [],
         }
-
         self.assertDictEqual(m.request_history[1].json(), expected_payload)
         self.assertDictEqual(ret, HISTORY_RES)
 
+        # 入出力テキスト両方なし
         with self.assertRaises(BadRequest) as e:
             client.create_qa_history(
                 ORGANIZATION_ID,
@@ -345,17 +345,9 @@ class TestOpsBeeLLMAPIClient(unittest.TestCase):
                 input_text=None,
                 output_text=None,
             )
-        self.assertEqual(e.exception.error_description, '"input_text" is necessary')
+        self.assertEqual(e.exception.error_description, '"input_text" or "output_text" is necessary')
 
-        with self.assertRaises(BadRequest) as e:
-            client.create_qa_history(
-                ORGANIZATION_ID,
-                DEPLOYMENT_QA_ID,
-                input_text=INPUT_TEXT,
-                output_text=None,
-            )
-        self.assertEqual(e.exception.error_description, '"output_text" is necessary')
-
+        # サポート外のでデプロイメントタイプ
         path = '/opsbee-llm/organizations/{}/deployments/{}'.format(
             ORGANIZATION_ID,
             DEPLOYMENT_CHAT_ID,
@@ -550,6 +542,7 @@ class TestOpsBeeLLMAPIClient(unittest.TestCase):
         self.assertDictEqual(m.request_history[1].json(), expected_payload)
         self.assertDictEqual(ret, HISTORY_RES)
 
+        # 入出力テキスト両方なし
         with self.assertRaises(BadRequest) as e:
             client.create_chat_history(
                 ORGANIZATION_ID,
@@ -558,18 +551,9 @@ class TestOpsBeeLLMAPIClient(unittest.TestCase):
                 input_text=None,
                 output_text=None,
             )
-        self.assertEqual(e.exception.error_description, '"input_text" is necessary')
+        self.assertEqual(e.exception.error_description, '"input_text" or "output_text" is necessary')
 
-        with self.assertRaises(BadRequest) as e:
-            client.create_chat_history(
-                ORGANIZATION_ID,
-                DEPLOYMENT_CHAT_ID,
-                THREAD_ID,
-                input_text=INPUT_TEXT,
-                output_text=None,
-            )
-        self.assertEqual(e.exception.error_description, '"output_text" is necessary')
-
+        # サポート外のでデプロイメントタイプ
         path = '/opsbee-llm/organizations/{}/deployments/{}'.format(
             ORGANIZATION_ID,
             DEPLOYMENT_QA_ID,
