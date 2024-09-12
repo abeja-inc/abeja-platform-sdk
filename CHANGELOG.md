@@ -1,3 +1,6 @@
+# 2.3.1
+- [OpsBeeLLM] Enable to input_text or output_text is empty in create history
+
 # 2.3.0
 - Add OpsBeeLLM (α version) SDK (#92)
 - [ABEJA Platform OpsBeeLLM] Add OpsBeeLLM SDK doc #98
