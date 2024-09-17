@@ -380,20 +380,12 @@ class APIClient(BaseAPIClient):
             - **organization_id** (str): organization identifier
             - **deployment_id** (str): deployment identifier for OpsBee LLM
             - **search_query** (str): **[optional]** search query
-                available search keys is below and AND, OR operators are available for each keys.
-                - `input_text`: * operators are available.
-                - output_text: * operators are available.
-                - input_token_count: <=, <, >=, >, operators are available.
-                - output_token_count: <=, <, >=, >, operators are available.
-                - tag_ids:
-                - tag_names:
-                - metadata_ids:
-                - metadata_keys:
-                - metadata_values:
-                - created_at: <=, <, >=, >, operators are available.
-                - updated_at: <=, <, >=, >, operators are available.
+                - available search keys is `input_text:`, `output_text:`, `input_token_count:`, `output_token_count:`, `tag_ids:`, `tag_names:`, `metadata_ids:`, `metadata_keys:`, `metadata_values;`, `created_at:`, `updated_at:`.
+                - AND and OR operators are available for each keys.
+                - `*` operators are available for `input_text:`, `output_text:` keys.
+                - `<=`, `<`, `>=`, `>` operators are available for `input_token_count:`, `output_token_count:`, `created_at`, `updated_at` keys.
                 example:
-                    search_query='input_text:ABEJA* AND input_token_count:>=10 AND metadata_keys:metadata1 OR metadata_keys:metadata2'
+                    search_query='input_text:ABEJA* AND input_token_count:>=10 AND metadata_keys:metadata1 AND metadata_keys:metadata2'
             - **offset** (int): **[optional]** offset of histories ( which starts from 0 )
             - **limit** (int): **[optional]** max number of histories to be returned
 
@@ -1059,20 +1051,12 @@ class APIClient(BaseAPIClient):
             - **organization_id** (str): organization identifier
             - **deployment_id** (str): deployment identifier for OpsBee LLM
             - **search_query** (str): **[optional]** search query
-                available search keys is below and AND, OR operators are available for each keys.
-                - `input_text`: * operators are available.
-                - output_text: * operators are available.
-                - input_token_count: <=, <, >=, >, operators are available.
-                - output_token_count: <=, <, >=, >, operators are available.
-                - tag_ids:
-                - tag_names:
-                - metadata_ids:
-                - metadata_keys:
-                - metadata_values:
-                - created_at: <=, <, >=, >, operators are available.
-                - updated_at: <=, <, >=, >, operators are available.
+                - available search keys is `input_text:`, `output_text:`, `input_token_count:`, `output_token_count:`, `tag_ids:`, `tag_names:`, `metadata_ids:`, `metadata_keys:`, `metadata_values;`, `created_at:`, `updated_at:`.
+                - AND and OR operators are available for each keys.
+                - `*` operators are available for `input_text:`, `output_text:` keys.
+                - `<=`, `<`, `>=`, `>` operators are available for `input_token_count:`, `output_token_count:`, `created_at`, `updated_at` keys.
                 example:
-                    search_query='input_text:ABEJA* AND input_token_count:>=10 AND metadata_keys:metadata1 OR metadata_keys:metadata2'
+                    search_query='input_text:ABEJA* AND input_token_count:>=10 AND metadata_keys:metadata1 AND metadata_keys:metadata2'
             - **offset** (int): **[optional]** offset of histories ( which starts from 0 )
             - **limit** (int): **[optional]** max number of histories to be returned
 
