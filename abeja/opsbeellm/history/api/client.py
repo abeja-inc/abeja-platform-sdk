@@ -380,7 +380,18 @@ class APIClient(BaseAPIClient):
             - **organization_id** (str): organization identifier
             - **deployment_id** (str): deployment identifier for OpsBee LLM
             - **search_query** (str): **[optional]** search query
-                - available search keys is `input_text:`, `output_text:`, `input_token_count:`, `output_token_count:`, `tag_ids:`, `tag_names:`, `metadata_ids:`, `metadata_keys:`, `metadata_values;`, `created_at:`, `updated_at:`.
+                - available search keys is below:
+                    - `input_text:`
+                    - `output_text:`
+                    - `input_token_count:`
+                    - `output_token_count:`
+                    - `tag_ids:`
+                    - `tag_names:`
+                    - `metadata_ids:`
+                    - `metadata_keys:`
+                    - `metadata_values:`
+                    - `created_at:`
+                    - `updated_at:`
                 - AND and OR operators are available for each keys.
                 - `*` operators are available for `input_text:`, `output_text:` keys.
                 - `<=`, `<`, `>=`, `>` operators are available for `input_token_count:`, `output_token_count:`, `created_at`, `updated_at` keys.
@@ -1051,7 +1062,18 @@ class APIClient(BaseAPIClient):
             - **organization_id** (str): organization identifier
             - **deployment_id** (str): deployment identifier for OpsBee LLM
             - **search_query** (str): **[optional]** search query
-                - available search keys is `input_text:`, `output_text:`, `input_token_count:`, `output_token_count:`, `tag_ids:`, `tag_names:`, `metadata_ids:`, `metadata_keys:`, `metadata_values;`, `created_at:`, `updated_at:`.
+                - available search keys is below:
+                    - `input_text:`
+                    - `output_text:`
+                    - `input_token_count:`
+                    - `output_token_count:`
+                    - `tag_ids:`
+                    - `tag_names:`
+                    - `metadata_ids:`
+                    - `metadata_keys:`
+                    - `metadata_values:`
+                    - `created_at:`
+                    - `updated_at:`
                 - AND and OR operators are available for each keys.
                 - `*` operators are available for `input_text:`, `output_text:` keys.
                 - `<=`, `<`, `>=`, `>` operators are available for `input_token_count:`, `output_token_count:`, `created_at`, `updated_at` keys.
