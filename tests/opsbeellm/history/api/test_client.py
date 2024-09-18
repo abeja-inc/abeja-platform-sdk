@@ -274,6 +274,22 @@ class TestOpsBeeLLMAPIClient(unittest.TestCase):
         )
         self.assertDictEqual(ret, HISTORIES_RES)
 
+        # search query
+        search_query = 'input_text:"ABEJA*"'
+        path = '/opsbee-llm/organizations/{}/deployments/{}/qa_histories?search_query={}'.format(
+            ORGANIZATION_ID,
+            DEPLOYMENT_QA_ID,
+            search_query
+        )
+        m.get(path, json=HISTORIES_RES)
+
+        ret = client.get_qa_histories(
+            ORGANIZATION_ID,
+            DEPLOYMENT_QA_ID,
+            search_query=search_query,
+        )
+        self.assertDictEqual(ret, HISTORIES_RES)
+
     @requests_mock.Mocker()
     def test_get_qa_history(self, m):
         # get-deployment-api mock
