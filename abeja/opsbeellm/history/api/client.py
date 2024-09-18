@@ -381,6 +381,7 @@ class APIClient(BaseAPIClient):
             - **deployment_id** (str): deployment identifier for OpsBee LLM
             - **search_query** (str): **[optional]** search query
                 - available search keys is below:
+                    - `history_id:`
                     - `input_text:`
                     - `output_text:`
                     - `input_token_count:`
@@ -396,7 +397,7 @@ class APIClient(BaseAPIClient):
                 - `*` operators are available for `input_text:`, `output_text:` keys.
                 - `<=`, `<`, `>=`, `>` operators are available for `input_token_count:`, `output_token_count:`, `created_at`, `updated_at` keys.
                 example:
-                    search_query='input_text:ABEJA* AND input_token_count:>=10 AND metadata_keys:metadata1 AND metadata_keys:metadata2'
+                    search_query='input_text:"ABEJA*" AND input_token_count:>=10 AND metadata_keys:metadata1 AND metadata_keys:metadata2'
             - **offset** (int): **[optional]** offset of histories ( which starts from 0 )
             - **limit** (int): **[optional]** max number of histories to be returned
 
@@ -1063,6 +1064,7 @@ class APIClient(BaseAPIClient):
             - **deployment_id** (str): deployment identifier for OpsBee LLM
             - **search_query** (str): **[optional]** search query
                 - available search keys is below:
+                    - `history_id:`
                     - `input_text:`
                     - `output_text:`
                     - `input_token_count:`
@@ -1078,7 +1080,7 @@ class APIClient(BaseAPIClient):
                 - `*` operators are available for `input_text:`, `output_text:` keys.
                 - `<=`, `<`, `>=`, `>` operators are available for `input_token_count:`, `output_token_count:`, `created_at`, `updated_at` keys.
                 example:
-                    search_query='input_text:ABEJA* AND input_token_count:>=10 AND metadata_keys:metadata1 AND metadata_keys:metadata2'
+                    search_query='input_text:"ABEJA*" AND input_token_count:>=10 AND metadata_keys:metadata1 AND metadata_keys:metadata2'
             - **offset** (int): **[optional]** offset of histories ( which starts from 0 )
             - **limit** (int): **[optional]** max number of histories to be returned
 
