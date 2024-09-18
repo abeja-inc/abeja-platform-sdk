@@ -386,18 +386,18 @@ class APIClient(BaseAPIClient):
                     - `output_text:`
                     - `input_token_count:`
                     - `output_token_count:`
-                    - `tag_ids:`
-                    - `tag_names:`
-                    - `metadata_ids:`
-                    - `metadata_keys:`
-                    - `metadata_values:`
+                    - `tag_id:`
+                    - `tag_name:`
+                    - `metadata_id:`
+                    - `metadata_key:`
+                    - `metadata_value:`
                     - `created_at:`
                     - `updated_at:`
                 - AND and OR operators are available for each keys.
                 - `*` operators are available for `input_text:`, `output_text:` keys.
                 - `<=`, `<`, `>=`, `>` operators are available for `input_token_count:`, `output_token_count:`, `created_at`, `updated_at` keys.
                 example:
-                    search_query='input_text:"ABEJA*" AND input_token_count:>=10 AND metadata_keys:metadata1 AND metadata_keys:metadata2'
+                    search_query='input_text:"ABEJA*" AND input_token_count:>=10 AND metadata_key:metadata1 AND metadata_key:metadata2'
             - **offset** (int): **[optional]** offset of histories ( which starts from 0 )
             - **limit** (int): **[optional]** max number of histories to be returned
 
@@ -1069,18 +1069,18 @@ class APIClient(BaseAPIClient):
                     - `output_text:`
                     - `input_token_count:`
                     - `output_token_count:`
-                    - `tag_ids:`
-                    - `tag_names:`
-                    - `metadata_ids:`
-                    - `metadata_keys:`
-                    - `metadata_values:`
+                    - `tag_id:`
+                    - `tag_name:`
+                    - `metadata_id:`
+                    - `metadata_key:`
+                    - `metadata_value:`
                     - `created_at:`
                     - `updated_at:`
                 - AND and OR operators are available for each keys.
                 - `*` operators are available for `input_text:`, `output_text:` keys.
                 - `<=`, `<`, `>=`, `>` operators are available for `input_token_count:`, `output_token_count:`, `created_at`, `updated_at` keys.
                 example:
-                    search_query='input_text:"ABEJA*" AND input_token_count:>=10 AND metadata_keys:metadata1 AND metadata_keys:metadata2'
+                    search_query='input_text:"ABEJA*" AND input_token_count:>=10 AND metadata_key:metadata1 AND metadata_key:metadata2'
             - **offset** (int): **[optional]** offset of histories ( which starts from 0 )
             - **limit** (int): **[optional]** max number of histories to be returned
 
