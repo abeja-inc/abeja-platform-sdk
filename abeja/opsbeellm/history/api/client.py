@@ -358,6 +358,7 @@ class APIClient(BaseAPIClient):
         self,
         organization_id: str,
         deployment_id: str,
+        search_query: Optional[str] = None,
         offset: Optional[int] = 0,
         limit: Optional[int] = 1000,
     ) -> dict:
@@ -378,6 +379,25 @@ class APIClient(BaseAPIClient):
         Params:
             - **organization_id** (str): organization identifier
             - **deployment_id** (str): deployment identifier for OpsBee LLM
+            - **search_query** (str): **[optional]** search query
+                - available search keys is below:
+                    - `history_id:`
+                    - `input_text:`
+                    - `output_text:`
+                    - `input_token_count:`
+                    - `output_token_count:`
+                    - `tag_id:`
+                    - `tag_name:`
+                    - `metadata_id:`
+                    - `metadata_key:`
+                    - `metadata_value:`
+                    - `created_at:`
+                    - `updated_at:`
+                - AND and OR operators are available for each keys.
+                - `*` operators are available for `input_text:`, `output_text:` keys.
+                - `<=`, `<`, `>=`, `>` operators are available for `input_token_count:`, `output_token_count:`, `created_at`, `updated_at` keys.
+                example:
+                    search_query='input_text:"ABEJA*" AND input_token_count:>=10 AND metadata_key:metadata1 AND metadata_key:metadata2'
             - **offset** (int): **[optional]** offset of histories ( which starts from 0 )
             - **limit** (int): **[optional]** max number of histories to be returned
 
@@ -480,12 +500,22 @@ class APIClient(BaseAPIClient):
             )
 
         # get qa histories
-        path = '/opsbee-llm/organizations/{}/deployments/{}/qa_histories?offset={}&limit={}'.format(
-            organization_id,
-            deployment_id,
-            offset,
-            limit,
-        )
+        if search_query:
+            path = '/opsbee-llm/organizations/{}/deployments/{}/qa_histories?search_query={}&offset={}&limit={}'.format(
+                organization_id,
+                deployment_id,
+                search_query,
+                offset,
+                limit,
+            )
+        else:
+            path = '/opsbee-llm/organizations/{}/deployments/{}/qa_histories?offset={}&limit={}'.format(
+                organization_id,
+                deployment_id,
+                offset,
+                limit,
+            )
+
         return self._connection.api_request(method='GET', path=path, params=params)
 
     def get_qa_history(
@@ -1011,6 +1041,7 @@ class APIClient(BaseAPIClient):
         self,
         organization_id: str,
         deployment_id: str,
+        search_query: Optional[str] = None,
         offset: Optional[int] = 0,
         limit: Optional[int] = 1000,
     ) -> dict:
@@ -1031,6 +1062,25 @@ class APIClient(BaseAPIClient):
         Params:
             - **organization_id** (str): organization identifier
             - **deployment_id** (str): deployment identifier for OpsBee LLM
+            - **search_query** (str): **[optional]** search query
+                - available search keys is below:
+                    - `history_id:`
+                    - `input_text:`
+                    - `output_text:`
+                    - `input_token_count:`
+                    - `output_token_count:`
+                    - `tag_id:`
+                    - `tag_name:`
+                    - `metadata_id:`
+                    - `metadata_key:`
+                    - `metadata_value:`
+                    - `created_at:`
+                    - `updated_at:`
+                - AND and OR operators are available for each keys.
+                - `*` operators are available for `input_text:`, `output_text:` keys.
+                - `<=`, `<`, `>=`, `>` operators are available for `input_token_count:`, `output_token_count:`, `created_at`, `updated_at` keys.
+                example:
+                    search_query='input_text:"ABEJA*" AND input_token_count:>=10 AND metadata_key:metadata1 AND metadata_key:metadata2'
             - **offset** (int): **[optional]** offset of histories ( which starts from 0 )
             - **limit** (int): **[optional]** max number of histories to be returned
 
@@ -1133,12 +1183,21 @@ class APIClient(BaseAPIClient):
             )
 
         # get chat histories
-        path = '/opsbee-llm/organizations/{}/deployments/{}/histories?offset={}&limit={}'.format(
-            organization_id,
-            deployment_id,
-            offset,
-            limit,
-        )
+        if search_query:
+            path = '/opsbee-llm/organizations/{}/deployments/{}/histories?search_query={}&offset={}&limit={}'.format(
+                organization_id,
+                deployment_id,
+                search_query,
+                offset,
+                limit,
+            )
+        else:
+            path = '/opsbee-llm/organizations/{}/deployments/{}/histories?offset={}&limit={}'.format(
+                organization_id,
+                deployment_id,
+                offset,
+                limit,
+            )
         return self._connection.api_request(method='GET', path=path, params=params)
 
     def get_chat_history(

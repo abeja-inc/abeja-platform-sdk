@@ -1,3 +1,6 @@
+# 2.3.2
+- [OpsBeeLLM] Add search_query in get-histories #100
+
 # 2.3.1
 - [OpsBeeLLM] Enable to input_text or output_text is empty in create history
 

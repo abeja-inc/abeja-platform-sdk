@@ -1,7 +1,7 @@
 [tool]
 [tool.poetry]
 name = "abeja-sdk"
-version = "2.3.1"
+version = "2.3.2"
 description = "ABEJA Platform Software Development Kit"
 classifiers = [
     "Development Status :: 3 - Alpha",
