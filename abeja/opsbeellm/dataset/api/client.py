@@ -459,12 +459,22 @@ class APIClient(BaseAPIClient):
         params['offset'] = offset
         params['limit'] = limit
 
-        path = '/opsbee-llm/organizations/{}/datasets/{}/items?offset={}&limit={}'.format(
-            organization_id,
-            dataset_id,
-            offset,
-            limit,
-        )
+        if search_query:
+            path = '/opsbee-llm/organizations/{}/datasets/{}/items?search_query={}&offset={}&limit={}'.format(
+                organization_id,
+                dataset_id,
+                search_query,
+                offset,
+                limit,
+            )
+        else:
+            path = '/opsbee-llm/organizations/{}/datasets/{}/items?offset={}&limit={}'.format(
+                organization_id,
+                dataset_id,
+                offset,
+                limit,
+            )
+
         return self._connection.api_request(method='GET', path=path, params=params)
 
     def get_dataset_item(
