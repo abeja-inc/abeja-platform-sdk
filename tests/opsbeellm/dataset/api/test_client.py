@@ -256,6 +256,22 @@ class TestOpsBeeLLMAPIClient(unittest.TestCase):
         )
         self.assertDictEqual(ret, DATASET_LLM_ITEMS_RES)
 
+        # search query
+        search_query = 'input_values:"ABEJA*"'
+        path = '/opsbee-llm/organizations/{}/datasets/{}/items?search_query={}'.format(
+            ORGANIZATION_ID,
+            DATASET_LLM_ID,
+            search_query
+        )
+        m.get(path, json=DATASET_LLM_ITEMS_RES)
+
+        ret = client.get_dataset_items(
+            ORGANIZATION_ID,
+            DATASET_LLM_ID,
+            search_query=search_query,
+        )
+        self.assertDictEqual(ret, DATASET_LLM_ITEMS_RES)
+
     @requests_mock.Mocker()
     def test_get_dataset_item(self, m):
         # get-dataset-item-api mock

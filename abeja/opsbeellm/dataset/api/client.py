@@ -362,6 +362,7 @@ class APIClient(BaseAPIClient):
         self,
         organization_id: str,
         dataset_id: str,
+        search_query: Optional[str] = None,
         offset: Optional[int] = 0,
         limit: Optional[int] = 1000,
     ) -> dict:
@@ -382,6 +383,23 @@ class APIClient(BaseAPIClient):
         Params:
             - **organization_id** (str): organization identifier
             - **dataset_id** (str): dataset identifier
+            - **search_query** (str): **[optional]** search query
+                - available search keys is below:
+                    - `item_id:`
+                    - `input_keys:`
+                    - `input_values:`
+                    - `output_keys:`
+                    - `output_values:`
+                    - `tag_values:`
+                    - `metadata_keys:`
+                    - `metadata_values:`
+                    - `created_at:`
+                    - `updated_at:`
+                - AND and OR operators are available for each keys.
+                - `*` operators are available for `input_keys:`, `input_values:`, `output_keys:`, `output_values:` keys.
+                - `<=`, `<`, `>=`, `>` operators are available for `created_at`, `updated_at` keys.
+                example:
+                    search_query='input_values:"ABEJA*" AND created_at:>="2024-09-17T00:00:00" AND metadata_keys:metadata1 AND metadata_keys:metadata2'
             - **offset** (int): **[optional]** offset of datasets ( which starts from 0 )
             - **limit** (int): **[optional]** max number of datasets to be returned
 
