@@ -1,3 +1,6 @@
+# 2.3.3
+- [OpsBeeLLM] Add search_query in get-dataset-items #101
+
 # 2.3.2
 - [OpsBeeLLM] Add search_query in get-histories #100
 
