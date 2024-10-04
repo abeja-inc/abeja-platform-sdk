@@ -361,6 +361,8 @@ class APIClient(BaseAPIClient):
         search_query: Optional[str] = None,
         offset: Optional[int] = 0,
         limit: Optional[int] = 1000,
+        sort_by:Optional[str] = "updated_at",
+        sort_order:Optional[str] = "desc",
     ) -> dict:
         """get qa histories
 
@@ -373,8 +375,10 @@ class APIClient(BaseAPIClient):
                 deployment_id = "1234567890123"
                 offset = 0
                 limit = 1000
+                sort_by = "updated_at"
+                sort_order = "desc"
                 response = api_client.get_qa_histories(
-                    organization_id, deployment_id, offset, limit)
+                    organization_id, deployment_id, offset, limit, sort_by, sort_order)
 
         Params:
             - **organization_id** (str): organization identifier
@@ -400,6 +404,21 @@ class APIClient(BaseAPIClient):
                     search_query='input_text:"ABEJA*" AND input_token_count:>=10 AND metadata_key:metadata1 AND metadata_key:metadata2'
             - **offset** (int): **[optional]** offset of histories ( which starts from 0 )
             - **limit** (int): **[optional]** max number of histories to be returned
+            - **sort_by** (str): **[optional]** field to sort the results by
+                - available options include:
+                    - `id`
+                    - `input_text`
+                    - `output_text`
+                    - `input_token_count`
+                    - `output_token_count`
+                    - `created_at`
+                    - `updated_at`
+                - Defaults to `updated_at` if not specified.
+            - **sort_order** (str): **[optional]** the order in which results are sorted
+                - Available options:
+                    - `asc` for ascending order (e.g., oldest to newest)
+                    - `desc` for descending order (e.g., newest to oldest)
+                - Defaults to `desc` if not specified.
 
         Return type:
             dict
@@ -460,6 +479,8 @@ class APIClient(BaseAPIClient):
                     ],
                     'offset': 0,
                     'limit': 1000,
+                    'sort_by': "updated_at",
+                    'sort_order': "desc",
                     'total': 10,
                     'has_next': False,
                 }
@@ -474,8 +495,14 @@ class APIClient(BaseAPIClient):
             offset = 0
         if limit is None:
             limit = 1000
+        if sort_by is None:
+            sort_by = "updated_at"
+        if sort_order is None:
+            sort_order = "desc"
         params['offset'] = offset
         params['limit'] = limit
+        params['sort_by'] = sort_by
+        params['sort_order'] = sort_order
 
         # verify deployment type
         path = '/opsbee-llm/organizations/{}/deployments/{}'.format(
@@ -501,19 +528,23 @@ class APIClient(BaseAPIClient):
 
         # get qa histories
         if search_query:
-            path = '/opsbee-llm/organizations/{}/deployments/{}/qa_histories?search_query={}&offset={}&limit={}'.format(
+            path = '/opsbee-llm/organizations/{}/deployments/{}/qa_histories?search_query={}&offset={}&limit={}&sort_by={}&sort_order={}'.format(
                 organization_id,
                 deployment_id,
                 search_query,
                 offset,
                 limit,
+                sort_by,
+                sort_order
             )
         else:
-            path = '/opsbee-llm/organizations/{}/deployments/{}/qa_histories?offset={}&limit={}'.format(
+            path = '/opsbee-llm/organizations/{}/deployments/{}/qa_histories?offset={}&limit={}&sort_by={}&sort_order={}'.format(
                 organization_id,
                 deployment_id,
                 offset,
                 limit,
+                sort_by,
+                sort_order
             )
 
         return self._connection.api_request(method='GET', path=path, params=params)
@@ -1044,6 +1075,8 @@ class APIClient(BaseAPIClient):
         search_query: Optional[str] = None,
         offset: Optional[int] = 0,
         limit: Optional[int] = 1000,
+        sort_by:Optional[str] = "updated_at",
+        sort_order:Optional[str] = "desc",
     ) -> dict:
         """get chat histories
 
@@ -1056,8 +1089,10 @@ class APIClient(BaseAPIClient):
                 deployment_id = "1234567890123"
                 offset = 0
                 limit = 1000
+                sort_by = "updated_at"
+                sort_order = "desc"
                 response = api_client.get_chat_histories(
-                    organization_id, deployment_id, offset, limit)
+                    organization_id, deployment_id, offset, limit, sort_by, sort_order)
 
         Params:
             - **organization_id** (str): organization identifier
@@ -1083,7 +1118,23 @@ class APIClient(BaseAPIClient):
                     search_query='input_text:"ABEJA*" AND input_token_count:>=10 AND metadata_key:metadata1 AND metadata_key:metadata2'
             - **offset** (int): **[optional]** offset of histories ( which starts from 0 )
             - **limit** (int): **[optional]** max number of histories to be returned
-
+            - **sort_by** (str): **[optional]** field to sort the results by
+                - available options include:
+                    - `id`
+                    - `thread_id`
+                    - `input_text`
+                    - `output_text`
+                    - `input_token_count`
+                    - `output_token_count`
+                    - `created_at`
+                    - `updated_at`
+                - Defaults to `updated_at` if not specified.
+            - **sort_order** (str): **[optional]** the order in which results are sorted
+                - Available options:
+                    - `asc` for ascending order (e.g., oldest to newest)
+                    - `desc` for descending order (e.g., newest to oldest)
+                - Defaults to `desc` if not specified.
+                
         Return type:
             dict
 
@@ -1143,6 +1194,8 @@ class APIClient(BaseAPIClient):
                     ],
                     'offset': 0,
                     'limit': 1000,
+                    'sort_by': "updated_at",
+                    'sort_order': "desc",
                     'total': 10,
                     'has_next': False,
                 }
@@ -1157,8 +1210,14 @@ class APIClient(BaseAPIClient):
             offset = 0
         if limit is None:
             limit = 1000
+        if sort_by is None:
+            sort_by = "updated_at"
+        if sort_order is None:
+            sort_order = "desc"
         params['offset'] = offset
         params['limit'] = limit
+        params['sort_by'] = sort_by
+        params['sort_order'] = sort_order
 
         # verify deployment type
         path = '/opsbee-llm/organizations/{}/deployments/{}'.format(
@@ -1184,19 +1243,23 @@ class APIClient(BaseAPIClient):
 
         # get chat histories
         if search_query:
-            path = '/opsbee-llm/organizations/{}/deployments/{}/histories?search_query={}&offset={}&limit={}'.format(
+            path = '/opsbee-llm/organizations/{}/deployments/{}/histories?search_query={}&offset={}&limit={}&sort_by={}&sort_order={}'.format(
                 organization_id,
                 deployment_id,
                 search_query,
                 offset,
                 limit,
+                sort_by,
+                sort_order
             )
         else:
-            path = '/opsbee-llm/organizations/{}/deployments/{}/histories?offset={}&limit={}'.format(
+            path = '/opsbee-llm/organizations/{}/deployments/{}/histories?offset={}&limit={}&sort_by={}&sort_order={}'.format(
                 organization_id,
                 deployment_id,
                 offset,
                 limit,
+                sort_by,
+                sort_order
             )
         return self._connection.api_request(method='GET', path=path, params=params)
 
