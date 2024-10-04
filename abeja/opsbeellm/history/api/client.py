@@ -361,8 +361,8 @@ class APIClient(BaseAPIClient):
         search_query: Optional[str] = None,
         offset: Optional[int] = 0,
         limit: Optional[int] = 1000,
-        sort_by:Optional[str] = "updated_at",
-        sort_order:Optional[str] = "desc",
+        sort_by: Optional[str] = "updated_at",
+        sort_order: Optional[str] = "desc",
     ) -> dict:
         """get qa histories
 
@@ -1075,8 +1075,8 @@ class APIClient(BaseAPIClient):
         search_query: Optional[str] = None,
         offset: Optional[int] = 0,
         limit: Optional[int] = 1000,
-        sort_by:Optional[str] = "updated_at",
-        sort_order:Optional[str] = "desc",
+        sort_by: Optional[str] = "updated_at",
+        sort_order: Optional[str] = "desc",
     ) -> dict:
         """get chat histories
 
@@ -1134,7 +1134,7 @@ class APIClient(BaseAPIClient):
                     - `asc` for ascending order (e.g., oldest to newest)
                     - `desc` for descending order (e.g., newest to oldest)
                 - Defaults to `desc` if not specified.
-                
+
         Return type:
             dict
 
