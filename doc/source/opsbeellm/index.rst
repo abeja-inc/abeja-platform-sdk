@@ -92,12 +92,14 @@ API Mapping (OpsBeeLLM History)
    get, /opsbee-llm/organizations/<organization_id>/deployments/<deployment_id>/qa_histories/<history_id>, :meth:`APIClient.get_qa_history() <abeja.opsbeellm.history.APIClient.get_qa_history>`
    delete, /opsbee-llm/organizations/<organization_id>/deployments/<deployment_id>/qa_histories/<history_id>, :meth:`APIClient.delete_qa_history() <abeja.opsbeellm.history.APIClient.delete_qa_history>`
    patch, /opsbee-llm/organizations/<organization_id>/deployments/<deployment_id>/qa_histories/<history_id>, :meth:`APIClient.update_qa_history() <abeja.opsbeellm.history.APIClient.update_qa_history>`
+   post, /opsbee-llm/organizations/<organization_id>/deployments/<deployment_id>/qa_histories/dataset/<dataset_id>/items, :meth:`APIClient.add_qa_histories_to_dataset() <abeja.opsbeellm.history.APIClient.add_qa_histories_to_dataset>`
 
    post, /opsbee-llm/organizations/<organization_id>/deployments/<deployment_id>/threads/<thread_id>/histories, :meth:`APIClient.create_chat_history() <abeja.opsbeellm.history.APIClient.create_chat_history>`
    get, /opsbee-llm/organizations/<organization_id>/deployments/<deployment_id>/threads/<thread_id>/histories, :meth:`APIClient.get_chat_histories() <abeja.opsbeellm.history.APIClient.get_chat_histories>`
    get, /opsbee-llm/organizations/<organization_id>/deployments/<deployment_id>/threads/<thread_id>/histories/<history_id>, :meth:`APIClient.get_chat_history() <abeja.opsbeellm.history.APIClient.get_chat_history>`
    delete, /opsbee-llm/organizations/<organization_id>/deployments/<deployment_id>/threads/<thread_id>/histories/<history_id>, :meth:`APIClient.delete_chat_history() <abeja.opsbeellm.history.APIClient.delete_chat_history>`
    patch, /opsbee-llm/organizations/<organization_id>/deployments/<deployment_id>/threads/<thread_id>/histories/<history_id>, :meth:`APIClient.update_chat_history() <abeja.opsbeellm.history.APIClient.update_chat_history>`
+   post, /opsbee-llm/organizations/<organization_id>/deployments/<deployment_id>/histories/dataset/<dataset_id>/items, :meth:`APIClient.add_chat_histories_to_dataset() <abeja.opsbeellm.history.APIClient.add_chat_histories_to_dataset>`
 
 
 API Mapping (OpsBeeLLM History Metadata)
