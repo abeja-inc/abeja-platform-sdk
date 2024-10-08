@@ -314,8 +314,7 @@ class APIClient(BaseAPIClient):
         Request syntax:
             .. code-block:: python
 
-               response = api_client.delete_service(organization_id='1111111111111',
-                                                    deployment_id='9999999999999', service_id='ser-abc1111111111111')
+               response = api_client.delete_service(organization_id='1111111111111', deployment_id='9999999999999', service_id='ser-abc1111111111111')
 
         Params:
             - **organization_id** (str): organization_id
@@ -354,8 +353,7 @@ class APIClient(BaseAPIClient):
         Request syntax:
             .. code-block:: python
 
-               response = api_client.stop_service(organization_id='1111111111111',
-                                                　　　　　　　　deployment_id='9999999999999', service_id='ser-abc1111111111111')
+                response = api_client.stop_service(organization_id='1111111111111',deployment_id='9999999999999', service_id='ser-abc1111111111111')
 
         Params:
             - **organization_id** (str): organization_id
@@ -395,8 +393,7 @@ class APIClient(BaseAPIClient):
         Request syntax:
             .. code-block:: python
 
-               response = api_client.stop_service(organization_id='1111111111111',
-                                                　　　　　　　　deployment_id='9999999999999', service_id='ser-abc1111111111111')
+                response = api_client.stop_service(organization_id='1111111111111',deployment_id='9999999999999', service_id='ser-abc1111111111111')
 
         Params:
             - **organization_id** (str): organization_id
