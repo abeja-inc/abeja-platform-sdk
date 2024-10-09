@@ -1037,6 +1037,93 @@ class APIClient(BaseAPIClient):
         )
         return self._connection.api_request(method='DELETE', path=path)
 
+    def add_qa_histories_to_dataset(
+        self,
+        organization_id: str,
+        deployment_id: str,
+        dataset_id: str,
+        history_ids: List[str],
+    ) -> dict:
+        """add qa histories to a dataset
+
+        API reference: POST /opsbee-llm/organizations/<organization_id>/deployments/<deployment_id>/qa_histories/<history_id>/datasets/<dataset_id>/items
+
+        Request Syntax:
+            .. code-block:: python
+
+                organization_id = "1410000000000"
+                deployment_id = "1234567890123"
+                dataset_id = "1234567890127"
+                history_ids = ["1234567890125", "1234567890126"]
+                response = api_client.add_qa_history_to_dataset(
+                    organization_id, deployment_id, dataset_id, history_ids)
+
+        Params:
+            - **organization_id** (str): organization identifier
+            - **deployment_id** (str): deployment identifier for OpsBee LLM
+            - **dataset_id** (str): dataset identifier
+            - **history_ids** (list): list of history identifiers
+
+        Return type:
+            dict
+
+        Returns:
+            Response Syntax:
+
+            .. code-block:: json
+
+                {
+                    'message': "Successfully added qa histories to dataset 1234567890127",
+                }
+        """
+        if not isinstance(history_ids, list):
+            error_message = '"history_ids" must be a list of history identifiers'
+            raise BadRequest(
+                error=error_message,
+                error_description=error_message,
+                status_code=400
+            )
+        if len(history_ids) == 0:
+            error_message = '"history_ids" must not be greater than 0'
+            raise BadRequest(
+                error=error_message,
+                error_description=error_message,
+                status_code=400
+            )
+
+        # verify deployment type
+        path = '/opsbee-llm/organizations/{}/deployments/{}'.format(
+            organization_id,
+            deployment_id,
+        )
+        resp_deployment = self._connection.api_request(method='GET', path=path)
+        try:
+            deployment_type = resp_deployment["type"]
+        except Exception as e:
+            raise BadRequest(
+                error="Failed to get deployment type",
+                error_description=f"Failed to get deployment type | {e}",
+                status_code=400
+            )
+
+        if deployment_type != "qa":
+            raise BadRequest(
+                error="deployment type is not supported",
+                error_description=f"The specified deployment '{deployment_id}' type is '{deployment_type}', but it not supported! Only 'qa' is supported.",
+                status_code=400
+            )
+
+        # add qa histories to dataset
+        path = '/opsbee-llm/organizations/{}/deployments/{}/qa_histories/datasets/{}/items'.format(
+            organization_id,
+            deployment_id,
+            dataset_id,
+        )
+        payload = {
+            'history_ids': history_ids,
+        }
+        return self._connection.api_request(method='POST', path=path, json=payload)
+
     def get_chat_histories(
         self,
         organization_id: str,
@@ -1735,6 +1822,93 @@ class APIClient(BaseAPIClient):
             history_id,
         )
         return self._connection.api_request(method='DELETE', path=path)
+
+    def add_chat_histories_to_dataset(
+        self,
+        organization_id: str,
+        deployment_id: str,
+        dataset_id: str,
+        history_ids: List[str],
+    ) -> dict:
+        """add chat histories to a dataset
+
+        API reference: POST /opsbee-llm/organizations/<organization_id>/deployments/<deployment_id>/histories/<history_id>/datasets/<dataset_id>/items
+
+        Request Syntax:
+            .. code-block:: python
+
+                organization_id = "1410000000000"
+                deployment_id = "1234567890123"
+                dataset_id = "1234567890127"
+                history_ids = ["1234567890125", "1234567890126"]
+                response = api_client.add_chat_history_to_dataset(
+                    organization_id, deployment_id, dataset_id, history_ids)
+
+        Params:
+            - **organization_id** (str): organization identifier
+            - **deployment_id** (str): deployment identifier for OpsBee LLM
+            - **dataset_id** (str): dataset identifier
+            - **history_ids** (list): list of history identifiers
+
+        Return type:
+            dict
+
+        Returns:
+            Response Syntax:
+
+            .. code-block:: json
+
+                {
+                    'message': "Successfully added histories to dataset 1234567890127",
+                }
+        """
+        if not isinstance(history_ids, list):
+            error_message = '"history_ids" must be a list of history identifiers'
+            raise BadRequest(
+                error=error_message,
+                error_description=error_message,
+                status_code=400
+            )
+        if len(history_ids) == 0:
+            error_message = '"history_ids" must not be greater than 0'
+            raise BadRequest(
+                error=error_message,
+                error_description=error_message,
+                status_code=400
+            )
+
+        # verify deployment type
+        path = '/opsbee-llm/organizations/{}/deployments/{}'.format(
+            organization_id,
+            deployment_id,
+        )
+        resp_deployment = self._connection.api_request(method='GET', path=path)
+        try:
+            deployment_type = resp_deployment["type"]
+        except Exception as e:
+            raise BadRequest(
+                error="Failed to get deployment type",
+                error_description=f"Failed to get deployment type | {e}",
+                status_code=400
+            )
+
+        if deployment_type != "chat":
+            raise BadRequest(
+                error="deployment type is not supported",
+                error_description=f"The specified deployment '{deployment_id}' type is '{deployment_type}', but it not supported! Only 'qa' is supported.",
+                status_code=400
+            )
+
+        # add chat histories to dataset
+        path = '/opsbee-llm/organizations/{}/deployments/{}/histories/datasets/{}/items'.format(
+            organization_id,
+            deployment_id,
+            dataset_id,
+        )
+        payload = {
+            'history_ids': history_ids,
+        }
+        return self._connection.api_request(method='POST', path=path, json=payload)
 
     def get_tags(
         self,
