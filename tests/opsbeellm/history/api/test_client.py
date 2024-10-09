@@ -97,12 +97,40 @@ HISTORY_RES = {
     "created_at": "2023-12-14T04:42:34.913644Z",
     "updated_at": "2018-12-15T04:42:34.913726Z"
 }
+SUB_HISTORY_RES = {
+    "id": HISTORY_ID + "SUB",
+    "organization_id": ORGANIZATION_ID,
+    "deployment_id": DEPLOYMENT_ID,
+    "thread_id": THREAD_ID + "SUB",
+    "input_text": INPUT_TEXT + "SUB",
+    "output_text": OUTPUT_TEXT + "SUB",
+    "input_token_count": INPUT_TOKEN_COUNT + 1,
+    "output_token_count": OUTPUT_TOKEN_COUNT + 1,
+    "tags": [
+        TAG_RES
+    ],
+    "matadata": [],
+    "created_at": "2023-12-16T04:42:34.913645Z",
+    "updated_at": "2018-12-17T04:42:34.913727Z"
+}
 HISTORIES_RES = {
     'organization_id': ORGANIZATION_ID,
     'deployment_id': DEPLOYMENT_ID,
     'thread_id': THREAD_ID,
     'histories': [
         HISTORY_RES,
+    ],
+    'offset': 0,
+    'limit': 1000,
+    'has_next': False,
+}
+SORTED_HISTORIES_RES = {
+    'organization_id': ORGANIZATION_ID,
+    'deployment_id': DEPLOYMENT_ID,
+    'thread_id': THREAD_ID,
+    'histories': [
+        HISTORY_RES,
+        SUB_HISTORY_RES
     ],
     'offset': 0,
     'limit': 1000,
@@ -290,6 +318,29 @@ class TestOpsBeeLLMAPIClient(unittest.TestCase):
             search_query=search_query,
         )
         self.assertDictEqual(ret, HISTORIES_RES)
+
+        # sort params
+        default_offset = 0
+        default_limit = 1000
+        sort_by = "input_token_count"
+        sort_order = "asc"
+        path = '/opsbee-llm/organizations/{}/deployments/{}/qa_histories?offset={}&limit={}&sort_by={}&sort_order={}'.format(
+            ORGANIZATION_ID,
+            DEPLOYMENT_QA_ID,
+            default_offset,
+            default_limit,
+            sort_by,
+            sort_order
+        )
+        m.get(path, json=SORTED_HISTORIES_RES)
+
+        ret = client.get_qa_histories(
+            ORGANIZATION_ID,
+            DEPLOYMENT_QA_ID,
+            sort_by=sort_by,
+            sort_order=sort_order
+        )
+        self.assertDictEqual(ret, SORTED_HISTORIES_RES)
 
     @requests_mock.Mocker()
     def test_get_qa_history(self, m):
@@ -575,6 +626,29 @@ class TestOpsBeeLLMAPIClient(unittest.TestCase):
             search_query=search_query,
         )
         self.assertDictEqual(ret, HISTORIES_RES)
+
+        # sort params
+        default_offset = 0
+        default_limit = 1000
+        sort_by = "input_token_count"
+        sort_order = "asc"
+        path = '/opsbee-llm/organizations/{}/deployments/{}/histories?offset={}&limit={}&sort_by={}&sort_order={}'.format(
+            ORGANIZATION_ID,
+            DEPLOYMENT_CHAT_ID,
+            default_offset,
+            default_limit,
+            sort_by,
+            sort_order
+        )
+        m.get(path, json=SORTED_HISTORIES_RES)
+
+        ret = client.get_chat_histories(
+            ORGANIZATION_ID,
+            DEPLOYMENT_CHAT_ID,
+            sort_by=sort_by,
+            sort_order=sort_order
+        )
+        self.assertDictEqual(ret, SORTED_HISTORIES_RES)
 
     @requests_mock.Mocker()
     def test_get_chat_history(self, m):
