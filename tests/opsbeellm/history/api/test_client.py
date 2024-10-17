@@ -19,6 +19,7 @@ INPUT_TEXT = 'ABEJAについて教えて'
 OUTPUT_TEXT = 'ABEJAは、スペイン語で「ミツバチ」の意味であり、植物の受粉を手伝い、世界の食料生産を支える存在として社名になっています。'
 INPUT_TOKEN_COUNT = 10
 OUTPUT_TOKEN_COUNT = 10
+DATASET_ID = '1234567890123'
 
 TAG_RES = {
     'id': TAG_ID,
@@ -96,12 +97,40 @@ HISTORY_RES = {
     "created_at": "2023-12-14T04:42:34.913644Z",
     "updated_at": "2018-12-15T04:42:34.913726Z"
 }
+SUB_HISTORY_RES = {
+    "id": HISTORY_ID + "SUB",
+    "organization_id": ORGANIZATION_ID,
+    "deployment_id": DEPLOYMENT_ID,
+    "thread_id": THREAD_ID + "SUB",
+    "input_text": INPUT_TEXT + "SUB",
+    "output_text": OUTPUT_TEXT + "SUB",
+    "input_token_count": INPUT_TOKEN_COUNT + 1,
+    "output_token_count": OUTPUT_TOKEN_COUNT + 1,
+    "tags": [
+        TAG_RES
+    ],
+    "matadata": [],
+    "created_at": "2023-12-16T04:42:34.913645Z",
+    "updated_at": "2018-12-17T04:42:34.913727Z"
+}
 HISTORIES_RES = {
     'organization_id': ORGANIZATION_ID,
     'deployment_id': DEPLOYMENT_ID,
     'thread_id': THREAD_ID,
     'histories': [
         HISTORY_RES,
+    ],
+    'offset': 0,
+    'limit': 1000,
+    'has_next': False,
+}
+SORTED_HISTORIES_RES = {
+    'organization_id': ORGANIZATION_ID,
+    'deployment_id': DEPLOYMENT_ID,
+    'thread_id': THREAD_ID,
+    'histories': [
+        HISTORY_RES,
+        SUB_HISTORY_RES
     ],
     'offset': 0,
     'limit': 1000,
@@ -290,6 +319,29 @@ class TestOpsBeeLLMAPIClient(unittest.TestCase):
         )
         self.assertDictEqual(ret, HISTORIES_RES)
 
+        # sort params
+        default_offset = 0
+        default_limit = 1000
+        sort_by = "input_token_count"
+        sort_order = "asc"
+        path = '/opsbee-llm/organizations/{}/deployments/{}/qa_histories?offset={}&limit={}&sort_by={}&sort_order={}'.format(
+            ORGANIZATION_ID,
+            DEPLOYMENT_QA_ID,
+            default_offset,
+            default_limit,
+            sort_by,
+            sort_order
+        )
+        m.get(path, json=SORTED_HISTORIES_RES)
+
+        ret = client.get_qa_histories(
+            ORGANIZATION_ID,
+            DEPLOYMENT_QA_ID,
+            sort_by=sort_by,
+            sort_order=sort_order
+        )
+        self.assertDictEqual(ret, SORTED_HISTORIES_RES)
+
     @requests_mock.Mocker()
     def test_get_qa_history(self, m):
         # get-deployment-api mock
@@ -467,6 +519,75 @@ class TestOpsBeeLLMAPIClient(unittest.TestCase):
         self.assertDictEqual(ret, HISTORY_RES)
 
     @requests_mock.Mocker()
+    def test_add_qa_histories_to_dataset(self, m):
+        # get-deployment-api mock
+        path = '/opsbee-llm/organizations/{}/deployments/{}'.format(
+            ORGANIZATION_ID,
+            DEPLOYMENT_QA_ID,
+        )
+        m.get(path, json=DEPLOYMENT_QA_RES)
+
+        # add-histories-dataset-api mock
+        path = '/opsbee-llm/organizations/{}/deployments/{}/qa_histories/datasets/{}/items'.format(
+            ORGANIZATION_ID,
+            DEPLOYMENT_QA_ID,
+            DATASET_ID,
+        )
+        res = {
+            'message': f'Successfully added histories to dataset {DATASET_ID}.'
+        }
+        m.post(path, json=res)
+
+        # unit test OK
+        client = APIClient()
+        ret = client.add_qa_histories_to_dataset(
+            ORGANIZATION_ID,
+            DEPLOYMENT_QA_ID,
+            DATASET_ID,
+            [HISTORY_ID],
+        )
+        expected_payload = {
+            'history_ids': [HISTORY_ID],
+        }
+        self.assertDictEqual(ret, res)
+        self.assertDictEqual(m.request_history[1].json(), expected_payload)
+
+        # 履歴IDリストの型が不正
+        with self.assertRaises(BadRequest) as e:
+            client.add_qa_histories_to_dataset(
+                ORGANIZATION_ID,
+                DEPLOYMENT_QA_ID,
+                DATASET_ID,
+                HISTORY_ID,
+            )
+            self.assertEqual(e.exception.error, '"history_ids" must not be greater than 0')
+
+        # 履歴IDリストが空
+        with self.assertRaises(BadRequest) as e:
+            client.add_qa_histories_to_dataset(
+                ORGANIZATION_ID,
+                DEPLOYMENT_QA_ID,
+                DATASET_ID,
+                [],
+            )
+            self.assertEqual(e.exception.error, '"history_ids" must not be greater than 0')
+
+        # サポート外のでデプロイメントタイプ
+        path = '/opsbee-llm/organizations/{}/deployments/{}'.format(
+            ORGANIZATION_ID,
+            DEPLOYMENT_CHAT_ID,
+        )
+        m.get(path, json=DEPLOYMENT_CHAT_RES)
+        with self.assertRaises(BadRequest) as e:
+            client.add_qa_histories_to_dataset(
+                ORGANIZATION_ID,
+                DEPLOYMENT_CHAT_ID,
+                DATASET_ID,
+                [HISTORY_ID],
+            )
+        self.assertEqual(e.exception.error, 'deployment type is not supported')
+
+    @requests_mock.Mocker()
     def test_get_chat_histories(self, m):
         # get-deployment-api mock
         path = '/opsbee-llm/organizations/{}/deployments/{}'.format(
@@ -505,6 +626,29 @@ class TestOpsBeeLLMAPIClient(unittest.TestCase):
             search_query=search_query,
         )
         self.assertDictEqual(ret, HISTORIES_RES)
+
+        # sort params
+        default_offset = 0
+        default_limit = 1000
+        sort_by = "input_token_count"
+        sort_order = "asc"
+        path = '/opsbee-llm/organizations/{}/deployments/{}/histories?offset={}&limit={}&sort_by={}&sort_order={}'.format(
+            ORGANIZATION_ID,
+            DEPLOYMENT_CHAT_ID,
+            default_offset,
+            default_limit,
+            sort_by,
+            sort_order
+        )
+        m.get(path, json=SORTED_HISTORIES_RES)
+
+        ret = client.get_chat_histories(
+            ORGANIZATION_ID,
+            DEPLOYMENT_CHAT_ID,
+            sort_by=sort_by,
+            sort_order=sort_order
+        )
+        self.assertDictEqual(ret, SORTED_HISTORIES_RES)
 
     @requests_mock.Mocker()
     def test_get_chat_history(self, m):
@@ -693,6 +837,75 @@ class TestOpsBeeLLMAPIClient(unittest.TestCase):
             HISTORY_ID,
         )
         self.assertDictEqual(ret, HISTORY_RES)
+
+    @requests_mock.Mocker()
+    def test_add_chat_histories_to_dataset(self, m):
+        # get-deployment-api mock
+        path = '/opsbee-llm/organizations/{}/deployments/{}'.format(
+            ORGANIZATION_ID,
+            DEPLOYMENT_CHAT_ID,
+        )
+        m.get(path, json=DEPLOYMENT_CHAT_RES)
+
+        # add-histories-dataset-api mock
+        path = '/opsbee-llm/organizations/{}/deployments/{}/histories/datasets/{}/items'.format(
+            ORGANIZATION_ID,
+            DEPLOYMENT_CHAT_ID,
+            DATASET_ID,
+        )
+        res = {
+            'message': f'Successfully added histories to dataset {DATASET_ID}.'
+        }
+        m.post(path, json=res)
+
+        # unit test OK
+        client = APIClient()
+        ret = client.add_chat_histories_to_dataset(
+            ORGANIZATION_ID,
+            DEPLOYMENT_CHAT_ID,
+            DATASET_ID,
+            [HISTORY_ID],
+        )
+        expected_payload = {
+            'history_ids': [HISTORY_ID],
+        }
+        self.assertDictEqual(ret, res)
+        self.assertDictEqual(m.request_history[1].json(), expected_payload)
+
+        # 履歴IDリストの型が不正
+        with self.assertRaises(BadRequest) as e:
+            client.add_chat_histories_to_dataset(
+                ORGANIZATION_ID,
+                DEPLOYMENT_CHAT_ID,
+                DATASET_ID,
+                HISTORY_ID,
+            )
+            self.assertEqual(e.exception.error, '"history_ids" must not be greater than 0')
+
+        # 履歴IDリストが空
+        with self.assertRaises(BadRequest) as e:
+            client.add_chat_histories_to_dataset(
+                ORGANIZATION_ID,
+                DEPLOYMENT_CHAT_ID,
+                DATASET_ID,
+                [],
+            )
+            self.assertEqual(e.exception.error, '"history_ids" must not be greater than 0')
+
+        # サポート外のでデプロイメントタイプ
+        path = '/opsbee-llm/organizations/{}/deployments/{}'.format(
+            ORGANIZATION_ID,
+            DEPLOYMENT_QA_ID,
+        )
+        m.get(path, json=DEPLOYMENT_QA_RES)
+        with self.assertRaises(BadRequest) as e:
+            client.add_chat_histories_to_dataset(
+                ORGANIZATION_ID,
+                DEPLOYMENT_QA_ID,
+                DATASET_ID,
+                [HISTORY_ID],
+            )
+        self.assertEqual(e.exception.error, 'deployment type is not supported')
 
     @requests_mock.Mocker()
     def test_get_tags(self, m):
