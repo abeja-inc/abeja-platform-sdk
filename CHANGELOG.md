@@ -1,3 +1,7 @@
+$ 2.3.4
+- [OpsBeeLLM] Add methods for add-histories-dataset-apis #103
+- [OpsBeeLLM] Sort get histories #102
+
 # 2.3.3
 - [OpsBeeLLM] Add search_query in get-dataset-items #101
 
