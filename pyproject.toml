@@ -1,11 +1,10 @@
 [tool]
 [tool.poetry]
 name = "abeja-sdk"
-version = "2.3.4"
+version = "2.3.5.rc0"
 description = "ABEJA Platform Software Development Kit"
 classifiers = [
     "Development Status :: 3 - Alpha",
-    "Programming Language :: Python :: 3.7",
     "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
@@ -22,10 +21,10 @@ packages = [
 include = ["abeja/training/py.typed"]
 
 [tool.poetry.dependencies]
-python = ">=3.7,<3.12"
+python = ">=3.8,<3.12"
 retrying = "==1.3.4"
 tensorboardx = "==2.5.1"
-tomlkit = "==0.7.0"
+tomlkit = ">=0.7.0,<1.0.0"
 # Specify less than version 4 of protobuf as a dependency to prevent tensorboardX from breaking.
 # see https://github.com/lanpa/tensorboardX/issues/663
 protobuf = "<4"
