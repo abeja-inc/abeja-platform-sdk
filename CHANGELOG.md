@@ -1,4 +1,7 @@
-$ 2.3.4
+# 2.3.5
+- Update python & python packages version #104
+
+# 2.3.4
 - [OpsBeeLLM] Add methods for add-histories-dataset-apis #103
 - [OpsBeeLLM] Sort get histories #102
 
