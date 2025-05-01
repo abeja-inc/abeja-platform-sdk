@@ -10,9 +10,9 @@ class APIClient(BaseAPIClient):
 
     .. code-block:: python
 
-       from abeja.secret_manager.secret_version import APIClient
+        from abeja.secret_manager.secret_version import APIClient
 
-       api_client = APIClient()
+        api_client = APIClient()
     """
 
     def get_secret_versions(
@@ -29,12 +29,11 @@ class APIClient(BaseAPIClient):
         Request Syntax:
             .. code-block:: python
 
-            organization_id = "1410000000000"
-            secret_id = "3053595942757"
-            offset = 0
-            limit = 50
-            response = api_client.get_secret_versions(
-                organization_id, secret_id, offset, limit)
+                organization_id = "1410000000000"
+                secret_id = "3053595942757"
+                offset = 0
+                limit = 50
+                response = api_client.get_secret_versions(organization_id, secret_id, offset, limit)
 
         Params:
             - **organization_id** (str): organization identifier
@@ -50,27 +49,27 @@ class APIClient(BaseAPIClient):
 
             .. code-block:: json
 
-            {
-                "pagination": {
-                    "count": 1,
-                    "has_next": false,
-                    "limit": 50,
-                    "offset": 0
-                },
-                "versions": [
-                    {
-                        "created_at": "2025-04-30T19:01:19.216304Z",
-                        "id": "3884379411160",
-                        "organization_id": "3617229248589",
-                        "provider": "aws-secret-manager",
-                        "secret_id": "3471958194321",
-                        "status": "active",
-                        "updated_at": "2025-05-01T07:35:01.002633Z",
-                        "value": "test",
-                        "version": 1
-                    }
-                ]
-            }
+                {
+                    "pagination": {
+                        "count": 1,
+                        "has_next": false,
+                        "limit": 50,
+                        "offset": 0
+                    },
+                    "versions": [
+                        {
+                            "created_at": "2025-04-30T19:01:19.216304Z",
+                            "id": "3884379411160",
+                            "organization_id": "3617229248589",
+                            "provider": "aws-secret-manager",
+                            "secret_id": "3471958194321",
+                            "status": "active",
+                            "updated_at": "2025-05-01T07:35:01.002633Z",
+                            "value": "test",
+                            "version": 1
+                        }
+                    ]
+                }
 
         Raises:
             - BadRequest
@@ -146,11 +145,10 @@ class APIClient(BaseAPIClient):
         Request Syntax:
             .. code-block:: python
 
-            organization_id = "1410000000000"
-            secret_id = "3053595942757"
-            version_id = "1234567890123"
-            response = api_client.get_secret_version(
-                organization_id, secret_id, version_id)
+                organization_id = "1410000000000"
+                secret_id = "3053595942757"
+                version_id = "1234567890123"
+                response = api_client.get_secret_version(organization_id, secret_id, version_id)
 
         Params:
             - **organization_id** (str): organization identifier
@@ -165,17 +163,17 @@ class APIClient(BaseAPIClient):
 
             .. code-block:: json
 
-            {
-                "created_at": "2025-05-01T04:02:20.962352Z",
-                "id": "4914543680412",
-                "organization_id": "3617229248589",
-                "provider": "aws-secret-manager",
-                "secret_id": "3471958194321",
-                "status": "active",
-                "updated_at": "2025-05-01T07:40:00.204109Z",
-                "value": "test",
-                "version": 2
-            }
+                {
+                    "created_at": "2025-05-01T04:02:20.962352Z",
+                    "id": "4914543680412",
+                    "organization_id": "3617229248589",
+                    "provider": "aws-secret-manager",
+                    "secret_id": "3471958194321",
+                    "status": "active",
+                    "updated_at": "2025-05-01T07:40:00.204109Z",
+                    "value": "test",
+                    "version": 2
+                }
 
         Raises:
             - BadRequest
@@ -237,11 +235,10 @@ class APIClient(BaseAPIClient):
         Request Syntax:
             .. code-block:: python
 
-            organization_id = "1410000000000"
-            secret_id = "3053595942757"
-            value = "AKIAIOSFODNN7EXAMPLE"
-            response = api_client.create_secret_version(
-                organization_id, secret_id, value)
+                organization_id = "1410000000000"
+                secret_id = "3053595942757"
+                value = "AKIAIOSFODNN7EXAMPLE"
+                response = api_client.create_secret_version(organization_id, secret_id, value)
 
         Params:
             - **organization_id** (str): organization identifier
@@ -256,17 +253,17 @@ class APIClient(BaseAPIClient):
 
             .. code-block:: json
 
-            {
-                "created_at": "2025-05-01T18:58:18.712607Z",
-                "id": "7285296397904",
-                "organization_id": "3617229248589",
-                "provider": "aws-secret-manager",
-                "secret_id": "9598242896082",
-                "status": "active",
-                "updated_at": "2025-05-01T18:58:18.712610Z",
-                "value": "AKIAIOSFODNN7EXAMPLE",
-                "version": 2
-            }
+                {
+                    "created_at": "2025-05-01T18:58:18.712607Z",
+                    "id": "7285296397904",
+                    "organization_id": "3617229248589",
+                    "provider": "aws-secret-manager",
+                    "secret_id": "9598242896082",
+                    "status": "active",
+                    "updated_at": "2025-05-01T18:58:18.712610Z",
+                    "value": "AKIAIOSFODNN7EXAMPLE",
+                    "version": 2
+                }
 
         Raises:
             - BadRequest
@@ -325,12 +322,11 @@ class APIClient(BaseAPIClient):
         Request Syntax:
             .. code-block:: python
 
-            organization_id = "1410000000000"
-            secret_id = "3053595942757"
-            version_id = "1234567890123"
-            status = "inactive"
-            response = api_client.update_secret_version(
-                organization_id, secret_id, version_id, status)
+                organization_id = "1410000000000"
+                secret_id = "3053595942757"
+                version_id = "1234567890123"
+                status = "inactive"
+                response = api_client.update_secret_version(organization_id, secret_id, version_id, status)
 
         Params:
             - **organization_id** (str): organization identifier
@@ -346,17 +342,17 @@ class APIClient(BaseAPIClient):
 
             .. code-block:: json
 
-            {
-                "created_at": "2025-05-01T18:58:18.712607Z",
-                "id": "7285296397904",
-                "organization_id": "3617229248589",
-                "provider": "aws-secret-manager",
-                "secret_id": "9598242896082",
-                "status": "inactive",
-                "updated_at": "2025-05-01T19:04:40.398828Z",
-                "value": "test",
-                "version": 2
-            }
+                {
+                    "created_at": "2025-05-01T18:58:18.712607Z",
+                    "id": "7285296397904",
+                    "organization_id": "3617229248589",
+                    "provider": "aws-secret-manager",
+                    "secret_id": "9598242896082",
+                    "status": "inactive",
+                    "updated_at": "2025-05-01T19:04:40.398828Z",
+                    "value": "test",
+                    "version": 2
+                }
 
         Raises:
             - BadRequest
@@ -427,11 +423,10 @@ class APIClient(BaseAPIClient):
         Request Syntax:
             .. code-block:: python
 
-            organization_id = "1410000000000"
-            secret_id = "3053595942757"
-            version_id = "1234567890123"
-            response = api_client.delete_secret_version(
-                organization_id, secret_id, version_id)
+                organization_id = "1410000000000"
+                secret_id = "3053595942757"
+                version_id = "1234567890123"
+                response = api_client.delete_secret_version(organization_id, secret_id, version_id)
 
         Params:
             - **organization_id** (str): organization identifier
@@ -446,9 +441,9 @@ class APIClient(BaseAPIClient):
 
             .. code-block:: json
 
-            {
-                "message": "secret_version_id 1234567890123 successfully deleted"
-            }
+                {
+                    "message": "secret_version_id 1234567890123 successfully deleted"
+                }
 
         Raises:
             - BadRequest

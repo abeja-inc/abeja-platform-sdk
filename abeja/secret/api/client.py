@@ -28,11 +28,11 @@ class APIClient(BaseAPIClient):
         Request Syntax:
             .. code-block:: python
 
-            organization_id = "1410000000000"
-            offset = 0
-            limit = 50
-            response = api_client.get_secrets(
-                organization_id, offset, limit)
+                organization_id = "1410000000000"
+                offset = 0
+                limit = 50
+                response = api_client.get_secrets(
+                    organization_id, offset, limit)
 
         Params:
             - **organization_id** (str): organization identifier (required)
@@ -47,40 +47,40 @@ class APIClient(BaseAPIClient):
 
             .. code-block:: json
 
-            {
-                "organization_id": "3617229248589",
-                "secrets": [
-                    {
-                        "created_at": "2025-05-01T04:13:32.861378Z",
-                        "description": "",
-                        "expired_at": "2025-05-29T04:13:00Z",
-                        "id": "3354488798882",
-                        "name": "test",
-                        "organization_id": "3617229248589",
-                        "properties": null,
-                        "provider": "aws-secret-manager",
-                        "rotation": false,
-                        "updated_at": "2025-05-01T04:13:32.861380Z",
-                        "user_id": "3614618482910",
-                        "versions": [
-                            {
-                                "created_at": "2025-05-01T04:14:20.657971Z",
-                                "id": "9960370863434",
-                                "organization_id": "3617229248589",
-                                "provider": "aws-secret-manager",
-                                "secret_id": "3354488798882",
-                                "status": "inactive",
-                                "updated_at": "2025-05-01T07:05:00.613985Z",
-                                "value": test,
-                                "version": 1
-                            }
-                        ]
-                    }
-                ],
-                "offset": 0,
-                "limit": 50,
-                "has_next": false
-            }
+                {
+                    "organization_id": "3617229248589",
+                    "secrets": [
+                        {
+                            "created_at": "2025-05-01T04:13:32.861378Z",
+                            "description": "",
+                            "expired_at": "2025-05-29T04:13:00Z",
+                            "id": "3354488798882",
+                            "name": "test",
+                            "organization_id": "3617229248589",
+                            "properties": null,
+                            "provider": "aws-secret-manager",
+                            "rotation": false,
+                            "updated_at": "2025-05-01T04:13:32.861380Z",
+                            "user_id": "3614618482910",
+                            "versions": [
+                                {
+                                    "created_at": "2025-05-01T04:14:20.657971Z",
+                                    "id": "9960370863434",
+                                    "organization_id": "3617229248589",
+                                    "provider": "aws-secret-manager",
+                                    "secret_id": "3354488798882",
+                                    "status": "inactive",
+                                    "updated_at": "2025-05-01T07:05:00.613985Z",
+                                    "value": "test",
+                                    "version": 1
+                                }
+                            ]
+                        }
+                    ],
+                    "offset": 0,
+                    "limit": 50,
+                    "has_next": false
+                }
 
         Raises:
             - BadRequest: Invalid parameters (organization_id is missing, offset < 0, limit < 1 or limit > 100)
@@ -147,10 +147,10 @@ class APIClient(BaseAPIClient):
         Request Syntax:
             .. code-block:: python
 
-            organization_id = "1410000000000"
-            secret_id = "3053595942757"
-            response = api_client.get_secret(
-                organization_id, secret_id)
+                organization_id = "1410000000000"
+                secret_id = "3053595942757"
+                response = api_client.get_secret(
+                    organization_id, secret_id)
 
         Params:
             - **organization_id** (str): organization identifier (required)
@@ -164,32 +164,32 @@ class APIClient(BaseAPIClient):
 
             .. code-block:: json
 
-            {
-                "created_at": "2025-04-30T19:01:19.209973Z",
-                "description": "test",
-                "expired_at": "2025-05-21T19:01:00Z",
-                "id": "3471958194321",
-                "name": "test",
-                "organization_id": "3617229248589",
-                "properties": null,
-                "provider": "aws-secret-manager",
-                "rotation": false,
-                "updated_at": "2025-04-30T19:01:19.209975Z",
-                "user_id": "3614618482910",
-                "versions": [
-                    {
-                        "created_at": "2025-05-01T04:02:20.962352Z",
-                        "id": "4914543680412",
-                        "organization_id": "3617229248589",
-                        "provider": "aws-secret-manager",
-                        "secret_id": "3471958194321",
-                        "status": "active",
-                        "updated_at": "2025-05-01T07:10:00.646086Z",
-                        "value": "test",
-                        "version": 1
-                    }
-                ]
-            }
+                {
+                    "created_at": "2025-04-30T19:01:19.209973Z",
+                    "description": "test",
+                    "expired_at": "2025-05-21T19:01:00Z",
+                    "id": "3471958194321",
+                    "name": "test",
+                    "organization_id": "3617229248589",
+                    "properties": null,
+                    "provider": "aws-secret-manager",
+                    "rotation": false,
+                    "updated_at": "2025-04-30T19:01:19.209975Z",
+                    "user_id": "3614618482910",
+                    "versions": [
+                        {
+                            "created_at": "2025-05-01T04:02:20.962352Z",
+                            "id": "4914543680412",
+                            "organization_id": "3617229248589",
+                            "provider": "aws-secret-manager",
+                            "secret_id": "3471958194321",
+                            "status": "active",
+                            "updated_at": "2025-05-01T07:10:00.646086Z",
+                            "value": "test",
+                            "version": 1
+                        }
+                    ]
+                }
 
         Raises:
             - BadRequest: Invalid parameters (organization_id or secret_id is missing)
@@ -245,13 +245,13 @@ class APIClient(BaseAPIClient):
         Request Syntax:
             .. code-block:: python
 
-            organization_id = "1410000000000"
-            name = "AWS_ACCESS_KEY"
-            value = "AKIAIOSFODNN7EXAMPLE"
-            description = "AWS access key"
-            expired_at = "2024-12-15T16:50:33+09:00"
-            response = api_client.create_secret(
-                organization_id, name, value, description, expired_at)
+                organization_id = "1410000000000"
+                name = "AWS_ACCESS_KEY"
+                value = "AKIAIOSFODNN7EXAMPLE"
+                description = "AWS access key"
+                expired_at = "2024-12-15T16:50:33+09:00"
+                response = api_client.create_secret(
+                    organization_id, name, value, description, expired_at)
 
         Params:
             - **organization_id** (str): organization identifier (required)
@@ -270,32 +270,32 @@ class APIClient(BaseAPIClient):
 
             .. code-block:: json
 
-            {
-                "created_at": "2025-05-01T07:12:23.319068Z",
-                "description": null,
-                "expired_at": null,
-                "id": "2372152227971",
-                "name": "test-1612",
-                "organization_id": "3617229248589",
-                "properties": null,
-                "provider": "aws-secret-manager",
-                "rotation": false,
-                "updated_at": "2025-05-01T07:12:23.319071Z",
-                "user_id": "3614618482910",
-                "versions": [
-                    {
-                        "created_at": "2025-05-01T07:12:23.321625Z",
-                        "id": "1235028292438",
-                        "organization_id": "3617229248589",
-                        "provider": "aws-secret-manager",
-                        "secret_id": "2372152227971",
-                        "status": "active",
-                        "updated_at": "2025-05-01T07:12:23.321628Z",
-                        "value": "test",
-                        "version": 1
-                    }
-                ]
-            }
+                {
+                    "created_at": "2025-05-01T07:12:23.319068Z",
+                    "description": null,
+                    "expired_at": null,
+                    "id": "2372152227971",
+                    "name": "test-1612",
+                    "organization_id": "3617229248589",
+                    "properties": null,
+                    "provider": "aws-secret-manager",
+                    "rotation": false,
+                    "updated_at": "2025-05-01T07:12:23.319071Z",
+                    "user_id": "3614618482910",
+                    "versions": [
+                        {
+                            "created_at": "2025-05-01T07:12:23.321625Z",
+                            "id": "1235028292438",
+                            "organization_id": "3617229248589",
+                            "provider": "aws-secret-manager",
+                            "secret_id": "2372152227971",
+                            "status": "active",
+                            "updated_at": "2025-05-01T07:12:23.321628Z",
+                            "value": "test",
+                            "version": 1
+                        }
+                    ]
+                }
 
         Raises:
             - BadRequest: Invalid parameters (organization_id, name, or value is missing)
@@ -361,12 +361,12 @@ class APIClient(BaseAPIClient):
         Request Syntax:
             .. code-block:: python
 
-            organization_id = "1410000000000"
-            secret_id = "3053595942757"
-            description = "Updated AWS access key"
-            expired_at = "2025-12-15T16:50:33+09:00"
-            response = api_client.update_secret(
-                organization_id, secret_id, description, expired_at)
+                organization_id = "1410000000000"
+                secret_id = "3053595942757"
+                description = "Updated AWS access key"
+                expired_at = "2025-12-15T16:50:33+09:00"
+                response = api_client.update_secret(
+                    organization_id, secret_id, description, expired_at)
 
         Params:
             - **organization_id** (str): organization identifier (required)
@@ -382,32 +382,32 @@ class APIClient(BaseAPIClient):
 
             .. code-block:: json
 
-            {
-                "created_at": "2025-05-01T07:12:23.319068Z",
-                "description": "test",
-                "expired_at": null,
-                "id": "2372152227971",
-                "name": "test",
-                "organization_id": "3617229248589",
-                "properties": null,
-                "provider": "aws-secret-manager",
-                "rotation": false,
-                "updated_at": "2025-05-01T07:13:37.031149Z",
-                "user_id": "3614618482910",
-                "versions": [
-                    {
-                        "created_at": "2025-05-01T07:12:23.321625Z",
-                        "id": "1235028292438",
-                        "organization_id": "3617229248589",
-                        "provider": "aws-secret-manager",
-                        "secret_id": "2372152227971",
-                        "status": "active",
-                        "updated_at": "2025-05-01T07:12:23.321628Z",
-                        "value": "test",
-                        "version": 1
-                    }
-                ]
-            }
+                {
+                    "created_at": "2025-05-01T07:12:23.319068Z",
+                    "description": "test",
+                    "expired_at": null,
+                    "id": "2372152227971",
+                    "name": "test",
+                    "organization_id": "3617229248589",
+                    "properties": null,
+                    "provider": "aws-secret-manager",
+                    "rotation": false,
+                    "updated_at": "2025-05-01T07:13:37.031149Z",
+                    "user_id": "3614618482910",
+                    "versions": [
+                        {
+                            "created_at": "2025-05-01T07:12:23.321625Z",
+                            "id": "1235028292438",
+                            "organization_id": "3617229248589",
+                            "provider": "aws-secret-manager",
+                            "secret_id": "2372152227971",
+                            "status": "active",
+                            "updated_at": "2025-05-01T07:12:23.321628Z",
+                            "value": "test",
+                            "version": 1
+                        }
+                    ]
+                }
 
         Raises:
             - BadRequest: Invalid parameters (organization_id or secret_id is missing)
@@ -440,10 +440,10 @@ class APIClient(BaseAPIClient):
         Request Syntax:
             .. code-block:: python
 
-            organization_id = "1410000000000"
-            secret_id = "3053595942757"
-            response = api_client.delete_secret(
-                organization_id, secret_id)
+                organization_id = "1410000000000"
+                secret_id = "3053595942757"
+                response = api_client.delete_secret(
+                    organization_id, secret_id)
 
         Params:
             - **organization_id** (str): organization identifier (required)
@@ -457,9 +457,9 @@ class APIClient(BaseAPIClient):
 
             .. code-block:: json
 
-            {
-                "message": "secret_id 2372152227971 successfully deleted"
-            }
+                {
+                    "message": "secret_id 2372152227971 successfully deleted"
+                }
 
         Raises:
             - BadRequest: Invalid parameters (organization_id or secret_id is missing)
