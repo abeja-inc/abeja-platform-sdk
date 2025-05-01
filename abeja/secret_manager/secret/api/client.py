@@ -19,8 +19,7 @@ class APIClient(BaseAPIClient):
         self,
         organization_id: str,
         offset: Optional[int] = 0,
-        limit: Optional[int] = 50,
-        return_secret_value: Optional[bool] = False,
+        limit: Optional[int] = 50
     ) -> dict:
         """get secrets
 
@@ -29,18 +28,16 @@ class APIClient(BaseAPIClient):
         Request Syntax:
             .. code-block:: python
 
-                organization_id = "1410000000000"
-                offset = 0
-                limit = 50
-                return_secret_value = False
-                response = api_client.get_secrets(
-                    organization_id, offset, limit, return_secret_value)
+            organization_id = "1410000000000"
+            offset = 0
+            limit = 50
+            response = api_client.get_secrets(
+                organization_id, offset, limit)
 
         Params:
             - **organization_id** (str): organization identifier (required)
             - **offset** (int): **[optional]** offset of secrets (which starts from 0)
             - **limit** (int): **[optional]** max number of secrets to be returned (between 1 and 100)
-            - **return_secret_value** (bool): **[optional]** whether to return secret values
 
         Return type:
             dict
@@ -50,33 +47,40 @@ class APIClient(BaseAPIClient):
 
             .. code-block:: json
 
-                {
-                    'organization_id': '1410000000000'
-                    'secrets': [
-                        {
-                            'id': '3053595942757',
-                            'organization_id': '1410000000000',
-                            'name': 'AWS_ACCESS_KEY',
-                            'description': 'AWS access key',
-                            'rotation': false,
-                            'created_at': '2023-12-15T16:50:33+09:00',
-                            'updated_at': '2023-12-15T16:50:33+09:00',
-                            'versions': [
-                                {
-                                    'id': '1234567890123',
-                                    'secret_id': '3053595942757',
-                                    'version': 1,
-                                    'expired_at': '2024-12-15T16:50:33+09:00',
-                                    'created_at': '2023-12-15T16:50:33+09:00'
-                                }
-                            ]
-                        },
-                        ...
-                    ],
-                    'offset': 0,
-                    'limit': 50,
-                    'has_next': False,
-                }
+            {
+                "organization_id": "3617229248589",
+                "secrets": [
+                    {
+                        "created_at": "2025-05-01T04:13:32.861378Z",
+                        "description": "",
+                        "expired_at": "2025-05-29T04:13:00Z",
+                        "id": "3354488798882",
+                        "name": "test",
+                        "organization_id": "3617229248589",
+                        "properties": null,
+                        "provider": "aws-secret-manager",
+                        "rotation": false,
+                        "updated_at": "2025-05-01T04:13:32.861380Z",
+                        "user_id": "3614618482910",
+                        "versions": [
+                            {
+                                "created_at": "2025-05-01T04:14:20.657971Z",
+                                "id": "9960370863434",
+                                "organization_id": "3617229248589",
+                                "provider": "aws-secret-manager",
+                                "secret_id": "3354488798882",
+                                "status": "inactive",
+                                "updated_at": "2025-05-01T07:05:00.613985Z",
+                                "value": test,
+                                "version": 1
+                            }
+                        ]
+                    }
+                ],
+                "offset": 0,
+                "limit": 50,
+                "has_next": false
+            }
 
         Raises:
             - BadRequest: Invalid parameters (organization_id is missing, offset < 0, limit < 1 or limit > 100)
@@ -114,21 +118,20 @@ class APIClient(BaseAPIClient):
 
         params['offset'] = offset
         params['limit'] = limit
-        params['return_secret_value'] = bool(return_secret_value)
+        params['return_secret_value'] = True
 
         path = '/secret-manager/organizations/{}/secrets'.format(
             organization_id,
         )
         result = self._connection.api_request(method='GET', path=path, params=params)
 
-        if return_secret_value:
-            for secret in result.get('secrets', []):
-                for version in secret.get('versions', []):
-                    if 'value' in version:
-                        try:
-                            version['value'] = base64.b64decode(version['value']).decode('utf-8')
-                        except Exception:
-                            pass
+        for secret in result.get('secrets', []):
+            for version in secret.get('versions', []):
+                if 'value' in version:
+                    try:
+                        version['value'] = base64.b64decode(version['value']).decode('utf-8')
+                    except Exception:
+                        pass
 
         return result
 
@@ -136,7 +139,6 @@ class APIClient(BaseAPIClient):
         self,
         organization_id: str,
         secret_id: str,
-        return_secret_value: Optional[bool] = False,
     ) -> dict:
         """get secret
 
@@ -145,16 +147,14 @@ class APIClient(BaseAPIClient):
         Request Syntax:
             .. code-block:: python
 
-                organization_id = "1410000000000"
-                secret_id = "3053595942757"
-                return_secret_value = False
-                response = api_client.get_secret(
-                    organization_id, secret_id, return_secret_value)
+            organization_id = "1410000000000"
+            secret_id = "3053595942757"
+            response = api_client.get_secret(
+                organization_id, secret_id)
 
         Params:
             - **organization_id** (str): organization identifier (required)
             - **secret_id** (str): secret identifier (required)
-            - **return_secret_value** (bool): **[optional]** whether to return secret values
 
         Return type:
             dict
@@ -164,24 +164,32 @@ class APIClient(BaseAPIClient):
 
             .. code-block:: json
 
-                {
-                    'id': '3053595942757',
-                    'organization_id': '1410000000000',
-                    'name': 'AWS_ACCESS_KEY',
-                    'description': 'AWS access key',
-                    'rotation': false,
-                    'created_at': '2023-12-15T16:50:33+09:00',
-                    'updated_at': '2023-12-15T16:50:33+09:00',
-                    'versions': [
-                        {
-                            'id': '1234567890123',
-                            'secret_id': '3053595942757',
-                            'version': 1,
-                            'expired_at': '2024-12-15T16:50:33+09:00',
-                            'created_at': '2023-12-15T16:50:33+09:00'
-                        }
-                    ]
-                }
+            {
+                "created_at": "2025-04-30T19:01:19.209973Z",
+                "description": "test",
+                "expired_at": "2025-05-21T19:01:00Z",
+                "id": "3471958194321",
+                "name": "test",
+                "organization_id": "3617229248589",
+                "properties": null,
+                "provider": "aws-secret-manager",
+                "rotation": false,
+                "updated_at": "2025-04-30T19:01:19.209975Z",
+                "user_id": "3614618482910",
+                "versions": [
+                    {
+                        "created_at": "2025-05-01T04:02:20.962352Z",
+                        "id": "4914543680412",
+                        "organization_id": "3617229248589",
+                        "provider": "aws-secret-manager",
+                        "secret_id": "3471958194321",
+                        "status": "active",
+                        "updated_at": "2025-05-01T07:10:00.646086Z",
+                        "value": "test",
+                        "version": 1
+                    }
+                ]
+            }
 
         Raises:
             - BadRequest: Invalid parameters (organization_id or secret_id is missing)
@@ -205,7 +213,7 @@ class APIClient(BaseAPIClient):
             )
 
         params = {}
-        params['return_secret_value'] = bool(return_secret_value)
+        params['return_secret_value'] = True
 
         path = '/secret-manager/organizations/{}/secrets/{}'.format(
             organization_id,
@@ -213,13 +221,12 @@ class APIClient(BaseAPIClient):
         )
         result = self._connection.api_request(method='GET', path=path, params=params)
 
-        if return_secret_value:
-            for version in result.get('versions', []):
-                if 'value' in version:
-                    try:
-                        version['value'] = base64.b64decode(version['value']).decode('utf-8')
-                    except Exception:
-                        pass
+        for version in result.get('versions', []):
+            if 'value' in version:
+                try:
+                    version['value'] = base64.b64decode(version['value']).decode('utf-8')
+                except Exception:
+                    pass
 
         return result
 
@@ -228,7 +235,6 @@ class APIClient(BaseAPIClient):
         organization_id: str,
         name: str,
         value: str,
-        rotation: bool = False,
         description: Optional[str] = None,
         expired_at: Optional[str] = None,
     ) -> dict:
@@ -239,20 +245,20 @@ class APIClient(BaseAPIClient):
         Request Syntax:
             .. code-block:: python
 
-                organization_id = "1410000000000"
-                name = "AWS_ACCESS_KEY"
-                value = "AKIAIOSFODNN7EXAMPLE"
-                rotation = False
-                description = "AWS access key"
-                expired_at = "2024-12-15T16:50:33+09:00"
-                response = api_client.create_secret(
-                    organization_id, name, value, rotation, description, expired_at)
+            organization_id = "1410000000000"
+            name = "AWS_ACCESS_KEY"
+            value = "AKIAIOSFODNN7EXAMPLE"
+            description = "AWS access key"
+            expired_at = "2024-12-15T16:50:33+09:00"
+            response = api_client.create_secret(
+                organization_id, name, value, description, expired_at)
 
         Params:
             - **organization_id** (str): organization identifier (required)
-            - **name** (str): secret name (required)
+            - **name** (str): secret name (required) The secret name can contain ASCII letters, numbers, and the following
+              characters: /_+=.@- Do not end your secret name with a hyphen followed by six characters. The secret name must
+              be unique within the same organization.
             - **value** (str): secret value (required)
-            - **rotation** (bool): **[optional]** whether to enable rotation
             - **description** (str): **[optional]** secret description
             - **expired_at** (str): **[optional]** expiration date (ISO 8601 format)
 
@@ -264,25 +270,32 @@ class APIClient(BaseAPIClient):
 
             .. code-block:: json
 
-                {
-                    'id': '3053595942757',
-                    'organization_id': '1410000000000',
-                    'name': 'AWS_ACCESS_KEY',
-                    'description': 'AWS access key',
-                    'rotation': false,
-                    'created_at': '2023-12-15T16:50:33+09:00',
-                    'updated_at': '2023-12-15T16:50:33+09:00',
-                    'versions': [
-                        {
-                            'id': '1234567890123',
-                            'secret_id': '3053595942757',
-                            'version': 1,
-                            'value': 'AKIAIOSFODNN7EXAMPLE',
-                            'expired_at': '2024-12-15T16:50:33+09:00',
-                            'created_at': '2023-12-15T16:50:33+09:00'
-                        }
-                    ]
-                }
+            {
+                "created_at": "2025-05-01T07:12:23.319068Z",
+                "description": null,
+                "expired_at": null,
+                "id": "2372152227971",
+                "name": "test-1612",
+                "organization_id": "3617229248589",
+                "properties": null,
+                "provider": "aws-secret-manager",
+                "rotation": false,
+                "updated_at": "2025-05-01T07:12:23.319071Z",
+                "user_id": "3614618482910",
+                "versions": [
+                    {
+                        "created_at": "2025-05-01T07:12:23.321625Z",
+                        "id": "1235028292438",
+                        "organization_id": "3617229248589",
+                        "provider": "aws-secret-manager",
+                        "secret_id": "2372152227971",
+                        "status": "active",
+                        "updated_at": "2025-05-01T07:12:23.321628Z",
+                        "value": "test",
+                        "version": 1
+                    }
+                ]
+            }
 
         Raises:
             - BadRequest: Invalid parameters (organization_id, name, or value is missing)
@@ -326,9 +339,6 @@ class APIClient(BaseAPIClient):
         if description:
             payload['description'] = description
 
-        if rotation:
-            payload['rotation'] = str(rotation).lower()
-
         path = '/secret-manager/organizations/{}/secrets'.format(
             organization_id,
         )
@@ -342,7 +352,6 @@ class APIClient(BaseAPIClient):
         organization_id: str,
         secret_id: str,
         description: Optional[str] = None,
-        rotation: Optional[bool] = False,
         expired_at: Optional[str] = None,
     ) -> dict:
         """update a secret
@@ -352,19 +361,17 @@ class APIClient(BaseAPIClient):
         Request Syntax:
             .. code-block:: python
 
-                organization_id = "1410000000000"
-                secret_id = "3053595942757"
-                description = "Updated AWS access key"
-                rotation = True
-                expired_at = "2025-12-15T16:50:33+09:00"
-                response = api_client.update_secret(
-                    organization_id, secret_id, description, rotation, expired_at)
+            organization_id = "1410000000000"
+            secret_id = "3053595942757"
+            description = "Updated AWS access key"
+            expired_at = "2025-12-15T16:50:33+09:00"
+            response = api_client.update_secret(
+                organization_id, secret_id, description, expired_at)
 
         Params:
             - **organization_id** (str): organization identifier (required)
             - **secret_id** (str): secret identifier (required)
             - **description** (str): **[optional]** secret description
-            - **rotation** (bool): **[optional]** whether to enable rotation
             - **expired_at** (str): **[optional]** expiration date (ISO 8601 format)
 
         Return type:
@@ -375,27 +382,35 @@ class APIClient(BaseAPIClient):
 
             .. code-block:: json
 
-                {
-                    'id': '3053595942757',
-                    'organization_id': '1410000000000',
-                    'name': 'AWS_ACCESS_KEY',
-                    'description': 'Updated AWS access key',
-                    'rotation': true,
-                    'created_at': '2023-12-15T16:50:33+09:00',
-                    'updated_at': '2024-04-30T10:30:00+09:00',
-                    'versions': [
-                        {
-                            'id': '1234567890123',
-                            'secret_id': '3053595942757',
-                            'version': 1,
-                            'expired_at': '2025-12-15T16:50:33+09:00',
-                            'created_at': '2023-12-15T16:50:33+09:00'
-                        }
-                    ]
-                }
+            {
+                "created_at": "2025-05-01T07:12:23.319068Z",
+                "description": "test",
+                "expired_at": null,
+                "id": "2372152227971",
+                "name": "test",
+                "organization_id": "3617229248589",
+                "properties": null,
+                "provider": "aws-secret-manager",
+                "rotation": false,
+                "updated_at": "2025-05-01T07:13:37.031149Z",
+                "user_id": "3614618482910",
+                "versions": [
+                    {
+                        "created_at": "2025-05-01T07:12:23.321625Z",
+                        "id": "1235028292438",
+                        "organization_id": "3617229248589",
+                        "provider": "aws-secret-manager",
+                        "secret_id": "2372152227971",
+                        "status": "active",
+                        "updated_at": "2025-05-01T07:12:23.321628Z",
+                        "value": "test",
+                        "version": 1
+                    }
+                ]
+            }
 
         Raises:
-            - BadRequest: Invalid parameters
+            - BadRequest: Invalid parameters (organization_id or secret_id is missing)
             - Unauthorized: Authentication failed
             - InternalServerError
         """
@@ -403,9 +418,6 @@ class APIClient(BaseAPIClient):
 
         if description:
             payload['description'] = description
-
-        if rotation:
-            payload['rotation'] = str(rotation).lower()
 
         if expired_at:
             payload['expired_at'] = expired_at
@@ -428,10 +440,10 @@ class APIClient(BaseAPIClient):
         Request Syntax:
             .. code-block:: python
 
-                organization_id = "1410000000000"
-                secret_id = "3053595942757"
-                response = api_client.delete_secret(
-                    organization_id, secret_id)
+            organization_id = "1410000000000"
+            secret_id = "3053595942757"
+            response = api_client.delete_secret(
+                organization_id, secret_id)
 
         Params:
             - **organization_id** (str): organization identifier (required)
@@ -445,15 +457,9 @@ class APIClient(BaseAPIClient):
 
             .. code-block:: json
 
-                {
-                    'id': '3053595942757',
-                    'organization_id': '1410000000000',
-                    'name': 'AWS_ACCESS_KEY',
-                    'description': 'AWS access key',
-                    'rotation': false,
-                    'created_at': '2023-12-15T16:50:33+09:00',
-                    'updated_at': '2023-12-15T16:50:33+09:00'
-                }
+            {
+                "message": "secret_id 2372152227971 successfully deleted"
+            }
 
         Raises:
             - BadRequest: Invalid parameters (organization_id or secret_id is missing)

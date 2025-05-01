@@ -21,7 +21,6 @@ class APIClient(BaseAPIClient):
         secret_id: str,
         offset: Optional[int] = 0,
         limit: Optional[int] = 50,
-        return_secret_value: Optional[bool] = False,
     ) -> dict:
         """get secret versions
 
@@ -30,20 +29,18 @@ class APIClient(BaseAPIClient):
         Request Syntax:
             .. code-block:: python
 
-                organization_id = "1410000000000"
-                secret_id = "3053595942757"
-                offset = 0
-                limit = 50
-                return_secret_value = False
-                response = api_client.get_secret_versions(
-                    organization_id, secret_id, offset, limit, return_secret_value)
+            organization_id = "1410000000000"
+            secret_id = "3053595942757"
+            offset = 0
+            limit = 50
+            response = api_client.get_secret_versions(
+                organization_id, secret_id, offset, limit)
 
         Params:
             - **organization_id** (str): organization identifier
             - **secret_id** (str): secret identifier
             - **offset** (int): **[optional]** offset of versions ( which starts from 0 )
             - **limit** (int): **[optional]** max number of versions to be returned
-            - **return_secret_value** (bool): **[optional]** whether to return secret values
 
         Return type:
             dict
@@ -53,30 +50,27 @@ class APIClient(BaseAPIClient):
 
             .. code-block:: json
 
-                {
-                    'secret_id': '3053595942757',
-                    'versions': [
-                        {
-                            'id': '1234567890123',
-                            'secret_id': '3053595942757',
-                            'version': 2,
-                            'status': 'active',
-                            'expired_at': '2024-12-15T16:50:33+09:00',
-                            'created_at': '2023-12-15T16:50:33+09:00'
-                        },
-                        {
-                            'id': '9876543210987',
-                            'secret_id': '3053595942757',
-                            'version': 1,
-                            'status': 'inactive',
-                            'expired_at': '2024-06-15T16:50:33+09:00',
-                            'created_at': '2023-06-15T16:50:33+09:00'
-                        }
-                    ],
-                    'offset': 0,
-                    'limit': 50,
-                    'has_next': False,
-                }
+            {
+                "pagination": {
+                    "count": 1,
+                    "has_next": false,
+                    "limit": 50,
+                    "offset": 0
+                },
+                "versions": [
+                    {
+                        "created_at": "2025-04-30T19:01:19.216304Z",
+                        "id": "3884379411160",
+                        "organization_id": "3617229248589",
+                        "provider": "aws-secret-manager",
+                        "secret_id": "3471958194321",
+                        "status": "active",
+                        "updated_at": "2025-05-01T07:35:01.002633Z",
+                        "value": "test",
+                        "version": 1
+                    }
+                ]
+            }
 
         Raises:
             - BadRequest
@@ -122,7 +116,7 @@ class APIClient(BaseAPIClient):
 
         params['offset'] = offset
         params['limit'] = limit
-        params['return_secret_value'] = bool(return_secret_value)
+        params['return_secret_value'] = True
 
         path = '/secret-manager/organizations/{}/secrets/{}/versions'.format(
             organization_id,
@@ -130,13 +124,12 @@ class APIClient(BaseAPIClient):
         )
         response = self._connection.api_request(method='GET', path=path, params=params)
 
-        if return_secret_value and 'versions' in response:
-            for version in response['versions']:
-                if 'value' in version and version['value']:
-                    try:
-                        version['value'] = base64.b64decode(version['value']).decode('utf-8')
-                    except Exception:
-                        pass
+        for version in response['versions']:
+            if 'value' in version and version['value']:
+                try:
+                    version['value'] = base64.b64decode(version['value']).decode('utf-8')
+                except Exception:
+                    pass
 
         return response
 
@@ -145,7 +138,6 @@ class APIClient(BaseAPIClient):
         organization_id: str,
         secret_id: str,
         version_id: str,
-        return_secret_value: Optional[bool] = False,
     ) -> dict:
         """get secret version
 
@@ -154,18 +146,16 @@ class APIClient(BaseAPIClient):
         Request Syntax:
             .. code-block:: python
 
-                organization_id = "1410000000000"
-                secret_id = "3053595942757"
-                version_id = "1234567890123"
-                return_secret_value = False
-                response = api_client.get_secret_version(
-                    organization_id, secret_id, version_id, return_secret_value)
+            organization_id = "1410000000000"
+            secret_id = "3053595942757"
+            version_id = "1234567890123"
+            response = api_client.get_secret_version(
+                organization_id, secret_id, version_id)
 
         Params:
             - **organization_id** (str): organization identifier
             - **secret_id** (str): secret identifier
             - **version_id** (str): version identifier
-            - **return_secret_value** (bool): **[optional]** whether to return secret value
 
         Return type:
             dict
@@ -175,14 +165,17 @@ class APIClient(BaseAPIClient):
 
             .. code-block:: json
 
-                {
-                    'id': '1234567890123',
-                    'secret_id': '3053595942757',
-                    'version': 2,
-                    'status': 'active',
-                    'expired_at': '2024-12-15T16:50:33+09:00',
-                    'created_at': '2023-12-15T16:50:33+09:00'
-                }
+            {
+                "created_at": "2025-05-01T04:02:20.962352Z",
+                "id": "4914543680412",
+                "organization_id": "3617229248589",
+                "provider": "aws-secret-manager",
+                "secret_id": "3471958194321",
+                "status": "active",
+                "updated_at": "2025-05-01T07:40:00.204109Z",
+                "value": "test",
+                "version": 2
+            }
 
         Raises:
             - BadRequest
@@ -214,7 +207,7 @@ class APIClient(BaseAPIClient):
             )
 
         params = {}
-        params['return_secret_value'] = return_secret_value
+        params['return_secret_value'] = True
 
         path = '/secret-manager/organizations/{}/secrets/{}/versions/{}'.format(
             organization_id,
@@ -223,7 +216,7 @@ class APIClient(BaseAPIClient):
         )
         response = self._connection.api_request(method='GET', path=path, params=params)
 
-        if return_secret_value and 'value' in response and response['value']:
+        if 'value' in response and response['value']:
             try:
                 response['value'] = base64.b64decode(response['value']).decode('utf-8')
             except Exception:
@@ -236,7 +229,6 @@ class APIClient(BaseAPIClient):
         organization_id: str,
         secret_id: str,
         value: str,
-        return_secret_value: Optional[bool] = False,
     ) -> dict:
         """create a secret version
 
@@ -245,18 +237,16 @@ class APIClient(BaseAPIClient):
         Request Syntax:
             .. code-block:: python
 
-                organization_id = "1410000000000"
-                secret_id = "3053595942757"
-                value = "AKIAIOSFODNN7EXAMPLE"
-                return_secret_value = False
-                response = api_client.create_secret_version(
-                    organization_id, secret_id, value, return_secret_value)
+            organization_id = "1410000000000"
+            secret_id = "3053595942757"
+            value = "AKIAIOSFODNN7EXAMPLE"
+            response = api_client.create_secret_version(
+                organization_id, secret_id, value)
 
         Params:
             - **organization_id** (str): organization identifier
             - **secret_id** (str): secret identifier
             - **value** (str): secret value
-            - **return_secret_value** (bool): **[optional]** whether to return secret value
 
         Return type:
             dict
@@ -266,15 +256,17 @@ class APIClient(BaseAPIClient):
 
             .. code-block:: json
 
-                {
-                    'id': '1234567890123',
-                    'secret_id': '3053595942757',
-                    'version': 2,
-                    'status': 'active',
-                    'value': 'AKIAIOSFODNN7EXAMPLE',
-                    'expired_at': '2024-12-15T16:50:33+09:00',
-                    'created_at': '2023-12-15T16:50:33+09:00'
-                }
+            {
+                "created_at": "2025-05-01T18:58:18.712607Z",
+                "id": "7285296397904",
+                "organization_id": "3617229248589",
+                "provider": "aws-secret-manager",
+                "secret_id": "9598242896082",
+                "status": "active",
+                "updated_at": "2025-05-01T18:58:18.712610Z",
+                "value": "AKIAIOSFODNN7EXAMPLE",
+                "version": 2
+            }
 
         Raises:
             - BadRequest
@@ -306,7 +298,7 @@ class APIClient(BaseAPIClient):
             )
 
         params = {}
-        params['return_secret_value'] = return_secret_value
+        params['return_secret_value'] = True
 
         payload = {
             'value': value,
@@ -316,15 +308,8 @@ class APIClient(BaseAPIClient):
             organization_id,
             secret_id,
         )
-        response = self._connection.api_request(method='POST', path=path, json=payload, params=params)
 
-        if return_secret_value and 'value' in response and response['value']:
-            try:
-                response['value'] = base64.b64decode(response['value']).decode('utf-8')
-            except Exception:
-                pass
-
-        return response
+        return self._connection.api_request(method='POST', path=path, json=payload, params=params)
 
     def update_secret_version(
         self,
@@ -332,7 +317,6 @@ class APIClient(BaseAPIClient):
         secret_id: str,
         version_id: str,
         status: str,
-        value: Optional[str] = None,
     ) -> dict:
         """update a secret version
 
@@ -341,20 +325,18 @@ class APIClient(BaseAPIClient):
         Request Syntax:
             .. code-block:: python
 
-                organization_id = "1410000000000"
-                secret_id = "3053595942757"
-                version_id = "1234567890123"
-                status = "inactive"
-                value = "AKIAIOSFODNN7EXAMPLE"  # オプショナル
-                response = api_client.update_secret_version(
-                    organization_id, secret_id, version_id, status, value)
+            organization_id = "1410000000000"
+            secret_id = "3053595942757"
+            version_id = "1234567890123"
+            status = "inactive"
+            response = api_client.update_secret_version(
+                organization_id, secret_id, version_id, status)
 
         Params:
             - **organization_id** (str): organization identifier
             - **secret_id** (str): secret identifier
             - **version_id** (str): version identifier
             - **status** (str): version status ('active' or 'inactive')
-            - **value** (str): **[optional]** 新しいシークレット値
 
         Return type:
             dict
@@ -364,14 +346,17 @@ class APIClient(BaseAPIClient):
 
             .. code-block:: json
 
-                {
-                    'id': '1234567890123',
-                    'secret_id': '3053595942757',
-                    'version': 2,
-                    'status': 'inactive',
-                    'expired_at': '2024-12-15T16:50:33+09:00',
-                    'created_at': '2023-12-15T16:50:33+09:00'
-                }
+            {
+                "created_at": "2025-05-01T18:58:18.712607Z",
+                "id": "7285296397904",
+                "organization_id": "3617229248589",
+                "provider": "aws-secret-manager",
+                "secret_id": "9598242896082",
+                "status": "inactive",
+                "updated_at": "2025-05-01T19:04:40.398828Z",
+                "value": "test",
+                "version": 2
+            }
 
         Raises:
             - BadRequest
@@ -422,16 +407,6 @@ class APIClient(BaseAPIClient):
             'status': status,
         }
 
-        if value is not None:
-            if value == '':
-                error_message = '"value" is necessary'
-                raise BadRequest(
-                    error=error_message,
-                    error_description=error_message,
-                    status_code=400
-                )
-            payload['value'] = value
-
         path = '/secret-manager/organizations/{}/secrets/{}/versions/{}'.format(
             organization_id,
             secret_id,
@@ -452,11 +427,11 @@ class APIClient(BaseAPIClient):
         Request Syntax:
             .. code-block:: python
 
-                organization_id = "1410000000000"
-                secret_id = "3053595942757"
-                version_id = "1234567890123"
-                response = api_client.delete_secret_version(
-                    organization_id, secret_id, version_id)
+            organization_id = "1410000000000"
+            secret_id = "3053595942757"
+            version_id = "1234567890123"
+            response = api_client.delete_secret_version(
+                organization_id, secret_id, version_id)
 
         Params:
             - **organization_id** (str): organization identifier
@@ -471,14 +446,9 @@ class APIClient(BaseAPIClient):
 
             .. code-block:: json
 
-                {
-                    'id': '1234567890123',
-                    'secret_id': '3053595942757',
-                    'version': 2,
-                    'status': 'inactive',
-                    'expired_at': '2024-12-15T16:50:33+09:00',
-                    'created_at': '2023-12-15T16:50:33+09:00'
-                }
+            {
+                "message": "secret_version_id 1234567890123 successfully deleted"
+            }
 
         Raises:
             - BadRequest

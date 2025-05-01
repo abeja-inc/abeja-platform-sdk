@@ -13,8 +13,9 @@ SECRET_ID = '3053595942757'
 VERSION_ID = '1234567890123'
 SECRET_VALUE = 'AKIAIOSFODNN7EXAMPLE'
 ENCODED_SECRET_VALUE = base64.b64encode(SECRET_VALUE.encode('utf-8')).decode('utf-8')
-EXPIRED_AT = '2024-12-15T16:50:33+09:00'
 CREATED_AT = '2023-12-15T16:50:33+09:00'
+UPDATED_AT = '2023-12-15T16:55:33+09:00'
+PROVIDER = 'aws-secret-manager'
 
 # バージョン情報
 SECRET_VERSION = {
@@ -22,8 +23,10 @@ SECRET_VERSION = {
     'secret_id': SECRET_ID,
     'version': 1,
     'status': 'active',
-    'expired_at': EXPIRED_AT,
-    'created_at': CREATED_AT
+    'created_at': CREATED_AT,
+    'updated_at': UPDATED_AT,
+    'organization_id': ORGANIZATION_ID,
+    'provider': PROVIDER
 }
 
 # 値を含むバージョン情報
@@ -33,13 +36,14 @@ SECRET_VERSION_WITH_VALUE = {
     'version': 1,
     'status': 'active',
     'value': ENCODED_SECRET_VALUE,
-    'expired_at': EXPIRED_AT,
-    'created_at': CREATED_AT
+    'created_at': CREATED_AT,
+    'updated_at': UPDATED_AT,
+    'organization_id': ORGANIZATION_ID,
+    'provider': PROVIDER
 }
 
 # バージョン一覧のレスポンス
 SECRET_VERSIONS_RESPONSE = {
-    'secret_id': SECRET_ID,
     'versions': [
         SECRET_VERSION,
         {
@@ -47,18 +51,22 @@ SECRET_VERSIONS_RESPONSE = {
             'secret_id': SECRET_ID,
             'version': 2,
             'status': 'inactive',
-            'expired_at': EXPIRED_AT,
-            'created_at': CREATED_AT
+            'created_at': CREATED_AT,
+            'updated_at': UPDATED_AT,
+            'organization_id': ORGANIZATION_ID,
+            'provider': PROVIDER
         }
     ],
-    'offset': 0,
-    'limit': 50,
-    'has_next': False
+    'pagination': {
+        'offset': 0,
+        'limit': 50,
+        'has_next': False,
+        'count': 2
+    }
 }
 
 # 値を含むバージョン一覧のレスポンス
 SECRET_VERSIONS_WITH_VALUE_RESPONSE = {
-    'secret_id': SECRET_ID,
     'versions': [
         SECRET_VERSION_WITH_VALUE,
         {
@@ -67,13 +75,18 @@ SECRET_VERSIONS_WITH_VALUE_RESPONSE = {
             'version': 2,
             'status': 'inactive',
             'value': ENCODED_SECRET_VALUE,
-            'expired_at': EXPIRED_AT,
-            'created_at': CREATED_AT
+            'created_at': CREATED_AT,
+            'updated_at': UPDATED_AT,
+            'organization_id': ORGANIZATION_ID,
+            'provider': PROVIDER
         }
     ],
-    'offset': 0,
-    'limit': 50,
-    'has_next': False
+    'pagination': {
+        'offset': 0,
+        'limit': 50,
+        'has_next': False,
+        'count': 2
+    }
 }
 
 # 更新後のバージョン情報
@@ -82,8 +95,15 @@ UPDATED_SECRET_VERSION = {
     'secret_id': SECRET_ID,
     'version': 1,
     'status': 'inactive',
-    'expired_at': EXPIRED_AT,
-    'created_at': CREATED_AT
+    'created_at': CREATED_AT,
+    'updated_at': UPDATED_AT,
+    'organization_id': ORGANIZATION_ID,
+    'provider': PROVIDER
+}
+
+# 削除レスポンス
+DELETE_SECRET_VERSION_RESPONSE = {
+    "message": "secret_version_id {} successfully deleted".format(VERSION_ID)
 }
 
 
@@ -101,17 +121,17 @@ class TestSecretVersionAPIClient(unittest.TestCase):
         self.assertDictEqual(ret, SECRET_VERSIONS_RESPONSE)
 
         # with parameters
-        path_with_params = '/secret-manager/organizations/{}/secrets/{}/versions?offset=10&limit=20&return_secret_value=false'.format(
+        path_with_params = '/secret-manager/organizations/{}/secrets/{}/versions?offset=10&limit=20&return_secret_value=true'.format(
             ORGANIZATION_ID, SECRET_ID)
         m.get(path_with_params, json=SECRET_VERSIONS_RESPONSE)
-        ret = client.get_secret_versions(ORGANIZATION_ID, SECRET_ID, offset=10, limit=20, return_secret_value=False)
+        ret = client.get_secret_versions(ORGANIZATION_ID, SECRET_ID, offset=10, limit=20)
         self.assertDictEqual(ret, SECRET_VERSIONS_RESPONSE)
 
         # with return_secret_value
         path_with_secret_value = '/secret-manager/organizations/{}/secrets/{}/versions?offset=0&limit=50&return_secret_value=true'.format(
             ORGANIZATION_ID, SECRET_ID)
         m.get(path_with_secret_value, json=SECRET_VERSIONS_WITH_VALUE_RESPONSE)
-        ret = client.get_secret_versions(ORGANIZATION_ID, SECRET_ID, return_secret_value=True)
+        ret = client.get_secret_versions(ORGANIZATION_ID, SECRET_ID)
         # 値がデコードされていることを確認
         self.assertEqual(ret['versions'][0]['value'], SECRET_VALUE)
 
@@ -151,7 +171,7 @@ class TestSecretVersionAPIClient(unittest.TestCase):
         path_with_secret_value = '/secret-manager/organizations/{}/secrets/{}/versions/{}?return_secret_value=true'.format(
             ORGANIZATION_ID, SECRET_ID, VERSION_ID)
         m.get(path_with_secret_value, json=SECRET_VERSION_WITH_VALUE)
-        ret = client.get_secret_version(ORGANIZATION_ID, SECRET_ID, VERSION_ID, return_secret_value=True)
+        ret = client.get_secret_version(ORGANIZATION_ID, SECRET_ID, VERSION_ID)
         # 値がデコードされていることを確認
         self.assertEqual(ret['value'], SECRET_VALUE)
 
@@ -186,19 +206,7 @@ class TestSecretVersionAPIClient(unittest.TestCase):
         }
 
         self.assertDictEqual(m.request_history[0].json(), expected_payload)
-        self.assertDictEqual(ret, SECRET_VERSION_WITH_VALUE)
-
-        # return_secret_valueがTrueの場合のテスト
-        path_with_params = '/secret-manager/organizations/{}/secrets/{}/versions?return_secret_value=true'.format(ORGANIZATION_ID, SECRET_ID)
-        m.post(path_with_params, json=SECRET_VERSION_WITH_VALUE)
-        ret = client.create_secret_version(
-            ORGANIZATION_ID,
-            SECRET_ID,
-            SECRET_VALUE,
-            return_secret_value=True
-        )
-        # 値がデコードされていることを確認
-        self.assertEqual(ret['value'], SECRET_VALUE)
+        self.assertEqual(ret['value'], ENCODED_SECRET_VALUE)
 
         # バリデーションエラーテスト
         with self.assertRaises(BadRequest) as e:
@@ -238,22 +246,6 @@ class TestSecretVersionAPIClient(unittest.TestCase):
         self.assertDictEqual(m.request_history[0].json(), expected_payload)
         self.assertDictEqual(ret, UPDATED_SECRET_VERSION)
 
-        # valueを指定した場合のテスト
-        m.reset()
-        m.patch(path, json=UPDATED_SECRET_VERSION)
-        ret = client.update_secret_version(
-            ORGANIZATION_ID,
-            SECRET_ID,
-            VERSION_ID,
-            status='inactive',
-            value='NEW_SECRET_VALUE'
-        )
-        expected_payload = {
-            'status': 'inactive',
-            'value': 'NEW_SECRET_VALUE'
-        }
-        self.assertDictEqual(m.request_history[0].json(), expected_payload)
-
         # バリデーションエラーテスト
         with self.assertRaises(BadRequest) as e:
             client.update_secret_version(None, SECRET_ID, VERSION_ID, 'inactive')
@@ -275,20 +267,16 @@ class TestSecretVersionAPIClient(unittest.TestCase):
             client.update_secret_version(ORGANIZATION_ID, SECRET_ID, VERSION_ID, 'invalid_status')
         self.assertEqual(e.exception.error_description, '"status" need to be "active" or "inactive"')
 
-        with self.assertRaises(BadRequest) as e:
-            client.update_secret_version(ORGANIZATION_ID, SECRET_ID, VERSION_ID, 'inactive', value='')
-        self.assertEqual(e.exception.error_description, '"value" is necessary')
-
     @requests_mock.Mocker()
     def test_delete_secret_version(self, m):
         # delete-secret-version-api mock
         path = '/secret-manager/organizations/{}/secrets/{}/versions/{}'.format(ORGANIZATION_ID, SECRET_ID, VERSION_ID)
-        m.delete(path, json=SECRET_VERSION)
+        m.delete(path, json=DELETE_SECRET_VERSION_RESPONSE)
 
         # unit test
         client = APIClient()
         ret = client.delete_secret_version(ORGANIZATION_ID, SECRET_ID, VERSION_ID)
-        self.assertDictEqual(ret, SECRET_VERSION)
+        self.assertDictEqual(ret, DELETE_SECRET_VERSION_RESPONSE)
 
         # バリデーションエラーテスト
         with self.assertRaises(BadRequest) as e:
