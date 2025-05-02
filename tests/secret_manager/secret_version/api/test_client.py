@@ -35,7 +35,7 @@ SECRET_VERSION_WITH_VALUE = {
     'secret_id': SECRET_ID,
     'version': 1,
     'status': 'active',
-    'value': ENCODED_SECRET_VALUE,
+    'value': SECRET_VALUE,
     'created_at': CREATED_AT,
     'updated_at': UPDATED_AT,
     'organization_id': ORGANIZATION_ID,
