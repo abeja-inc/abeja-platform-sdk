@@ -206,7 +206,7 @@ class TestSecretVersionAPIClient(unittest.TestCase):
         }
 
         self.assertDictEqual(m.request_history[0].json(), expected_payload)
-        self.assertEqual(ret['value'], ENCODED_SECRET_VALUE)
+        self.assertEqual(ret['value'], SECRET_VALUE)
 
         # バリデーションエラーテスト
         with self.assertRaises(BadRequest) as e:
