@@ -4,7 +4,7 @@ import base64
 
 import requests_mock
 
-from abeja.secret_manager.secret_version.api.client import APIClient
+from abeja.secret_version.api.client import APIClient
 from abeja.exceptions import BadRequest
 
 os.environ['USER_AUTH_ARMS'] = 'False'

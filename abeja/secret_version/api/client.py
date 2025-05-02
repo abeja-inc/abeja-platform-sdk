@@ -10,7 +10,7 @@ class APIClient(BaseAPIClient):
 
     .. code-block:: python
 
-        from abeja.secret_manager.secret_version import APIClient
+        from abeja.secret_version import APIClient
 
         api_client = APIClient()
     """
