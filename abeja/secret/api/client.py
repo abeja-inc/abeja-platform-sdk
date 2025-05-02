@@ -359,16 +359,7 @@ class APIClient(BaseAPIClient):
             organization_id,
         )
 
-        result = self._connection.api_request(method='POST', path=path, json=payload)
-
-        for version in result.get('versions', []):
-            if 'value' in version:
-                try:
-                    version['value'] = base64.b64decode(version['value']).decode('utf-8')
-                except Exception:
-                    pass
-
-        return result
+        return self._connection.api_request(method='POST', path=path, json=payload)
 
     def update_secret(
         self,

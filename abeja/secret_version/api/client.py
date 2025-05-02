@@ -306,7 +306,15 @@ class APIClient(BaseAPIClient):
             secret_id,
         )
 
-        return self._connection.api_request(method='POST', path=path, json=payload, params=params)
+        response = self._connection.api_request(method='POST', path=path, json=payload, params=params)
+
+        if 'value' in response and response['value']:
+            try:
+                response['value'] = base64.b64decode(response['value']).decode('utf-8')
+            except Exception:
+                pass
+
+        return response
 
     def update_secret_version(
         self,
