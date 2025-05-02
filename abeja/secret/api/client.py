@@ -31,8 +31,7 @@ class APIClient(BaseAPIClient):
                 organization_id = "1410000000000"
                 offset = 0
                 limit = 50
-                response = api_client.get_secrets(
-                    organization_id, offset, limit)
+                response = api_client.get_secrets(organization_id, offset, limit)
 
         Params:
             - **organization_id** (str): organization identifier (required)
