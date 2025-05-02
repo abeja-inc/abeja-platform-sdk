@@ -3,6 +3,7 @@ from typing import Optional
 import base64
 from abeja.common.api_client import BaseAPIClient
 from abeja.exceptions import BadRequest
+import re
 
 
 class APIClient(BaseAPIClient):
@@ -255,7 +256,7 @@ class APIClient(BaseAPIClient):
         Params:
             - **organization_id** (str): organization identifier (required)
             - **name** (str): secret name (required) The secret name can contain ASCII letters, numbers, and the following
-              characters: /_+=.@- Do not end your secret name with a hyphen followed by six characters. The secret name must
+              characters: `_-` Do not end your secret name with a hyphen followed by six characters. The secret name must
               be unique within the same organization.
             - **value** (str): secret value (required)
             - **description** (str): **[optional]** secret description
@@ -311,6 +312,22 @@ class APIClient(BaseAPIClient):
 
         if not name:
             error_message = '"name" is necessary'
+            raise BadRequest(
+                error=error_message,
+                error_description=error_message,
+                status_code=400
+            )
+
+        if not re.match(r'^[a-zA-Z0-9_-]+$', name):
+            error_message = '"name" must contain only ASCII letters, numbers, and the following characters: _-'
+            raise BadRequest(
+                error=error_message,
+                error_description=error_message,
+                status_code=400
+            )
+
+        if re.match(r'.*-......$', name):
+            error_message = '"name" must not end with a hyphen followed by six characters'
             raise BadRequest(
                 error=error_message,
                 error_description=error_message,
