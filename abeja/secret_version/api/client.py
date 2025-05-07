@@ -297,8 +297,10 @@ class APIClient(BaseAPIClient):
         params = {}
         params['return_secret_value'] = True
 
+        encoded_value = base64.b64encode(value.encode('utf-8')).decode('utf-8')
+
         payload = {
-            'value': value,
+            'value': encoded_value,
         }
 
         path = '/secret-manager/organizations/{}/secrets/{}/versions'.format(
