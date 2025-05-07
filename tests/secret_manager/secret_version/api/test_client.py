@@ -202,7 +202,7 @@ class TestSecretVersionAPIClient(unittest.TestCase):
             SECRET_VALUE
         )
         expected_payload = {
-            'value': SECRET_VALUE
+            'value': ENCODED_SECRET_VALUE
         }
 
         self.assertDictEqual(m.request_history[0].json(), expected_payload)
