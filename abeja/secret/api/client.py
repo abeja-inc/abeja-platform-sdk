@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import Optional
+from typing import Optional, List
 import base64
 from abeja.common.api_client import BaseAPIClient
 from abeja.exceptions import BadRequest
