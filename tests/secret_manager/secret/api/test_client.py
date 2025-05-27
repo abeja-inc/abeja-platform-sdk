@@ -19,6 +19,8 @@ EXPIRED_AT = '2024-12-15T16:50:33+09:00'
 UPDATED_EXPIRED_AT = '2025-12-15T16:50:33+09:00'
 USER_ID = '3614618482910'
 PROVIDER = 'aws-secret-manager'
+INTEGRATION_SERVICE_TYPE = 'abeja-platform-labs'
+INTEGRATION_SERVICE_IDS = ['9909389711171', '9916291917033']
 
 SECRET_VERSION = {
     'id': SECRET_VERSION_ID,
@@ -55,7 +57,9 @@ SECRET = {
     'versions': [SECRET_VERSION],
     'properties': None,
     'provider': PROVIDER,
-    'user_id': USER_ID
+    'user_id': USER_ID,
+    'integration_service_type': INTEGRATION_SERVICE_TYPE,
+    'integration_service_ids': INTEGRATION_SERVICE_IDS
 }
 
 SECRET_WITH_VALUE = {
@@ -70,7 +74,9 @@ SECRET_WITH_VALUE = {
     'versions': [SECRET_VERSION_WITH_VALUE],
     'properties': None,
     'provider': PROVIDER,
-    'user_id': USER_ID
+    'user_id': USER_ID,
+    'integration_service_type': INTEGRATION_SERVICE_TYPE,
+    'integration_service_ids': INTEGRATION_SERVICE_IDS
 }
 
 SECRETS_RESPONSE = {
@@ -95,6 +101,8 @@ UPDATED_SECRET = {
     'name': SECRET_NAME,
     'description': 'Updated AWS access key',
     'rotation': False,
+    'integration_service_type': INTEGRATION_SERVICE_TYPE,
+    'integration_service_ids': INTEGRATION_SERVICE_IDS,
     'expired_at': UPDATED_EXPIRED_AT,
     'created_at': '2023-12-15T16:50:33+09:00',
     'updated_at': '2024-04-30T10:30:00+09:00',
@@ -201,13 +209,17 @@ class TestSecretManagerAPIClient(unittest.TestCase):
             name=SECRET_NAME,
             value=SECRET_VALUE,
             description=SECRET_DESCRIPTION,
-            expired_at=EXPIRED_AT
+            expired_at=EXPIRED_AT,
+            integration_service_type=INTEGRATION_SERVICE_TYPE,
+            integration_service_ids=INTEGRATION_SERVICE_IDS
         )
         expected_payload = {
             'name': SECRET_NAME,
             'value': ENCODED_SECRET_VALUE,
             'description': SECRET_DESCRIPTION,
-            'expired_at': EXPIRED_AT
+            'expired_at': EXPIRED_AT,
+            'integration_service_type': INTEGRATION_SERVICE_TYPE,
+            'integration_service_ids': INTEGRATION_SERVICE_IDS
         }
 
         self.assertDictEqual(m.request_history[0].json(), expected_payload)
@@ -242,11 +254,15 @@ class TestSecretManagerAPIClient(unittest.TestCase):
             ORGANIZATION_ID,
             SECRET_ID,
             description='Updated AWS access key',
-            expired_at=UPDATED_EXPIRED_AT
+            expired_at=UPDATED_EXPIRED_AT,
+            integration_service_type=INTEGRATION_SERVICE_TYPE,
+            integration_service_ids=INTEGRATION_SERVICE_IDS
         )
         expected_payload = {
             'description': 'Updated AWS access key',
-            'expired_at': UPDATED_EXPIRED_AT
+            'expired_at': UPDATED_EXPIRED_AT,
+            'integration_service_type': INTEGRATION_SERVICE_TYPE,
+            'integration_service_ids': INTEGRATION_SERVICE_IDS
         }
 
         self.assertDictEqual(m.request_history[0].json(), expected_payload)

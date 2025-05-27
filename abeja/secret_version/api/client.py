@@ -58,15 +58,15 @@ class APIClient(BaseAPIClient):
                     },
                     "versions": [
                         {
-                            "created_at": "2025-04-30T19:01:19.216304Z",
                             "id": "3884379411160",
                             "organization_id": "3617229248589",
-                            "provider": "aws-secret-manager",
                             "secret_id": "3471958194321",
-                            "status": "active",
-                            "updated_at": "2025-05-01T07:35:01.002633Z",
                             "value": "test",
-                            "version": 1
+                            "version": 1,
+                            "status": "active",
+                            "provider": "aws-secret-manager",
+                            "created_at": "2025-04-30T19:01:19.216304Z",
+                            "updated_at": "2025-05-01T07:35:01.002633Z",
                         }
                     ]
                 }
@@ -164,15 +164,15 @@ class APIClient(BaseAPIClient):
             .. code-block:: json
 
                 {
-                    "created_at": "2025-05-01T04:02:20.962352Z",
                     "id": "4914543680412",
                     "organization_id": "3617229248589",
-                    "provider": "aws-secret-manager",
                     "secret_id": "3471958194321",
                     "status": "active",
-                    "updated_at": "2025-05-01T07:40:00.204109Z",
                     "value": "test",
-                    "version": 2
+                    "version": 2,
+                    "provider": "aws-secret-manager",
+                    "created_at": "2025-05-01T04:02:20.962352Z",
+                    "updated_at": "2025-05-01T07:40:00.204109Z",
                 }
 
         Raises:
@@ -254,15 +254,15 @@ class APIClient(BaseAPIClient):
             .. code-block:: json
 
                 {
-                    "created_at": "2025-05-01T18:58:18.712607Z",
                     "id": "7285296397904",
                     "organization_id": "3617229248589",
-                    "provider": "aws-secret-manager",
                     "secret_id": "9598242896082",
-                    "status": "active",
-                    "updated_at": "2025-05-01T18:58:18.712610Z",
                     "value": "AKIAIOSFODNN7EXAMPLE",
                     "version": 2
+                    "status": "active",
+                    "provider": "aws-secret-manager",
+                    "created_at": "2025-05-01T18:58:18.712607Z",
+                    "updated_at": "2025-05-01T18:58:18.712610Z",
                 }
 
         Raises:
@@ -353,15 +353,15 @@ class APIClient(BaseAPIClient):
             .. code-block:: json
 
                 {
-                    "created_at": "2025-05-01T18:58:18.712607Z",
                     "id": "7285296397904",
                     "organization_id": "3617229248589",
-                    "provider": "aws-secret-manager",
                     "secret_id": "9598242896082",
-                    "status": "inactive",
-                    "updated_at": "2025-05-01T19:04:40.398828Z",
                     "value": "test",
-                    "version": 2
+                    "version": 2,
+                    "status": "inactive",
+                    "provider": "aws-secret-manager",
+                    "created_at": "2025-05-01T18:58:18.712607Z",
+                    "updated_at": "2025-05-01T19:04:40.398828Z",
                 }
 
         Raises:
