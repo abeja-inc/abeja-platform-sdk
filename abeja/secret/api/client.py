@@ -270,9 +270,10 @@ class APIClient(BaseAPIClient):
             - **value** (str): secret value (required)
             - **description** (str): **[optional]** secret description
             - **expired_at** (str): **[optional]** expiration date (ISO 8601 format)
-            - **integration_service_type** (str): **[optional]** ABEJA Platform service to integrate secret. Currently, only `abeja-platform-labs` is supported.
-            - **integration_service_ids** (List[str]): **[optional]** ABEJA Platform resource ids to integrate secret. If `integration_service_type` is "abeja-platform-labs",
-              the integration service ids must be a list of labs app ids.
+            - **integration_service_type** (str): **[optional]** ABEJA Platform service to integrate secret.
+              Currently, only `abeja-platform-labs` is supported.
+            - **integration_service_ids** (List[str]): **[optional]** ABEJA Platform resource ids to integrate secret.
+              If `integration_service_type` is "abeja-platform-labs", the integration service ids must be a list of labs app ids.
 
         Return type:
             dict
@@ -418,9 +419,10 @@ class APIClient(BaseAPIClient):
             - **secret_id** (str): secret identifier (required)
             - **description** (str): **[optional]** secret description
             - **expired_at** (str): **[optional]** expiration date (ISO 8601 format)
-            - **integration_service_type** (str): **[optional]** ABEJA Platform service to integrate secret. Currently, only `abeja-platform-labs` is supported.
-            - **integration_service_ids** (List[str]): **[optional]** ABEJA Platform resource ids to integrate secret. If `integration_service_type` is "abeja-platform-labs",
-              the integration service ids must be a list of labs app ids.
+            - **integration_service_type** (str): **[optional]** ABEJA Platform service to integrate secret.
+              Currently, only `abeja-platform-labs` is supported.
+            - **integration_service_ids** (List[str]): **[optional]** ABEJA Platform resource ids to integrate secret.
+              If `integration_service_type` is "abeja-platform-labs", the integration service ids must be a list of labs app ids.
 
         Return type:
             dict
