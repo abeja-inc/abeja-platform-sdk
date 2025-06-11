@@ -1,4 +1,9 @@
-$ 2.3.4
+# 2.3.5
+- [APF SecretManager] Add integration service in labs sdk #106
+- 【APF SecretManager】APF SDK からセキュアに利用できるようにする #105
+- Update python & python packages version #104
+
+# 2.3.4
 - [OpsBeeLLM] Add methods for add-histories-dataset-apis #103
 - [OpsBeeLLM] Sort get histories #102
 

@@ -24,6 +24,8 @@ Contents:
    services/index
    endpoints/index
    runs/index
+   secret/index
+   secret_version/index
    triggers/index
    registry/index
    opsbeellm/index
