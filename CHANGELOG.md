@@ -1,3 +1,6 @@
+# 2.3.6
+- Change release strategy from git-flow to PR-based workflow
+
 # 2.3.5
 - [APF SecretManager] Add integration service in labs sdk #106
 - 【APF SecretManager】APF SDK からセキュアに利用できるようにする #105

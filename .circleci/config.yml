@@ -83,7 +83,10 @@ release-rc: &release-rc
       keys:
       - v1-dependencies-{{ checksum "poetry.lock" }}
   - *install-release-dependencies
-  - run: sh .circleci/bump_version_rc.sh
+  - run:
+      name: Bump RC version
+      command: |
+        poetry version $(PYTHONPATH=./ poetry run python tools/get_next_rc_version.py)
   - *replace-version
   - *run-release
   - *trigger-system-test
@@ -118,6 +121,6 @@ workflows:
           filters:
             branches:
               only:
-                - /^release\/.*/
+                - staging
           requires:
             - codetest

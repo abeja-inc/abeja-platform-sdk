@@ -26,12 +26,12 @@ $ pip install abeja-sdk>=1.0.0 --pre
 If you have bigger version than latest pre-release, bigger not-pre-release version in installed.
 For example, when there are versions of `1.0.1` and `1.0.0rc1`, `1.0.1` is installed even if you specify `--pre` option.
 
-Release candidate is published when release branch is pushed to Github.
+Release candidate is published when staging branch is pushed to Github.
 
 もし、最新のプレリリース版よりも新しいバージョンがある場合はそのバージョンがインストールされます。
 例えば、 `1.0.1` と `1.0.0rc1` というバージョンがある場合、 `--pre` オプションを指定しても、 `1.0.1` がインストールされます。
 
-release ブランチがGithubにプッシュされると、リリース候補版が公開されます。
+staging ブランチがGithubにプッシュされると、リリース候補版が公開されます。
 
 ### Using requirements.txt
 
@@ -95,49 +95,27 @@ $ poetry install
 
 ## Release
 
-Synchronize master and develop branch.
+### Deploy to Development Environment
 
-まず、master ブランチとdevelop ブランチをpull します。
+When creating a PR from `feature/xxx` to `develop` branch, include version updates in the PR:
+- Update `CHANGELOG.md`: Add your changes to the latest version section (do not create a new version section if the current version hasn't been released to staging yet)
+- Update `pyproject.toml` version (e.g., `2.3.5` → `2.3.6`)
 
-```bash
-$ git checkout master
-$ git pull
-$ git checkout develop
-$ git pull
-```
+> **Note**: If the current version in `pyproject.toml` has never been released to staging, you don't need to create a new version section in `CHANGELOG.md` or update `pyproject.toml`. Instead, add your changes to the existing latest version section in `CHANGELOG.md`. Only create a new version section and update `pyproject.toml` when the previous version has been released to staging. Alternatively, update the version only when creating a PR to `staging` to avoid version gaps in PyPI releases.
 
-Create release branch and prepare for release.
+Then create a PR and merge from `feature/xxx` to `develop` branch.
 
-続いて、リリース用ブランチを作成し、リリースの準備をします。
-※ rc2 以上を作る場合はpyproject.toml のversion を明示的に指定する必要があります。
+### Deploy to Staging Environment
 
-```bash
-$ git flow release start X.X.X
-$ vim CHANGELOG.md
-# update to new version
-$ poetry version X.X.X
-$ git add pyproject.toml
-$ git add CHANGELOG.md
-$ git commit -m "bump version"
-$ git flow release publish X.X.X
-```
+Create a PR and merge from `develop` to `staging` branch.
 
-After pushing to relase branch, RC package is published to packagecloud.
+After pushing to staging branch, RC package is automatically published to PyPI with the next available RC version (e.g., `2.3.6rc1`, `2.3.6rc2`, ...). The RC version number is automatically determined by querying PyPI for existing RC versions.
 
-Check CircleCI result.
-If the build succeeded then execute:
+### Deploy to Production Environment
 
-リリース用ブランチにpush した後、RC パッケージはpackagecloud に公開されます。
+Create a PR and merge from `staging` to `master` branch.
 
-CircleCI の結果を確認します。
-ビルドに成功したら、次を実行します:
-
-```bash
-$ git flow release finish X.X.X
-$ git push origin develop
-$ git push origin master
-$ git push origin X.X.X
-```
+After pushing to master branch, the final package (e.g., `2.3.6`) is published to PyPI.
 
 ## 実装中のSDK をローカルで利用する方法
 以下のコマンドでwheel ファイルを作成する。dist ディレクトリに`abeja_sdk-x.x.x-py3-none-any.whl` というファイルが爆誕。
