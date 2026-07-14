@@ -105,6 +105,9 @@ html_static_path = ['_static']
 # _extra 配下はビルド出力ルートへ verbatim コピー（Firebase Hosting が 404.html を自動配信）
 html_extra_path = ['_extra']
 
+# 認証確定まで隠す CSS（FOUC対策）。head の render-blocking CSS で初回描画前に効かせる。
+html_css_files = ['css/auth-gate.css']
+
 # Firebase Auth gate（全ページの <head> に type="module" で読み込む）
 html_js_files = [
     ('js/auth-gate.js', {'type': 'module'}),
