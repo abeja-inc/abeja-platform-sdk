@@ -2,7 +2,7 @@ name: Deploy sdk-spec (dev) to Firebase Hosting
 
 on:
   push:
-    branches: [develop, feature/firebase-hosting-auth]   # TEMP: WIF 検証用。確認後 develop のみに戻す
+    branches: [develop]
     paths:
       - 'doc/**'
       - 'firebase.json'
@@ -37,7 +37,5 @@ jobs:
           service_account: github-deploy@apf-mlops-docs.iam.gserviceaccount.com
       - name: Deploy to Firebase Hosting (dev site)
         run: |
-          node --version
           npm install -g firebase-tools@15.22.4
-          firebase --version
-          firebase deploy --only hosting:sdk-spec-dev --project apf-mlops-docs --non-interactive --debug
+          firebase deploy --only hosting:sdk-spec-dev --project apf-mlops-docs --non-interactive
