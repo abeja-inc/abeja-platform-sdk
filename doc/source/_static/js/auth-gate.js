@@ -44,9 +44,14 @@ try {
     onAuthStateChanged(auth, (user) => {
       if (denied) return;
       if (!user) {
+        // 1回リダイレクトしても未認証で戻る状況（authDomain 未登録・Safari のストレージ分割等）で
+        // 無限リダイレクトすると白画面のまま開けない。UXゲートなので2回目は fail-open で表示に倒す。
+        if (sessionStorage.getItem("authRedirected")) { reveal(); return; }
+        sessionStorage.setItem("authRedirected", "1");
         signInWithRedirect(auth, new GoogleAuthProvider());
         return;
       }
+      sessionStorage.removeItem("authRedirected");
       const email = (user.email || "").toLowerCase();
       const ok = user.emailVerified && email.split("@").pop() === ALLOWED_DOMAIN;
       if (!ok) {
