@@ -2,7 +2,7 @@ name: Deploy sdk-spec (dev) to Firebase Hosting
 
 on:
   push:
-    branches: [develop]
+    branches: [develop, feature/firebase-hosting-auth]   # TEMP: WIF 検証用。確認後 develop のみに戻す
     paths:
       - 'doc/**'
       - 'firebase.json'
