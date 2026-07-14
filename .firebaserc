@@ -1,0 +1,15 @@
+{
+  "projects": {
+    "default": "apf-mlops-docs"
+  },
+  "targets": {
+    "apf-mlops-docs": {
+      "hosting": {
+        "sdk-spec-dev": [
+          "apf-mlops-docs-sdk-dev"
+        ]
+      }
+    }
+  },
+  "etags": {}
+}

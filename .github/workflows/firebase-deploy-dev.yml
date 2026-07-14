@@ -1,0 +1,35 @@
+name: Deploy sdk-spec (dev) to Firebase Hosting
+
+on:
+  push:
+    branches: [develop]
+    paths:
+      - 'doc/**'
+      - 'firebase.json'
+      - '.firebaserc'
+      - '.github/workflows/firebase-deploy-dev.yml'
+  workflow_dispatch:
+
+jobs:
+  deploy-dev:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'   # pyproject は python >=3.8,<3.12。3.12+ は範囲外
+      - name: Build Sphinx
+        run: |
+          pip install poetry
+          # dev 依存(mypy -> typed-ast 1.4.3)は 3.10+ でビルド不可。docs には不要なので --only main で除外
+          poetry install --only main --extras docs
+          poetry run sphinx-build -M html doc/source doc/build
+      - name: Deploy to Firebase Hosting (dev site)
+        uses: FirebaseExtended/action-hosting-deploy@v0.11.0
+        with:
+          repoToken: ${{ secrets.GITHUB_TOKEN }}
+          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_APF_MLOPS_DOCS }}
+          projectId: apf-mlops-docs
+          target: sdk-spec-dev
+          channelId: live
+          firebaseToolsVersion: "15.22.4"

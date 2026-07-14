@@ -1,0 +1,8 @@
+{
+  "hosting": {
+    "target": "sdk-spec-dev",
+    "public": "doc/build/html",
+    "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
+    "trailingSlash": true
+  }
+}
