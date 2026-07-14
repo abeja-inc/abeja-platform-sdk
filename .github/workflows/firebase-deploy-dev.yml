@@ -20,7 +20,7 @@ jobs:
           python-version: '3.11'   # pyproject は python >=3.8,<3.12。3.12+ は範囲外
       - name: Build Sphinx
         run: |
-          pip install poetry
+          pip install "poetry==1.8.5"
           # dev 依存(mypy -> typed-ast 1.4.3)は 3.10+ でビルド不可。docs には不要なので --only main で除外
           poetry install --only main --extras docs
           poetry run sphinx-build -M html doc/source doc/build
