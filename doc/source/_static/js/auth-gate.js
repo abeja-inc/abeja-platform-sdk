@@ -36,6 +36,15 @@ const deny = (msg) => {
 // 再ログインへ飛ばすと拒否画面が定着せずループする（Firebase 公式が警告）。
 let denied = false;
 
+// sessionStorage は cookie/ストレージ拒否・sandboxed iframe 等で SecurityError を投げうる（MDN）。
+// 認証コールバック内で未捕捉になると redirect が飛ばず fail-open するため、安全ラッパで包む。
+const _mem = {};
+const store = {
+  get(k) { try { return sessionStorage.getItem(k); } catch (e) { return _mem[k] ?? null; } },
+  set(k, v) { try { sessionStorage.setItem(k, v); } catch (e) { _mem[k] = v; } },
+  del(k) { try { sessionStorage.removeItem(k); } catch (e) { delete _mem[k]; } },
+};
+
 try {
   const auth = getAuth(initializeApp(firebaseConfig));
 
@@ -46,12 +55,12 @@ try {
       if (!user) {
         // 1回リダイレクトしても未認証で戻る状況（authDomain 未登録・Safari のストレージ分割等）で
         // 無限リダイレクトすると白画面のまま開けない。UXゲートなので2回目は fail-open で表示に倒す。
-        if (sessionStorage.getItem("authRedirected")) { reveal(); return; }
-        sessionStorage.setItem("authRedirected", "1");
+        if (store.get("authRedirected")) { reveal(); return; }
+        store.set("authRedirected", "1");
         signInWithRedirect(auth, new GoogleAuthProvider());
         return;
       }
-      sessionStorage.removeItem("authRedirected");
+      store.del("authRedirected");
       const email = (user.email || "").toLowerCase();
       const ok = user.emailVerified && email.split("@").pop() === ALLOWED_DOMAIN;
       if (!ok) {
