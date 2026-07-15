@@ -1,8 +1,16 @@
 {
-  "hosting": {
-    "target": "sdk-spec-dev",
-    "public": "doc/build/html",
-    "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
-    "trailingSlash": true
-  }
+  "hosting": [
+    {
+      "target": "sdk-spec-dev",
+      "public": "doc/build/html",
+      "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
+      "trailingSlash": true
+    },
+    {
+      "target": "sdk-spec-prod",
+      "public": "doc/build/html",
+      "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
+      "trailingSlash": true
+    }
+  ]
 }
