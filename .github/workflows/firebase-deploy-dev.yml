@@ -3,11 +3,6 @@ name: Deploy sdk-spec (dev) to Firebase Hosting
 on:
   push:
     branches: [develop]
-    paths:
-      - 'doc/**'
-      - 'firebase.json'
-      - '.firebaserc'
-      - '.github/workflows/firebase-deploy-dev.yml'
   workflow_dispatch:
 
 jobs:
