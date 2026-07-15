@@ -1,9 +1,0 @@
-/* 認証確定まで全体を隠す（FOUC対策）。head の render-blocking CSS なので初回ペイント前に効く。
-   auth-gate.js の reveal() がインライン visibility:visible で上書きして表示する。
-   JS が読めない場合（gstatic 不達・CSP 等で module import 失敗）に永久非表示にならないよう、
-   pure CSS の failsafe も持たせる: 8秒後に animation(forwards) で必ず表示に倒す（JS 非依存）。 */
-:root {
-  visibility: hidden;
-  animation: auth-gate-failsafe 0s linear 8s forwards;
-}
-@keyframes auth-gate-failsafe { to { visibility: visible; } }
