@@ -1,34 +1,49 @@
 name: Auto Tag on Release
 
 on:
-  push:
+  workflow_run:
+    workflows:
+      - Release
+    types:
+      - completed
     branches:
       - master
 
+permissions:
+  contents: write
+
 jobs:
   create-tag:
+    if: github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
+          ref: ${{ github.event.workflow_run.head_sha }}
           fetch-depth: 0
 
       - name: Get version from pyproject.toml
         id: get_version
         run: |
           VERSION=$(grep '^version = ' pyproject.toml | cut -d'"' -f2)
-          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
           echo "Version: $VERSION"
 
       - name: Check if tag already exists
         id: check_tag
         run: |
           if git rev-parse "refs/tags/${{ steps.get_version.outputs.version }}" >/dev/null 2>&1; then
-            echo "exists=true" >> $GITHUB_OUTPUT
+            tag_sha="$(git rev-list -n 1 "refs/tags/${{ steps.get_version.outputs.version }}")"
+            head_sha="$(git rev-parse HEAD)"
+            if [ "$tag_sha" != "$head_sha" ]; then
+              echo "Tag ${{ steps.get_version.outputs.version }} points to $tag_sha, not $head_sha." >&2
+              exit 1
+            fi
+            echo "exists=true" >> "$GITHUB_OUTPUT"
             echo "Tag ${{ steps.get_version.outputs.version }} already exists"
           else
-            echo "exists=false" >> $GITHUB_OUTPUT
+            echo "exists=false" >> "$GITHUB_OUTPUT"
             echo "Tag ${{ steps.get_version.outputs.version }} does not exist"
           fi
 
@@ -42,8 +57,7 @@ jobs:
           echo "✅ Created and pushed tag: ${{ steps.get_version.outputs.version }}"
 
       - name: Create GitHub Release
-        if: steps.check_tag.outputs.exists == 'false'
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v3
         with:
           tag_name: ${{ steps.get_version.outputs.version }}
           name: Release ${{ steps.get_version.outputs.version }}
@@ -52,4 +66,3 @@ jobs:
             See [CHANGELOG.md](https://github.com/${{ github.repository }}/blob/master/CHANGELOG.md) for details.
           draft: false
           prerelease: false
-

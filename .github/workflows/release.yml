@@ -1,0 +1,340 @@
+name: Release
+
+on:
+  push:
+    branches:
+      - staging
+      - master
+
+permissions:
+  contents: read
+
+# RC numbering and PyPI uploads must never race or be cancelled midway.
+concurrency:
+  group: release
+  queue: max
+
+jobs:
+  unit-tests:
+    name: Unit tests
+    uses: ./.github/workflows/test.yml
+
+  integration-tests:
+    name: Integration tests
+    uses: ./.github/workflows/integration-test.yml
+
+  build:
+    name: Build distribution
+    needs:
+      - unit-tests
+      - integration-tests
+    runs-on: ubuntu-22.04
+    timeout-minutes: 15
+    outputs:
+      package-version: ${{ steps.version.outputs.package-version }}
+      release-stage: ${{ steps.version.outputs.release-stage }}
+      target-ref: ${{ steps.version.outputs.target-ref }}
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.8"
+
+      - name: Install Poetry
+        run: python -m pip install --disable-pip-version-check "poetry==1.8.0"
+
+      - name: Prepare package version
+        id: version
+        run: |
+          case "$GITHUB_REF_NAME" in
+            staging)
+              rc_version="$(PYTHONPATH=. python tools/get_next_rc_version.py)"
+              if [ -z "$rc_version" ]; then
+                echo "The next RC version could not be determined." >&2
+                exit 1
+              fi
+              poetry version "$rc_version"
+              release_stage="staging"
+              target_ref="deployment/staging"
+              ;;
+            master)
+              release_stage="production"
+              target_ref="deployment/production"
+              ;;
+            *)
+              echo "Unsupported release branch: $GITHUB_REF_NAME" >&2
+              exit 1
+              ;;
+          esac
+
+          package_version="$(poetry version --short)"
+          python tools/validate_release_version.py \
+            "$package_version" \
+            "$release_stage"
+          sed -i -E "s/^VERSION = .*/VERSION = \"${package_version}\"/" abeja/version.py
+          grep -Fqx "VERSION = \"${package_version}\"" abeja/version.py
+
+          echo "package-version=$package_version" >> "$GITHUB_OUTPUT"
+          echo "release-stage=$release_stage" >> "$GITHUB_OUTPUT"
+          echo "target-ref=$target_ref" >> "$GITHUB_OUTPUT"
+
+      - name: Build wheel
+        run: poetry build --format wheel
+
+      - name: Record wheel digest
+        env:
+          PACKAGE_VERSION: ${{ steps.version.outputs.package-version }}
+          RELEASE_STAGE: ${{ steps.version.outputs.release-stage }}
+        run: |
+          echo "### Built distribution" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Source SHA: \`$GITHUB_SHA\`" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Package version: \`$PACKAGE_VERSION\`" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Release stage: \`$RELEASE_STAGE\`" >> "$GITHUB_STEP_SUMMARY"
+          for wheel in dist/*.whl; do
+            filename="$(basename "$wheel")"
+            digest="$(sha256sum "$wheel" | cut -d' ' -f1)"
+            echo "- \`$filename\`: \`$digest\`" >> "$GITHUB_STEP_SUMMARY"
+          done
+
+      - name: Upload distribution
+        uses: actions/upload-artifact@v7
+        with:
+          name: python-distribution
+          path: dist/*.whl
+          if-no-files-found: error
+          overwrite: true
+          retention-days: 7
+
+  system-test-readiness:
+    name: Verify platform system-test workflow
+    needs: build
+    runs-on: ubuntu-22.04
+    timeout-minutes: 10
+    permissions: {}
+    environment: system-test-dispatch
+    steps:
+      - name: Create read-only cross-repository GitHub App token
+        id: read-token
+        uses: actions/create-github-app-token@v3
+        with:
+          client-id: ${{ vars.SYSTEM_TEST_DISPATCH_APP_CLIENT_ID }}
+          private-key: ${{ secrets.SYSTEM_TEST_DISPATCH_APP_PRIVATE_KEY }}
+          owner: ${{ github.repository_owner }}
+          repositories: platform-system-test
+          permission-actions: read
+          permission-contents: read
+
+      - name: Verify workflow registration and target ref
+        env:
+          GH_TOKEN: ${{ steps.read-token.outputs.token }}
+          TARGET_REF: ${{ needs.build.outputs.target-ref }}
+          TARGET_REPOSITORY: ${{ github.repository_owner }}/platform-system-test
+          SYSTEM_TEST_WORKFLOW: ${{ vars.SYSTEM_TEST_WORKFLOW || 'system-test.yml' }}
+        run: |
+          case "$SYSTEM_TEST_WORKFLOW" in
+            */*)
+              echo "SYSTEM_TEST_WORKFLOW must be a workflow filename, not a path." >&2
+              exit 1
+              ;;
+          esac
+
+          default_branch="$(
+            gh api --method GET "repos/$TARGET_REPOSITORY" --jq '.default_branch'
+          )"
+
+          workflow_state="$(gh api --method GET \
+            "repos/$TARGET_REPOSITORY/actions/workflows/$SYSTEM_TEST_WORKFLOW" \
+            --jq '.state')"
+          if [ "$workflow_state" != "active" ]; then
+            echo "$SYSTEM_TEST_WORKFLOW is not active on $TARGET_REPOSITORY." >&2
+            exit 1
+          fi
+
+          for ref in "$default_branch" "$TARGET_REF"; do
+            echo "Validating $SYSTEM_TEST_WORKFLOW on $TARGET_REPOSITORY@$ref"
+            gh api --method GET \
+              "repos/$TARGET_REPOSITORY/contents/.github/workflows/$SYSTEM_TEST_WORKFLOW" \
+              -f "ref=$ref" \
+              --jq '.content' \
+              | tr -d '\n' \
+              | base64 --decode \
+              | TARGET_WORKFLOW_REF="$ref" ruby -ryaml -e '
+                  document = YAML.safe_load(STDIN.read, aliases: false)
+                  events = document["on"] || document[true]
+                  dispatch = events["workflow_dispatch"] if events.is_a?(Hash)
+                  inputs = dispatch["inputs"] if dispatch.is_a?(Hash)
+                  required_inputs = %w[
+                    sdk_version release_stage sdk_sha source_repository
+                    source_run_id source_run_url
+                  ]
+                  unexpected = if inputs.is_a?(Hash)
+                    inputs.keys.map(&:to_s) - required_inputs
+                  else
+                    []
+                  end
+                  invalid = required_inputs.reject do |name|
+                    declaration = inputs[name] if inputs.is_a?(Hash)
+                    declaration.is_a?(Hash) &&
+                      declaration["required"] == true &&
+                      declaration["type"] == "string"
+                  end
+                  unless invalid.empty? && unexpected.empty?
+                    abort(
+                      "#{ENV.fetch("TARGET_WORKFLOW_REF")}: " \
+                      "workflow_dispatch must contain exactly the six " \
+                      "required string inputs; invalid=#{invalid.join(",")} " \
+                      "unexpected=#{unexpected.join(",")}"
+                    )
+                  end
+                '
+          done
+
+      # Creating a token with this downscoped permission fails if the App was
+      # installed without Actions: Write. Do not expose this probe token to a
+      # shell step; the action revokes it when the job ends.
+      - name: Verify cross-repository dispatch permission
+        uses: actions/create-github-app-token@v3
+        with:
+          client-id: ${{ vars.SYSTEM_TEST_DISPATCH_APP_CLIENT_ID }}
+          private-key: ${{ secrets.SYSTEM_TEST_DISPATCH_APP_PRIVATE_KEY }}
+          owner: ${{ github.repository_owner }}
+          repositories: platform-system-test
+          permission-actions: write
+
+  publish:
+    name: Publish to PyPI
+    needs:
+      - build
+      - system-test-readiness
+    runs-on: ubuntu-22.04
+    timeout-minutes: 15
+    permissions: {}
+    environment:
+      name: pypi-${{ needs.build.outputs.release-stage }}
+      url: https://pypi.org/project/abeja-sdk/${{ needs.build.outputs.package-version }}/
+    steps:
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.8"
+
+      - name: Download distribution
+        uses: actions/download-artifact@v8
+        with:
+          name: python-distribution
+          path: dist
+
+      # Keep this inline so the credentialed job never executes checked-out
+      # repository code. The same rules are unit-tested in tools/.
+      - name: Check existing PyPI distribution
+        id: pypi-state
+        shell: python
+        env:
+          PACKAGE_VERSION: ${{ needs.build.outputs.package-version }}
+        run: |
+          import hashlib
+          import json
+          import os
+          import urllib.request
+          from pathlib import Path
+          from urllib.error import HTTPError
+          from urllib.parse import quote
+
+          wheels = list(Path("dist").glob("*.whl"))
+          if len(wheels) != 1:
+              raise RuntimeError(f"Expected one wheel, found {len(wheels)}")
+          wheel = wheels[0]
+
+          package_version = os.environ["PACKAGE_VERSION"]
+          release = quote(package_version, safe="")
+          url = f"https://pypi.org/pypi/abeja-sdk/{release}/json"
+          missing = False
+          try:
+              with urllib.request.urlopen(url, timeout=10) as response:
+                  data = json.loads(response.read())
+          except HTTPError as error:
+              if error.code != 404:
+                  raise
+              missing = True
+
+          if missing:
+              state = "missing"
+          else:
+              if not isinstance(data, dict):
+                  raise RuntimeError("PyPI returned an invalid JSON object")
+              urls = data.get("urls")
+              if not isinstance(urls, list):
+                  raise RuntimeError("PyPI returned an invalid file list")
+              matches = [
+                  item for item in urls
+                  if isinstance(item, dict) and item.get("filename") == wheel.name
+              ]
+              if len(matches) != 1:
+                  raise RuntimeError(f"PyPI does not contain exactly one {wheel.name}")
+              remote = matches[0]
+              if remote.get("yanked") is True:
+                  raise RuntimeError(f"PyPI wheel is yanked: {wheel.name}")
+              digests = remote.get("digests")
+              remote_digest = (
+                  digests.get("sha256") if isinstance(digests, dict) else None
+              )
+              local_digest = hashlib.sha256(wheel.read_bytes()).hexdigest()
+              if remote_digest != local_digest:
+                  raise RuntimeError(f"PyPI wheel digest differs: {wheel.name}")
+              state = "identical"
+
+          with open(os.environ["GITHUB_OUTPUT"], "a") as output:
+              output.write(f"state={state}\n")
+          if state == "identical":
+              with open(os.environ["GITHUB_STEP_SUMMARY"], "a") as summary:
+                  summary.write(
+                      "The identical wheel is already available on PyPI; "
+                      "upload is not repeated.\n"
+                  )
+
+      - name: Publish distribution
+        if: steps.pypi-state.outputs.state == 'missing'
+        uses: pypa/gh-action-pypi-publish@v1.14.0
+        with:
+          password: ${{ secrets.PYPI_API_TOKEN }}
+
+  trigger-system-tests:
+    name: Trigger platform system tests
+    needs:
+      - build
+      - publish
+    runs-on: ubuntu-22.04
+    timeout-minutes: 10
+    permissions: {}
+    environment: system-test-dispatch
+    steps:
+      - name: Create cross-repository GitHub App token
+        id: app-token
+        uses: actions/create-github-app-token@v3
+        with:
+          client-id: ${{ vars.SYSTEM_TEST_DISPATCH_APP_CLIENT_ID }}
+          private-key: ${{ secrets.SYSTEM_TEST_DISPATCH_APP_PRIVATE_KEY }}
+          owner: ${{ github.repository_owner }}
+          repositories: platform-system-test
+          permission-actions: write
+
+      - name: Dispatch platform-system-test workflow
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+          SDK_VERSION: ${{ needs.build.outputs.package-version }}
+          RELEASE_STAGE: ${{ needs.build.outputs.release-stage }}
+          TARGET_REF: ${{ needs.build.outputs.target-ref }}
+          SYSTEM_TEST_WORKFLOW: ${{ vars.SYSTEM_TEST_WORKFLOW || 'system-test.yml' }}
+        run: |
+          gh workflow run "$SYSTEM_TEST_WORKFLOW" \
+            --repo "${GITHUB_REPOSITORY_OWNER}/platform-system-test" \
+            --ref "$TARGET_REF" \
+            --field "sdk_version=$SDK_VERSION" \
+            --field "release_stage=$RELEASE_STAGE" \
+            --field "sdk_sha=$GITHUB_SHA" \
+            --field "source_repository=$GITHUB_REPOSITORY" \
+            --field "source_run_id=$GITHUB_RUN_ID" \
+            --field "source_run_url=$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"

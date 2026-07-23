@@ -1,0 +1,81 @@
+name: Integration tests
+
+on:
+  pull_request:
+    branches:
+      - develop
+      - staging
+      - master
+  push:
+    branches:
+      - develop
+  workflow_dispatch:
+  workflow_call:
+
+permissions:
+  contents: read
+
+env:
+  POETRY_VERSION: "1.8.0"
+
+jobs:
+  integration-tests:
+    name: Integration tests
+    # GitHub does not pass secrets to workflows from forks or Dependabot.
+    if: >-
+      github.event_name != 'pull_request' ||
+      (github.event.pull_request.head.repo.full_name == github.repository &&
+      github.actor != 'dependabot[bot]')
+    runs-on: ubuntu-22.04
+    timeout-minutes: 30
+    environment: sdk-integration-test
+    concurrency:
+      group: abeja-platform-sdk-datalake-integration
+      queue: max
+    steps:
+      - name: Check integration-test credentials
+        env:
+          CHANNEL_ID: ${{ secrets.CHANNEL_ID }}
+          ORGANIZATION_ID: ${{ secrets.ORGANIZATION_ID }}
+          USER_ID: ${{ secrets.USER_ID }}
+          PERSONAL_ACCESS_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+        run: |
+          missing=()
+          for name in CHANNEL_ID ORGANIZATION_ID USER_ID PERSONAL_ACCESS_TOKEN; do
+            if [ -z "${!name:-}" ]; then
+              missing+=("$name")
+            fi
+          done
+
+          if [ "${#missing[@]}" -eq 0 ]; then
+            exit 0
+          fi
+
+          echo "Integration tests could not start because these credentials are unavailable: ${missing[*]}" \
+            >> "$GITHUB_STEP_SUMMARY"
+          echo "Integration-test credentials are required for this trusted run." >&2
+          exit 1
+
+      - name: Check out repository
+        uses: actions/checkout@v7
+
+      - name: Install Poetry
+        run: pipx install "poetry==${POETRY_VERSION}"
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.8"
+          cache: poetry
+          cache-dependency-path: poetry.lock
+
+      - name: Install dependencies
+        run: poetry install --no-interaction --no-ansi
+
+      - name: Run integration tests
+        env:
+          CHANNEL_ID: ${{ secrets.CHANNEL_ID }}
+          ORGANIZATION_ID: ${{ secrets.ORGANIZATION_ID }}
+          USER_ID: ${{ secrets.USER_ID }}
+          PERSONAL_ACCESS_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+        run: make integration_test

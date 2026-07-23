@@ -5,7 +5,7 @@ ABEJA Platform SDK is the ABEJA Platform Software Development Kit (SDK) for Pyth
 ABEJA Platform SDKは、Python 用のABEJA Platform Software Development Kit（SDK）で、Python 開発者はDatalake, Dataset, Training, Deployment などのサービスを利用したソフトウェアを書くことができる。
 サポートされているサービスのリストなど、最新のドキュメントはdoc サイトでご覧いただけます。
 
-[![CircleCI](https://circleci.com/gh/abeja-inc/abeja-platform-sdk.svg?style=svg)](https://circleci.com/gh/abeja-inc/abeja-platform-sdk)
+[![Unit tests](https://github.com/abeja-inc/abeja-platform-sdk/actions/workflows/test.yml/badge.svg?branch=develop&event=push)](https://github.com/abeja-inc/abeja-platform-sdk/actions/workflows/test.yml)
 
 ## How to install
 
@@ -66,6 +66,10 @@ You can run tests in all supported Python versions using `pytest`.
 $ make test
 ```
 
+Live integration tests require a dedicated ABEJA Platform Datalake channel.
+GitHub Actions setup and release operations are documented in
+[`.github/CICD.md`](.github/CICD.md).
+
 You can also run individual tests with your default Python version:
 
 また、デフォルトのPython バージョンで個々のテストを実行することも可能です。
@@ -116,12 +120,14 @@ After pushing to staging branch, RC package is automatically published to PyPI w
 Create a PR and merge from `staging` to `master` branch.
 
 After pushing to master branch, the final package (e.g., `2.3.6`) is published to PyPI.
+After each RC or final package is published, GitHub Actions starts the matching
+`platform-system-test` workflow with the exact published SDK version.
 
 ## 実装中のSDK をローカルで利用する方法
 以下のコマンドでwheel ファイルを作成する。dist ディレクトリに`abeja_sdk-x.x.x-py3-none-any.whl` というファイルが爆誕。
 
 ```bash
-make release
+make dist
 ```
 
 SDK を利用する側を想定した環境で、上記のwhl ファイルを指定してpip install する
