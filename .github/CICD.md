@@ -112,6 +112,10 @@ check through the public Checks REST API and compares its wheel digest with
 PyPI before accepting the dispatch. The target authenticates that public read
 with its read-only CI GitHub App to avoid the low shared anonymous API rate
 limit; no SDK repository secret crosses the repository boundary.
+Before staging, install that separate read App on `abeja-platform-sdk` with
+Actions and Checks read access and verify the target can mint its downscoped
+token. This is distinct from the SDK-owned App that dispatches
+`platform-system-test`.
 
 The release-provenance contract is exact:
 
@@ -230,10 +234,12 @@ with PyPI. It skips the upload only when they match exactly and fails closed on
 any mismatch or yanked wheel. The build artifact is retained for 31 days,
 covering GitHub's 30-day workflow rerun window.
 
-The target rejects human dispatches and accepts only the configured SDK GitHub
-App bot. Recovery must therefore rerun the failed SDK workflow jobs so that the
-existing App-authenticated dispatch and provenance checks are reused. Do not
-manually dispatch the target or manually create the production tag or GitHub
+The target rejects new human dispatches and accepts only the configured SDK
+GitHub App bot. If the target dispatch was never accepted, rerun the failed SDK
+workflow jobs so that the App-authenticated dispatch and provenance checks are
+reused. If the linked target run exists but fails, rerun its failed jobs;
+rerunning the SDK dispatch only reconciles and exits after finding that run.
+Do not manually create a new target dispatch, production tag, or GitHub
 Release. If the rerun window has closed, or if the PyPI version is missing,
 yanked, or has a different digest, stop and escalate to the release owners for
 a separately reviewed recovery; use a new package version rather than
