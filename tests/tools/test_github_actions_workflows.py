@@ -19,6 +19,16 @@ def test_release_and_live_integration_runs_are_queued():
     assert "cancel-in-progress: false" not in integration
 
 
+def test_circleci_and_long_lived_pypi_credentials_stay_removed():
+    makefile = (ROOT / "Makefile").read_text()
+
+    assert not (ROOT / ".circleci" / "config.yml").exists()
+    assert not (ROOT / "tools" / "trigger_build_system_test.py").exists()
+    assert "TWINE_USERNAME" not in makefile
+    assert "TWINE_PASSWORD" not in makefile
+    assert "poetry publish" not in makefile
+
+
 def test_migrated_external_actions_are_commit_pinned():
     migrated_workflows = (
         "integration-test.yml",
