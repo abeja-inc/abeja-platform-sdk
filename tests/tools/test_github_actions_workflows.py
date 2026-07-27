@@ -232,12 +232,13 @@ def test_verified_release_provenance_check_binds_the_published_wheel():
     assert "id-token:" not in provenance
     assert "actions/checkout@" not in publish
     assert "actions/checkout@" not in provenance
-    assert (
-        publish.index("Check existing PyPI distribution")
-        < publish.index("Publish distribution")
-        < publish.index("Verify published distribution")
-        < publish.index("Record successful publish attempt")
-    )
+    publish_step_positions = [
+        publish.index("Check existing PyPI distribution"),
+        publish.index("Publish distribution"),
+        publish.index("Verify published distribution"),
+        publish.index("Record successful publish attempt"),
+    ]
+    assert publish_step_positions == sorted(publish_step_positions)
     assert (
         "run-attempt: ${{ steps.publish-attempt.outputs.run-attempt }}"
         in publish
