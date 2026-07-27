@@ -73,10 +73,10 @@ def test_migrated_external_actions_are_commit_pinned():
         ),
         (
             (
-                "pypa/gh-action-pypi-publish@"
-                "cef221092ed1bacb1cc03d23a2d87d1d172e277b"
+                "astral-sh/setup-uv@"
+                "08807647e7069bb48b6ef5acd8ec9567f424441b"
             ),
-            "v1.14.0",
+            "v8.1.0",
         ),
     }
     assert workflows.count(expected_checkout) == len(migrated_workflows)
@@ -256,7 +256,14 @@ def test_pypi_uses_protected_environment_and_trusted_publishing():
     assert "actions/setup-python@" not in publish
     assert "Check existing PyPI distribution" in publish
     assert "remote_digest != local_digest" in publish
-    assert "gh-action-pypi-publish@" in publish
+    assert "astral-sh/setup-uv@" in publish
+    assert 'version: "0.11.16"' in publish
+    assert (
+        "checksum: "
+        "74947fe2c03315cf07e82ab3acc703eddef01aba4d5232a98e4c6825ec116131"
+    ) in publish
+    assert "uv publish --trusted-publishing always --no-attestations" in publish
+    assert "gh-action-pypi-publish@" not in publish
     assert "Verify published distribution" in publish
     assert "Published PyPI wheel digest differs" in publish
     assert "PyPI publication was not verified" in publish

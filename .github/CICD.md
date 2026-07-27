@@ -93,8 +93,12 @@ publish job grants job-level `contents: read` only to recheck the release ref
 and `id-token: write` for Trusted Publishing; it does not check out or execute
 repository code. It downloads the already-built wheel, rechecks the filename
 and SHA-256 against PyPI on every publish-job attempt, verifies that a new
-publication still comes from the current branch head, and invokes the
-SHA-pinned publishing Action only when the version is absent.
+publication still comes from the current branch head, and invokes a
+checksum-verified fixed `uv` version only when the package version is absent.
+`uv publish --trusted-publishing always` fails closed unless the PyPI OIDC
+exchange succeeds. PEP 740 attestations are intentionally disabled for this
+initial migration; add a separately reviewed attestation step before enabling
+them.
 
 Restrict `pypi-staging` to `staging` and `pypi-production` to `master`. Add a
 required reviewer to `pypi-production` if the repository's release policy

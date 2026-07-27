@@ -265,6 +265,13 @@ jobs:
           name: python-distribution
           path: dist
 
+      - name: Install checksum-verified uv
+        uses: astral-sh/setup-uv@08807647e7069bb48b6ef5acd8ec9567f424441b # v8.1.0
+        with:
+          version: "0.11.16"
+          checksum: 74947fe2c03315cf07e82ab3acc703eddef01aba4d5232a98e4c6825ec116131
+          enable-cache: "false"
+
       # Keep this inline so the credentialed job never executes checked-out
       # repository code. The same rules are unit-tested in tools/.
       - name: Check existing PyPI distribution
@@ -362,7 +369,7 @@ jobs:
 
       - name: Publish distribution
         if: steps.pypi-state.outputs.state == 'missing'
-        uses: pypa/gh-action-pypi-publish@cef221092ed1bacb1cc03d23a2d87d1d172e277b # v1.14.0
+        run: uv publish --trusted-publishing always --no-attestations dist/*.whl
 
       - name: Verify published distribution
         if: steps.pypi-state.outputs.state == 'missing'
