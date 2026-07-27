@@ -67,6 +67,13 @@ def get_distribution_state(package_name, version, distribution_paths, urlopen=No
     if remote_files is None:
         return 'missing'
 
+    expected_files = {path.name for path in paths}
+    if set(remote_files) != expected_files:
+        raise RuntimeError(
+            f'PyPI has an unexpected file set for {package_name} {version}: '
+            f'expected {sorted(expected_files)}, found {sorted(remote_files)}'
+        )
+
     mismatches = []
     yanked = []
     for path in paths:

@@ -41,6 +41,14 @@ def get_pypi_versions(package_name="abeja-sdk"):
 
 def get_next_rc_version(base_version, existing_versions):
     """Find the next RC version number"""
+    if base_version in existing_versions:
+        raise ValueError(
+            "The final version {} already exists on PyPI; "
+            "bump the project version before publishing another RC".format(
+                base_version
+            )
+        )
+
     # Filter versions that match the base version with rc suffix
     rc_pattern = re.compile(rf"^{re.escape(base_version)}rc(\d+)$")
     rc_numbers = []

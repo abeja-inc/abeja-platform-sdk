@@ -6,21 +6,24 @@ on:
       - staging
       - master
 
-permissions:
-  contents: read
+permissions: {}
 
 # RC numbering and PyPI uploads must never race or be cancelled midway.
 concurrency:
-  group: release
+  group: abeja-sdk-pypi-release
   queue: max
 
 jobs:
   unit-tests:
     name: Unit tests
+    permissions:
+      contents: read
     uses: ./.github/workflows/test.yml
 
   integration-tests:
     name: Integration tests
+    permissions:
+      contents: read
     uses: ./.github/workflows/integration-test.yml
 
   build:
@@ -30,16 +33,37 @@ jobs:
       - integration-tests
     runs-on: ubuntu-22.04
     timeout-minutes: 15
+    permissions:
+      contents: read
     outputs:
       package-version: ${{ steps.version.outputs.package-version }}
       release-stage: ${{ steps.version.outputs.release-stage }}
       target-ref: ${{ steps.version.outputs.target-ref }}
     steps:
       - name: Check out repository
-        uses: actions/checkout@v7
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+        with:
+          persist-credentials: false
+
+      - name: Verify release source is the current branch head
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SOURCE_REF_NAME: ${{ github.ref_name }}
+          SOURCE_REPOSITORY: ${{ github.repository }}
+          SOURCE_SHA: ${{ github.sha }}
+        run: |
+          current_sha="$(
+            gh api --method GET \
+              "repos/$SOURCE_REPOSITORY/git/ref/heads/$SOURCE_REF_NAME" \
+              --jq '.object.sha'
+          )"
+          if [ "$current_sha" != "$SOURCE_SHA" ]; then
+            echo "Refusing stale release: $SOURCE_REF_NAME is now $current_sha." >&2
+            exit 1
+          fi
 
       - name: Set up Python
-        uses: actions/setup-python@v6
+        uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6.3.0
         with:
           python-version: "3.8"
 
@@ -77,9 +101,11 @@ jobs:
           sed -i -E "s/^VERSION = .*/VERSION = \"${package_version}\"/" abeja/version.py
           grep -Fqx "VERSION = \"${package_version}\"" abeja/version.py
 
-          echo "package-version=$package_version" >> "$GITHUB_OUTPUT"
-          echo "release-stage=$release_stage" >> "$GITHUB_OUTPUT"
-          echo "target-ref=$target_ref" >> "$GITHUB_OUTPUT"
+          {
+            echo "package-version=$package_version"
+            echo "release-stage=$release_stage"
+            echo "target-ref=$target_ref"
+          } >> "$GITHUB_OUTPUT"
 
       - name: Build wheel
         run: poetry build --format wheel
@@ -89,18 +115,20 @@ jobs:
           PACKAGE_VERSION: ${{ steps.version.outputs.package-version }}
           RELEASE_STAGE: ${{ steps.version.outputs.release-stage }}
         run: |
-          echo "### Built distribution" >> "$GITHUB_STEP_SUMMARY"
-          echo "- Source SHA: \`$GITHUB_SHA\`" >> "$GITHUB_STEP_SUMMARY"
-          echo "- Package version: \`$PACKAGE_VERSION\`" >> "$GITHUB_STEP_SUMMARY"
-          echo "- Release stage: \`$RELEASE_STAGE\`" >> "$GITHUB_STEP_SUMMARY"
-          for wheel in dist/*.whl; do
-            filename="$(basename "$wheel")"
-            digest="$(sha256sum "$wheel" | cut -d' ' -f1)"
-            echo "- \`$filename\`: \`$digest\`" >> "$GITHUB_STEP_SUMMARY"
-          done
+          {
+            echo "### Built distribution"
+            echo "- Source SHA: \`$GITHUB_SHA\`"
+            echo "- Package version: \`$PACKAGE_VERSION\`"
+            echo "- Release stage: \`$RELEASE_STAGE\`"
+            for wheel in dist/*.whl; do
+              filename="$(basename "$wheel")"
+              digest="$(sha256sum "$wheel" | cut -d' ' -f1)"
+              echo "- \`$filename\`: \`$digest\`"
+            done
+          } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Upload distribution
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: python-distribution
           path: dist/*.whl
@@ -115,10 +143,12 @@ jobs:
     timeout-minutes: 10
     permissions: {}
     environment: system-test-dispatch
+    outputs:
+      workflow: ${{ steps.target-workflow.outputs.workflow }}
     steps:
       - name: Create read-only cross-repository GitHub App token
         id: read-token
-        uses: actions/create-github-app-token@v3
+        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
         with:
           client-id: ${{ vars.SYSTEM_TEST_DISPATCH_APP_CLIENT_ID }}
           private-key: ${{ secrets.SYSTEM_TEST_DISPATCH_APP_PRIVATE_KEY }}
@@ -128,18 +158,18 @@ jobs:
           permission-contents: read
 
       - name: Verify workflow registration and target ref
+        id: target-workflow
         env:
           GH_TOKEN: ${{ steps.read-token.outputs.token }}
           TARGET_REF: ${{ needs.build.outputs.target-ref }}
           TARGET_REPOSITORY: ${{ github.repository_owner }}/platform-system-test
           SYSTEM_TEST_WORKFLOW: ${{ vars.SYSTEM_TEST_WORKFLOW || 'system-test.yml' }}
         run: |
-          case "$SYSTEM_TEST_WORKFLOW" in
-            */*)
-              echo "SYSTEM_TEST_WORKFLOW must be a workflow filename, not a path." >&2
-              exit 1
-              ;;
-          esac
+          if [ "${#SYSTEM_TEST_WORKFLOW}" -gt 100 ] ||
+            [[ ! "$SYSTEM_TEST_WORKFLOW" =~ ^[A-Za-z0-9][A-Za-z0-9._-]*\.ya?ml$ ]]; then
+            echo "SYSTEM_TEST_WORKFLOW must be a safe .yml or .yaml filename." >&2
+            exit 1
+          fi
 
           default_branch="$(
             gh api --method GET "repos/$TARGET_REPOSITORY" --jq '.default_branch'
@@ -181,22 +211,32 @@ jobs:
                       declaration["required"] == true &&
                       declaration["type"] == "string"
                   end
-                  unless invalid.empty? && unexpected.empty?
+                  expected_run_name = [
+                    "SDK $", "{{ inputs.sdk_version }} -> $",
+                    "{{ inputs.release_stage }} (source $",
+                    "{{ inputs.source_run_id }})"
+                  ].join
+                  unless invalid.empty? &&
+                    unexpected.empty? &&
+                    document["run-name"] == expected_run_name
                     abort(
                       "#{ENV.fetch("TARGET_WORKFLOW_REF")}: " \
                       "workflow_dispatch must contain exactly the six " \
-                      "required string inputs; invalid=#{invalid.join(",")} " \
+                      "required string inputs and the documented run-name; " \
+                      "invalid=#{invalid.join(",")} " \
                       "unexpected=#{unexpected.join(",")}"
                     )
                   end
                 '
           done
 
+          printf 'workflow=%s\n' "$SYSTEM_TEST_WORKFLOW" >> "$GITHUB_OUTPUT"
+
       # Creating a token with this downscoped permission fails if the App was
       # installed without Actions: Write. Do not expose this probe token to a
       # shell step; the action revokes it when the job ends.
       - name: Verify cross-repository dispatch permission
-        uses: actions/create-github-app-token@v3
+        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
         with:
           client-id: ${{ vars.SYSTEM_TEST_DISPATCH_APP_CLIENT_ID }}
           private-key: ${{ secrets.SYSTEM_TEST_DISPATCH_APP_PRIVATE_KEY }}
@@ -211,18 +251,16 @@ jobs:
       - system-test-readiness
     runs-on: ubuntu-22.04
     timeout-minutes: 15
-    permissions: {}
+    # Trusted Publishing exposes OIDC only to this minimal, checkout-free job.
+    permissions:
+      contents: read # Recheck the protected release ref before first publish.
+      id-token: write # Required only for PyPI Trusted Publishing.
     environment:
       name: pypi-${{ needs.build.outputs.release-stage }}
       url: https://pypi.org/project/abeja-sdk/${{ needs.build.outputs.package-version }}/
     steps:
-      - name: Set up Python
-        uses: actions/setup-python@v6
-        with:
-          python-version: "3.8"
-
       - name: Download distribution
-        uses: actions/download-artifact@v8
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
           name: python-distribution
           path: dist
@@ -268,13 +306,19 @@ jobs:
               urls = data.get("urls")
               if not isinstance(urls, list):
                   raise RuntimeError("PyPI returned an invalid file list")
-              matches = [
-                  item for item in urls
-                  if isinstance(item, dict) and item.get("filename") == wheel.name
-              ]
-              if len(matches) != 1:
-                  raise RuntimeError(f"PyPI does not contain exactly one {wheel.name}")
-              remote = matches[0]
+              if (
+                  len(urls) != 1
+                  or not isinstance(urls[0], dict)
+                  or urls[0].get("filename") != wheel.name
+              ):
+                  filenames = [
+                      item.get("filename") if isinstance(item, dict) else None
+                      for item in urls
+                  ]
+                  raise RuntimeError(
+                      f"PyPI has an unexpected file set: {filenames}"
+                  )
+              remote = urls[0]
               if remote.get("yanked") is True:
                   raise RuntimeError(f"PyPI wheel is yanked: {wheel.name}")
               digests = remote.get("digests")
@@ -295,17 +339,104 @@ jobs:
                       "upload is not repeated.\n"
                   )
 
+      # Environment approval can take long enough for the release branch to
+      # move after the build job's first check. Fence only a new upload here;
+      # an identical published artifact must remain recoverable on rerun.
+      - name: Recheck release source before first publication
+        if: steps.pypi-state.outputs.state == 'missing'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SOURCE_REF_NAME: ${{ github.ref_name }}
+          SOURCE_REPOSITORY: ${{ github.repository }}
+          SOURCE_SHA: ${{ github.sha }}
+        run: |
+          current_sha="$(
+            gh api --method GET \
+              "repos/$SOURCE_REPOSITORY/git/ref/heads/$SOURCE_REF_NAME" \
+              --jq '.object.sha'
+          )"
+          if [ "$current_sha" != "$SOURCE_SHA" ]; then
+            echo "Refusing stale publication: $SOURCE_REF_NAME is now $current_sha." >&2
+            exit 1
+          fi
+
       - name: Publish distribution
         if: steps.pypi-state.outputs.state == 'missing'
-        uses: pypa/gh-action-pypi-publish@v1.14.0
-        with:
-          password: ${{ secrets.PYPI_API_TOKEN }}
+        uses: pypa/gh-action-pypi-publish@cef221092ed1bacb1cc03d23a2d87d1d172e277b # v1.14.0
+
+      - name: Verify published distribution
+        if: steps.pypi-state.outputs.state == 'missing'
+        shell: python
+        env:
+          PACKAGE_VERSION: ${{ needs.build.outputs.package-version }}
+        run: |
+          import hashlib
+          import json
+          import os
+          import time
+          import urllib.request
+          from pathlib import Path
+          from urllib.error import HTTPError
+          from urllib.parse import quote
+
+          wheels = list(Path("dist").glob("*.whl"))
+          if len(wheels) != 1:
+              raise RuntimeError(f"Expected one wheel, found {len(wheels)}")
+          wheel = wheels[0]
+          local_digest = hashlib.sha256(wheel.read_bytes()).hexdigest()
+
+          release = quote(os.environ["PACKAGE_VERSION"], safe="")
+          url = f"https://pypi.org/pypi/abeja-sdk/{release}/json"
+          last_error = "release not visible"
+          for attempt in range(1, 21):
+              try:
+                  with urllib.request.urlopen(url, timeout=10) as response:
+                      data = json.loads(response.read())
+              except HTTPError as error:
+                  if error.code != 404:
+                      raise
+                  last_error = "release not visible"
+              else:
+                  urls = data.get("urls") if isinstance(data, dict) else None
+                  if not isinstance(urls, list):
+                      raise RuntimeError("PyPI returned an invalid file list")
+                  if (
+                      len(urls) == 1
+                      and isinstance(urls[0], dict)
+                      and urls[0].get("filename") == wheel.name
+                  ):
+                      remote = urls[0]
+                      digests = remote.get("digests")
+                      remote_digest = (
+                          digests.get("sha256")
+                          if isinstance(digests, dict)
+                          else None
+                      )
+                      if remote.get("yanked") is True:
+                          raise RuntimeError(f"PyPI wheel is yanked: {wheel.name}")
+                      if remote_digest != local_digest:
+                          raise RuntimeError(
+                              f"Published PyPI wheel digest differs: {wheel.name}"
+                          )
+                      break
+                  filenames = [
+                      item.get("filename") if isinstance(item, dict) else None
+                      for item in urls
+                  ]
+                  last_error = f"unexpected file set: {filenames}"
+
+              if attempt == 20:
+                  raise RuntimeError(
+                      f"PyPI publication was not verified: {last_error}"
+                  )
+              time.sleep(6)
 
   trigger-system-tests:
     name: Trigger platform system tests
     needs:
       - build
       - publish
+      - system-test-readiness
     runs-on: ubuntu-22.04
     timeout-minutes: 10
     permissions: {}
@@ -313,7 +444,7 @@ jobs:
     steps:
       - name: Create cross-repository GitHub App token
         id: app-token
-        uses: actions/create-github-app-token@v3
+        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
         with:
           client-id: ${{ vars.SYSTEM_TEST_DISPATCH_APP_CLIENT_ID }}
           private-key: ${{ secrets.SYSTEM_TEST_DISPATCH_APP_PRIVATE_KEY }}
@@ -327,8 +458,51 @@ jobs:
           SDK_VERSION: ${{ needs.build.outputs.package-version }}
           RELEASE_STAGE: ${{ needs.build.outputs.release-stage }}
           TARGET_REF: ${{ needs.build.outputs.target-ref }}
-          SYSTEM_TEST_WORKFLOW: ${{ vars.SYSTEM_TEST_WORKFLOW || 'system-test.yml' }}
+          SYSTEM_TEST_WORKFLOW: ${{ needs.system-test-readiness.outputs.workflow }}
         run: |
+          set -Eeuo pipefail
+
+          expected_title="SDK $SDK_VERSION -> $RELEASE_STAGE (source $GITHUB_RUN_ID)"
+          find_existing_dispatch() {
+            local matches
+            local match_count
+            matches="$(
+              gh api --paginate --method GET \
+                "repos/${GITHUB_REPOSITORY_OWNER}/platform-system-test/actions/workflows/$SYSTEM_TEST_WORKFLOW/runs" \
+                -f "branch=$TARGET_REF" \
+                -f "event=workflow_dispatch" \
+                -f "per_page=100" \
+                --jq '.workflow_runs[] | [.display_title, .html_url] | @tsv' \
+                | awk -F '\t' -v expected="$expected_title" \
+                    '$1 == expected { print $2 }'
+            )"
+            match_count="$(
+              printf '%s\n' "$matches" |
+                awk 'NF { count++ } END { print count + 0 }'
+            )"
+            if [ "$match_count" -gt 1 ]; then
+              echo "Found multiple matching system-test runs for $expected_title." >&2
+              return 2
+            fi
+            if [ "$match_count" -eq 1 ]; then
+              printf '%s\n' "$matches"
+              return 0
+            fi
+            return 1
+          }
+
+          existing_status=0
+          existing_url="$(find_existing_dispatch)" || existing_status=$?
+          if [ "$existing_status" -eq 0 ]; then
+            echo "Matching system-test dispatch already exists: $existing_url" \
+              >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+          if [ "$existing_status" -ne 1 ]; then
+            exit "$existing_status"
+          fi
+
+          dispatch_status=0
           gh workflow run "$SYSTEM_TEST_WORKFLOW" \
             --repo "${GITHUB_REPOSITORY_OWNER}/platform-system-test" \
             --ref "$TARGET_REF" \
@@ -337,4 +511,124 @@ jobs:
             --field "sdk_sha=$GITHUB_SHA" \
             --field "source_repository=$GITHUB_REPOSITORY" \
             --field "source_run_id=$GITHUB_RUN_ID" \
-            --field "source_run_url=$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+            --field "source_run_url=$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID" \
+            || dispatch_status=$?
+
+          for _ in $(seq 1 12); do
+            existing_status=0
+            existing_url="$(find_existing_dispatch)" || existing_status=$?
+            if [ "$existing_status" -eq 0 ]; then
+              echo "System-test dispatch accepted: $existing_url" \
+                >> "$GITHUB_STEP_SUMMARY"
+              exit 0
+            fi
+            if [ "$existing_status" -ne 1 ]; then
+              exit "$existing_status"
+            fi
+            sleep 5
+          done
+
+          echo "No matching system-test run appeared; dispatch exit status was $dispatch_status." >&2
+          exit 1
+
+  finalize-production-release:
+    name: Finalize production release
+    if: ${{ needs.build.outputs.release-stage == 'production' }}
+    needs:
+      - build
+      - publish
+      - trigger-system-tests
+    runs-on: ubuntu-22.04
+    timeout-minutes: 10
+    permissions:
+      contents: write # Required only to create the production tag/release.
+    steps:
+      # This job deliberately avoids checkout and reconciles partial success
+      # through the GitHub API before creating either immutable object.
+      - name: Reconcile production tag and GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PACKAGE_VERSION: ${{ needs.build.outputs.package-version }}
+          RELEASE_STAGE: ${{ needs.build.outputs.release-stage }}
+          REPOSITORY: ${{ github.repository }}
+          SERVER_URL: ${{ github.server_url }}
+          SOURCE_EVENT: ${{ github.event_name }}
+          SOURCE_REF: ${{ github.ref }}
+          SOURCE_SHA: ${{ github.sha }}
+        run: |
+          set -Eeuo pipefail
+
+          if [ "$REPOSITORY" != "abeja-inc/abeja-platform-sdk" ] ||
+            [ "$RELEASE_STAGE" != "production" ] ||
+            [ "$SOURCE_EVENT" != "push" ] ||
+            [ "$SOURCE_REF" != "refs/heads/master" ]; then
+            echo "Production release identity is invalid." >&2
+            exit 1
+          fi
+          if [[ ! "$PACKAGE_VERSION" =~ ^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$ ]]; then
+            echo "Production package version is not canonical: $PACKAGE_VERSION" >&2
+            exit 1
+          fi
+          if [[ ! "$SOURCE_SHA" =~ ^[0-9a-f]{40}$ ]]; then
+            echo "Production source SHA is invalid." >&2
+            exit 1
+          fi
+
+          tag_state="$(
+            gh api --method GET \
+              "repos/$REPOSITORY/git/ref/tags/$PACKAGE_VERSION" \
+              --jq '.object.type + " " + .object.sha' \
+              2>/dev/null || true
+          )"
+          if [ -z "$tag_state" ]; then
+            if ! gh api --method POST "repos/$REPOSITORY/git/refs" \
+              -f "ref=refs/tags/$PACKAGE_VERSION" \
+              -f "sha=$SOURCE_SHA" \
+              --silent; then
+              echo "Tag creation did not succeed; checking for a concurrent create." >&2
+            fi
+            tag_state="$(
+              gh api --method GET \
+                "repos/$REPOSITORY/git/ref/tags/$PACKAGE_VERSION" \
+                --jq '.object.type + " " + .object.sha'
+            )"
+          fi
+          if [ "$tag_state" != "commit $SOURCE_SHA" ]; then
+            echo "Tag $PACKAGE_VERSION has unexpected target: $tag_state" >&2
+            exit 1
+          fi
+
+          release_name="Release $PACKAGE_VERSION"
+          release_body="Release $PACKAGE_VERSION. See [CHANGELOG.md]($SERVER_URL/$REPOSITORY/blob/master/CHANGELOG.md) for details."
+          get_release_state() {
+            gh api --method GET \
+              "repos/$REPOSITORY/releases/tags/$PACKAGE_VERSION" \
+              --jq '[.tag_name, .name, .body, .draft, .prerelease] | @tsv' \
+              2>/dev/null
+          }
+
+          release_state="$(get_release_state || true)"
+          if [ -z "$release_state" ]; then
+            if ! gh api --method POST "repos/$REPOSITORY/releases" \
+              -f "tag_name=$PACKAGE_VERSION" \
+              -f "target_commitish=$SOURCE_SHA" \
+              -f "name=$release_name" \
+              -f "body=$release_body" \
+              -F draft=false \
+              -F prerelease=false \
+              --silent; then
+              echo "Release creation did not succeed; checking for a concurrent create." >&2
+            fi
+            release_state="$(get_release_state)"
+          fi
+
+          expected_release_state="$(
+            printf '%s\t%s\t%s\tfalse\tfalse' \
+              "$PACKAGE_VERSION" \
+              "$release_name" \
+              "$release_body"
+          )"
+          if [ "$release_state" != "$expected_release_state" ]; then
+            echo "GitHub Release metadata differs from the expected release." >&2
+            exit 1
+          fi

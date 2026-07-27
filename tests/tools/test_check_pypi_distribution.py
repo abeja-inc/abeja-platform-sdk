@@ -20,6 +20,25 @@ def pypi_response(filename, digest, yanked=False):
     return response
 
 
+def pypi_response_with_extra_file(filename, digest):
+    response = mock.MagicMock()
+    response.__enter__.return_value.read.return_value = json.dumps({
+        'urls': [
+            {
+                'filename': filename,
+                'digests': {'sha256': digest},
+                'yanked': False,
+            },
+            {
+                'filename': 'unexpected.tar.gz',
+                'digests': {'sha256': digest},
+                'yanked': False,
+            },
+        ],
+    }).encode()
+    return response
+
+
 def test_distribution_state_is_missing_for_unknown_release(tmp_path):
     distribution = tmp_path / 'abeja_sdk-2.3.6-py3-none-any.whl'
     distribution.write_bytes(b'wheel')
@@ -112,6 +131,26 @@ def test_distribution_state_rejects_different_digest(tmp_path):
             [distribution],
             urlopen=mock.Mock(
                 return_value=pypi_response(distribution.name, 'different')
+            ),
+        )
+
+
+def test_distribution_state_rejects_unexpected_extra_file(tmp_path):
+    distribution = tmp_path / 'abeja_sdk-2.3.6-py3-none-any.whl'
+    content = b'wheel'
+    distribution.write_bytes(content)
+    digest = hashlib.sha256(content).hexdigest()
+
+    with pytest.raises(RuntimeError, match='unexpected file set'):
+        get_distribution_state(
+            'abeja-sdk',
+            '2.3.6',
+            [distribution],
+            urlopen=mock.Mock(
+                return_value=pypi_response_with_extra_file(
+                    distribution.name,
+                    digest,
+                )
             ),
         )
 
