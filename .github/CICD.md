@@ -27,14 +27,15 @@ never restore both publishers on a release branch.
   before the Environment is accessed.
 - `Release` calls both test workflows, builds one wheel, verifies that the
   target system-test workflow is dispatchable, publishes the wheel, and then
-  triggers `platform-system-test`. Integration credentials are
-  mandatory in this release path. A successful release means that the target
-  registered the uniquely identified dispatch; it does not wait for the target
-  run to finish. A retry first reconciles target runs by source run ID, SDK
-  version, and release stage, and fails if it finds duplicates. On `master`, a
-  final checkout-free job then reconciles the immutable tag and GitHub Release
-  through the API. An identical existing tag/release is a safe no-op; a
-  conflicting target or release metadata fails closed.
+  records the verified PyPI file as a public GitHub check run, and then triggers
+  `platform-system-test`. Integration credentials are mandatory in this release
+  path. A successful release means that the target registered the uniquely
+  identified dispatch; it does not wait for the target run to finish. A retry
+  first reconciles both the provenance check and target runs, and fails on
+  duplicate or conflicting state. On `master`, a final checkout-free job then
+  reconciles the immutable tag and GitHub Release through the API. An identical
+  existing tag/release is a safe no-op; a conflicting target or release
+  metadata fails closed.
 
 Python 3.8 and Poetry 1.8.0 are intentionally fixed for the initial migration.
 The current pytest and mypy versions do not support a Python 3.10/3.11 test
@@ -45,7 +46,7 @@ matrix. Upgrade the development dependencies before expanding the matrix.
 | Event | Eligible refs / callers | Trust and credentials | Jobs and side effects |
 | --- | --- | --- | --- |
 | `pull_request` | Targets `develop`, `staging`, or `master` | Unit tests are unprivileged. Integration receives local Environment secrets only for a same-repository, non-Dependabot head. | Stable `Unit tests` gate; optional serialized integration test; no writes. |
-| `push` | `develop` for tests; `staging` and `master` for release | Protected repository code. Integration uses its Environment; publishing and dispatch credentials remain in separate jobs. | Tests on `develop`; serialized build/publish/dispatch on release branches; production tag/release reconciliation on `master`. |
+| `push` | `develop` for tests; `staging` and `master` for release | Protected repository code. Integration uses its Environment; OIDC publishing, Checks write, and dispatch credentials remain in separate checkout-free jobs. | Tests on `develop`; serialized build/publish/provenance-check/dispatch on release branches; production tag/release reconciliation on `master`. |
 | `workflow_dispatch` | Unit: any ref, no secrets. Integration: only the three named branches. | Integration is skipped before Environment access for every other ref. | Manual validation only; no package publication. |
 | `workflow_call` | Unit: public reusable workflow. Integration: same repository only, with the original event/ref restrictions still enforced. | The release caller forwards no secrets. The integration job resolves this repository's protected Environment secrets only after its repository guard passes. | Test jobs only. The static unit concurrency prefix cannot cancel its caller. |
 
@@ -100,6 +101,45 @@ checksum-verified fixed `uv` version only when the package version is absent.
 exchange succeeds. PEP 740 attestations are intentionally disabled for this
 initial migration; add a separately reviewed attestation step before enabling
 them.
+
+After either verifying an identical existing wheel or publishing and verifying
+a new wheel, a dedicated checkout-free job downloads the build artifact and
+re-verifies its embedded package name/version, exact filename, SHA-256, and
+non-yanked state against public PyPI. That job has only `checks: write`; the
+OIDC-enabled publish job does not receive Checks permission. It then creates a
+completed GitHub check run before dispatch. `platform-system-test` reads this
+check through the public Checks REST API and compares its wheel digest with
+PyPI before accepting the dispatch. The target authenticates that public read
+with its read-only CI GitHub App to avoid the low shared anonymous API rate
+limit; no SDK repository secret crosses the repository boundary.
+
+The release-provenance contract is exact:
+
+- `name`: `ABEJA SDK release provenance`
+- `app.slug`: `github-actions`
+- `head_sha`: the 40-character release source SHA
+- `external_id`:
+  `abeja-sdk-release-provenance:v1:<run-id>:<run-attempt>:<package-version>:<wheel-sha256>`
+- `details_url`:
+  `https://github.com/abeja-inc/abeja-platform-sdk/actions/runs/<run-id>/attempts/<run-attempt>`
+- `status` / `conclusion`: `completed` / `success`
+- `output.title`: `ABEJA SDK release provenance v1`
+- `output.summary`: one compact JSON object with lexicographically sorted keys.
+  Every value, including the positive run identifiers, is a JSON string:
+
+```json
+{"package":"abeja-sdk","package_version":"<package-version>","release_stage":"<staging-or-production>","schema":"abeja-sdk-release-provenance/v1","source_head_sha":"<40-lowercase-hex>","source_repository":"abeja-inc/abeja-platform-sdk","source_run_attempt":"<run-attempt>","source_run_id":"<run-id>","source_workflow":".github/workflows/release.yml","wheel_filename":"<wheel-filename>","wheel_sha256":"<64-lowercase-hex>"}
+```
+
+Consumers list all checks with that name for the source SHA using
+`GET /repos/abeja-inc/abeja-platform-sdk/commits/<sha>/check-runs`, select the
+exact `external_id`, and reject missing, duplicate, or conflicting records.
+They must also compare `wheel_filename` and `wheel_sha256` with the PyPI JSON
+response and verify the `Publish to PyPI` job in the recorded workflow-run
+attempt. `source_run_attempt` is the successful publish job's attempt, preserved
+as a job output: rerunning only a failed provenance or dispatch job therefore
+reuses the same identical check. Rerunning the publish job records its new
+attempt and produces a distinct external ID.
 
 Restrict `pypi-staging` to `staging` and `pypi-production` to `master`. Add a
 required reviewer to `pypi-production` if the repository's release policy
@@ -187,17 +227,17 @@ jobs**, not **Re-run all jobs**. A full staging rerun recalculates the next RC
 from PyPI and can intentionally produce a new version. On a failed publish-job
 retry, the workflow compares the downloaded artifact's filename and SHA-256
 with PyPI. It skips the upload only when they match exactly and fails closed on
-any mismatch or yanked wheel. The build artifact is retained for seven days;
-after that window, compare the PyPI digest with the version, filename, source
-SHA, and wheel SHA-256 recorded in the build job summary.
+any mismatch or yanked wheel. The build artifact is retained for 31 days,
+covering GitHub's 30-day workflow rerun window.
 
-For an exact staging match, manually dispatch the target with the recorded RC
-version and source identifiers; do not create a tag or GitHub Release. For an
-exact production match, manually dispatch the target, then create the missing
-tag at the recorded source SHA and the matching GitHub Release. Never move an
-existing tag. If the PyPI version is missing, yanked, or has a different digest,
-stop recovery and investigate; use a new package version rather than dispatching
-or tagging an unverified artifact.
+The target rejects human dispatches and accepts only the configured SDK GitHub
+App bot. Recovery must therefore rerun the failed SDK workflow jobs so that the
+existing App-authenticated dispatch and provenance checks are reused. Do not
+manually dispatch the target or manually create the production tag or GitHub
+Release. If the rerun window has closed, or if the PyPI version is missing,
+yanked, or has a different digest, stop and escalate to the release owners for
+a separately reviewed recovery; use a new package version rather than
+dispatching or tagging unverified evidence.
 
 ## Migration and decommission checklist
 

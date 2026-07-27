@@ -153,7 +153,7 @@ def test_release_ref_must_still_be_the_current_branch_head():
         "  system-test-readiness:", 1
     )[0]
     publish = release.split("  publish:", 1)[1].split(
-        "  trigger-system-tests:", 1
+        "  record-release-provenance:", 1
     )[0]
 
     assert "Verify release source is the current branch head" in build
@@ -195,7 +195,12 @@ def test_system_test_dispatch_waits_for_publish_and_forwards_the_contract():
     release = (WORKFLOWS / "release.yml").read_text()
     trigger = release.split("  trigger-system-tests:", 1)[1]
 
-    assert "      - build\n      - publish\n      - system-test-readiness" in trigger
+    assert (
+        "      - build\n"
+        "      - publish\n"
+        "      - record-release-provenance\n"
+        "      - system-test-readiness"
+    ) in trigger
     expected_fields = {
         'sdk_version=$SDK_VERSION',
         'release_stage=$RELEASE_STAGE',
@@ -209,6 +214,122 @@ def test_system_test_dispatch_waits_for_publish_and_forwards_the_contract():
     }
     for field in expected_fields:
         assert f'--field "{field}"' in trigger
+
+
+def test_verified_release_provenance_check_binds_the_published_wheel():
+    release = (WORKFLOWS / "release.yml").read_text()
+    publish = release.split("  publish:", 1)[1].split(
+        "  record-release-provenance:", 1
+    )[0]
+    provenance = release.split("  record-release-provenance:", 1)[1].split(
+        "  trigger-system-tests:", 1
+    )[0]
+
+    assert release.count("checks: write") == 1
+    assert "checks: write" not in publish
+    assert "checks: write" in provenance
+    assert "contents:" not in provenance
+    assert "id-token:" not in provenance
+    assert "actions/checkout@" not in publish
+    assert "actions/checkout@" not in provenance
+    assert (
+        publish.index("Check existing PyPI distribution")
+        < publish.index("Publish distribution")
+        < publish.index("Verify published distribution")
+        < publish.index("Record successful publish attempt")
+    )
+    assert (
+        "run-attempt: ${{ steps.publish-attempt.outputs.run-attempt }}"
+        in publish
+    )
+    assert (
+        "run: printf 'run-attempt=%s\\n' \"$GITHUB_RUN_ATTEMPT\" "
+        '>> "$GITHUB_OUTPUT"'
+    ) in publish
+    assert release.index("  publish:") < release.index(
+        "  record-release-provenance:"
+    )
+    assert release.index("  record-release-provenance:") < release.index(
+        "  trigger-system-tests:"
+    )
+    assert "Verify exact PyPI wheel" in provenance
+    assert 'metadata.get("Name") != "abeja-sdk"' in provenance
+    assert 'metadata.get("Version") != package_version' in provenance
+    assert "len(urls) == 1" in provenance
+    assert 'urls[0].get("filename") == wheel.name' in provenance
+    assert 'remote.get("yanked") is True' in provenance
+    assert "remote_digest != local_digest" in provenance
+    assert "filename={wheel.name}" in provenance
+    assert "sha256={local_digest}" in provenance
+    assert "retention-days: 31" in release
+    assert 'check_name="ABEJA SDK release provenance"' in provenance
+    assert 'output_title="ABEJA SDK release provenance v1"' in provenance
+    assert 'schema="abeja-sdk-release-provenance/v1"' in provenance
+    assert 'external_id_prefix="abeja-sdk-release-provenance:v1"' in provenance
+    assert "jq -cSn" in provenance
+    assert (
+        "SOURCE_RUN_ATTEMPT: ${{ needs.publish.outputs.run-attempt }}"
+        in provenance
+    )
+    assert (
+        'if [ "$SOURCE_RUN_ATTEMPT" -gt "$GITHUB_RUN_ATTEMPT" ]'
+        in provenance
+    )
+    assert 'case "$RELEASE_STAGE" in' in provenance
+    assert "version_pattern=" in provenance
+    assert (
+        'external_id="$external_id_prefix:$GITHUB_RUN_ID:$SOURCE_RUN_ATTEMPT:'
+        '$PACKAGE_VERSION:$WHEEL_SHA256"'
+    ) in provenance
+    assert (
+        'details_url="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/'
+        '$GITHUB_RUN_ID/attempts/$SOURCE_RUN_ATTEMPT"'
+    ) in provenance
+    assert '--arg source_run_id "$GITHUB_RUN_ID"' in provenance
+    assert (
+        '--arg source_run_attempt "$SOURCE_RUN_ATTEMPT"'
+        in provenance
+    )
+    for field in (
+        "package_version",
+        "release_stage",
+        "wheel_filename",
+        "wheel_sha256",
+        "source_repository",
+        "source_workflow",
+        "source_run_id",
+        "source_run_attempt",
+        "source_head_sha",
+    ):
+        assert f"{field}: ${field}" in provenance
+    assert 'app_slug: "github-actions"' in provenance
+    assert 'status: "completed"' in provenance
+    assert 'conclusion: "success"' in provenance
+
+
+def test_release_provenance_check_is_retry_safe_and_fails_on_conflicts():
+    release = (WORKFLOWS / "release.yml").read_text()
+    provenance = release.split("  record-release-provenance:", 1)[1].split(
+        "  trigger-system-tests:", 1
+    )[0]
+
+    assert "commits/$GITHUB_SHA/check-runs" in provenance
+    assert '-f "check_name=$check_name"' in provenance
+    assert '-f "filter=all"' in provenance
+    assert (
+        'logical_external_id_prefix="$external_id_prefix:$GITHUB_RUN_ID:'
+        '$SOURCE_RUN_ATTEMPT:$PACKAGE_VERSION:"'
+    ) in provenance
+    assert 'jq -c --arg prefix "$logical_external_id_prefix"' in provenance
+    assert "startswith($prefix)" in provenance
+    assert "select(.external_id == $external_id)" not in provenance
+    assert 'if [ "$match_count" -gt 1 ]' in provenance
+    assert 'if [ "$match_count" -eq 1 ]' in provenance
+    assert 'operation="Reusing"' in provenance
+    assert 'operation="Created"' in provenance
+    assert "repos/$GITHUB_REPOSITORY/check-runs" in provenance
+    assert 'actual_contract" != "$expected_contract' in provenance
+    assert "differs from the contract" in provenance
 
 
 def test_system_test_dispatch_reconciles_retries_by_run_and_version():
@@ -234,6 +355,9 @@ def test_release_credentials_are_scoped_to_the_jobs_that_need_them():
         "  publish:", 1
     )[0]
     publish = release.split("  publish:", 1)[1].split(
+        "  record-release-provenance:", 1
+    )[0]
+    provenance = release.split("  record-release-provenance:", 1)[1].split(
         "  trigger-system-tests:", 1
     )[0]
     trigger = release.split("  trigger-system-tests:", 1)[1].split(
@@ -249,13 +373,21 @@ def test_release_credentials_are_scoped_to_the_jobs_that_need_them():
         "      contents: read"
     ) in publish
     assert "id-token: write" in publish
+    assert "checks: write" not in publish
+    assert (
+        "    permissions:\n"
+        "      checks: write # Create/reconcile the exact public provenance check only.\n"
+        "    steps:"
+    ) in provenance
+    assert "contents:" not in provenance
+    assert "id-token:" not in provenance
     assert "    permissions:\n      contents: write" in finalize
 
 
 def test_pypi_uses_protected_environment_and_trusted_publishing():
     release = (WORKFLOWS / "release.yml").read_text()
     publish = release.split("  publish:", 1)[1].split(
-        "  trigger-system-tests:", 1
+        "  record-release-provenance:", 1
     )[0]
 
     assert "name: pypi-${{ needs.build.outputs.release-stage }}" in publish
