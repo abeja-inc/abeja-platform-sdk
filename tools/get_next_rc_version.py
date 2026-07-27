@@ -36,12 +36,19 @@ def get_pypi_versions(package_name="abeja-sdk"):
             data = json.loads(response.read())
             return list(data.get("releases", {}).keys())
     except Exception as e:
-        print(f"Warning: Could not fetch versions from PyPI: {e}", file=sys.stderr)
-        return []
+        raise RuntimeError(f"Could not fetch versions from PyPI: {e}") from e
 
 
 def get_next_rc_version(base_version, existing_versions):
     """Find the next RC version number"""
+    if base_version in existing_versions:
+        raise ValueError(
+            "The final version {} already exists on PyPI; "
+            "bump the project version before publishing another RC".format(
+                base_version
+            )
+        )
+
     # Filter versions that match the base version with rc suffix
     rc_pattern = re.compile(rf"^{re.escape(base_version)}rc(\d+)$")
     rc_numbers = []
@@ -73,4 +80,3 @@ def main():
 
 if __name__ == "__main__":
     sys.exit(main())
-

@@ -7,26 +7,41 @@ on:
 env:
   DEPENDABOT_AUTO_MERGE: ${{ vars.DEPENDABOT_AUTO_MERGE || 'false' }}
 
+permissions: {}
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
 jobs:
   auto-merge:
-    if: github.actor == 'dependabot[bot]'
+    name: Enable Dependabot auto-merge
+    if: >-
+      github.event.pull_request.user.login == 'dependabot[bot]' &&
+      github.event.pull_request.user.id == 49699333 &&
+      github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ubuntu-latest
     permissions:
-      contents: write
-      pull-requests: write
+      contents: write # Enable auto-merge through the GitHub CLI.
+      issues: write # Report the automation result on the PR.
+      pull-requests: write # Read PR metadata and update merge state.
+      vulnerability-alerts: read # Determine the matching Dependabot alert severity.
     steps:
       - name: Fetch Dependabot metadata
         id: metadata
-        uses: dependabot/fetch-metadata@v2
+        uses: dependabot/fetch-metadata@21025c705c08248db411dc16f3619e6b5f9ea21a # v2.5.0
 
       - name: Check Dependabot alerts severity
         id: severity
-        uses: actions/github-script@v7
+        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7.1.0
+        env:
+          UPDATE_TYPE: ${{ steps.metadata.outputs.update-type }}
         with:
           script: |
             const prNumber = context.issue.number;
             const owner = context.repo.owner;
             const repo = context.repo.repo;
+            const updateType = process.env.UPDATE_TYPE || '';
 
             // Get PR details to check for security labels
             const { data: pr } = await github.rest.pulls.get({
@@ -39,7 +54,7 @@ jobs:
             const isSecurityUpdate = pr.labels.some(label => 
               label.name.toLowerCase().includes('security')
             ) || pr.title.toLowerCase().includes('security') ||
-              '${{ steps.metadata.outputs.update-type }}'.includes('security');
+              updateType.includes('security');
 
             console.log(`Is security update: ${isSecurityUpdate}`);
 
@@ -118,22 +133,28 @@ jobs:
 
       - name: Check auto-merge configuration
         id: check
+        env:
+          AUTO_MERGE_ENABLED: ${{ env.DEPENDABOT_AUTO_MERGE }}
+          DEPENDENCY_TYPE: ${{ steps.metadata.outputs.dependency-type }}
+          UPDATE_TYPE: ${{ steps.metadata.outputs.update-type }}
+          SEVERITY: ${{ fromJSON(steps.severity.outputs.result).severity }}
+          IS_HIGH_OR_CRITICAL: ${{ fromJSON(steps.severity.outputs.result).isHighOrCritical }}
         run: |
-          echo "Auto-merge enabled: ${{ env.DEPENDABOT_AUTO_MERGE }}"
-          echo "Dependency type: ${{ steps.metadata.outputs.dependency-type }}"
-          echo "Update type: ${{ steps.metadata.outputs.update-type }}"
-          echo "Severity: ${{ fromJSON(steps.severity.outputs.result).severity }}"
-          echo "Is High/Critical: ${{ fromJSON(steps.severity.outputs.result).isHighOrCritical }}"
+          printf 'Auto-merge enabled: %s\n' "$AUTO_MERGE_ENABLED"
+          printf 'Dependency type: %s\n' "$DEPENDENCY_TYPE"
+          printf 'Update type: %s\n' "$UPDATE_TYPE"
+          printf 'Severity: %s\n' "$SEVERITY"
+          printf 'Is High/Critical: %s\n' "$IS_HIGH_OR_CRITICAL"
 
           # Auto-merge conditions:
           # 1. DEPENDABOT_AUTO_MERGE is enabled
           # 2. Security update with High or Critical severity
-          if [[ "${{ env.DEPENDABOT_AUTO_MERGE }}" == "true" ]] && \
-             [[ "${{ fromJSON(steps.severity.outputs.result).isHighOrCritical }}" == "true" ]]; then
-            echo "should_merge=true" >> $GITHUB_OUTPUT
+          if [[ "$AUTO_MERGE_ENABLED" == "true" ]] && \
+             [[ "$IS_HIGH_OR_CRITICAL" == "true" ]]; then
+            echo "should_merge=true" >> "$GITHUB_OUTPUT"
             echo "✅ Auto-merge conditions met (High/Critical security update)"
           else
-            echo "should_merge=false" >> $GITHUB_OUTPUT
+            echo "should_merge=false" >> "$GITHUB_OUTPUT"
             echo "⏸️ Auto-merge disabled or conditions not met"
           fi
 
@@ -148,11 +169,14 @@ jobs:
 
       - name: Comment on PR (success)
         if: steps.check.outputs.should_merge == 'true' && steps.merge.outcome == 'success'
-        uses: actions/github-script@v7
+        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7.1.0
+        env:
+          SEVERITY: ${{ fromJSON(steps.severity.outputs.result).severity }}
+          IS_GROUP: ${{ fromJSON(steps.severity.outputs.result).isGroup }}
         with:
           script: |
-            const severity = '${{ fromJSON(steps.severity.outputs.result).severity }}';
-            const isGroup = '${{ fromJSON(steps.severity.outputs.result).isGroup }}' === 'true';
+            const severity = process.env.SEVERITY || 'unknown';
+            const isGroup = process.env.IS_GROUP === 'true';
 
             const prType = isGroup ? 'Grouped Security Update' : 'Security Update';
 
@@ -174,11 +198,14 @@ jobs:
 
       - name: Comment on PR (skipped - low severity)
         if: steps.check.outputs.should_merge == 'false' && fromJSON(steps.severity.outputs.result).severity != 'none' && fromJSON(steps.severity.outputs.result).severity != 'unknown'
-        uses: actions/github-script@v7
+        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7.1.0
+        env:
+          SEVERITY: ${{ fromJSON(steps.severity.outputs.result).severity }}
+          IS_GROUP: ${{ fromJSON(steps.severity.outputs.result).isGroup }}
         with:
           script: |
-            const severity = '${{ fromJSON(steps.severity.outputs.result).severity }}';
-            const isGroup = '${{ fromJSON(steps.severity.outputs.result).isGroup }}' === 'true';
+            const severity = process.env.SEVERITY || 'unknown';
+            const isGroup = process.env.IS_GROUP === 'true';
 
             const prType = isGroup ? 'Grouped Security Update' : 'Security Update';
             const severityUpper = severity.toUpperCase();
@@ -199,7 +226,7 @@ jobs:
 
       - name: Comment on PR (failure)
         if: steps.check.outputs.should_merge == 'true' && steps.merge.outcome == 'failure'
-        uses: actions/github-script@v7
+        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7.1.0
         with:
           script: |
             await github.rest.issues.createComment({
@@ -208,4 +235,3 @@ jobs:
               issue_number: context.issue.number,
               body: '⚠️ Failed to enable auto-merge.\n\n**Possible reasons:**\n- "Allow auto-merge" is not enabled in repository settings\n- Branch protection rules are not properly configured\n- Insufficient permissions\n\nPlease check Settings > General > Pull Requests > Allow auto-merge.'
             });
-

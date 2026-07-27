@@ -11,8 +11,17 @@ on:
   pull_request_review:
     types: [submitted]
 
+permissions: {}
+
+# Keep distinct comments and reviews independent while cancelling duplicate
+# work for the same event identity.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.comment.id || github.event.review.id || github.event.issue.id || github.run_id }}
+  cancel-in-progress: true
+
 jobs:
   claude:
+    name: Handle Claude mention
     if: |
       (github.event_name == 'issue_comment' && contains(github.event.comment.body, '@claude')) ||
       (github.event_name == 'pull_request_review_comment' && contains(github.event.comment.body, '@claude')) ||
@@ -20,18 +29,20 @@ jobs:
       (github.event_name == 'issues' && (contains(github.event.issue.body, '@claude') || contains(github.event.issue.title, '@claude')))
     runs-on: ubuntu-latest
     permissions:
-      contents: write
-      pull-requests: write
-      issues: write
-      id-token: write
-      actions: read
+      contents: read
+      pull-requests: write # Update PR metadata and post review feedback.
+      issues: write # Reply to issue and PR comments.
+      id-token: write # Authenticate to Google Cloud through WIF.
+      actions: read # Let Claude inspect CI results.
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          persist-credentials: false
 
       - name: Authenticate to Google Cloud
         id: auth
-        uses: google-github-actions/auth@v2
+        uses: google-github-actions/auth@c200f3691d83b41bf9bbd8638997a462592937ed # v2.1.13
         with:
           project_id: ${{ secrets.CLAUDE_VERTEX_AI_GCP_PROJECT_ID }}
           workload_identity_provider: ${{ secrets.CLAUDE_VERTEX_AI_GCP_WORKLOAD_IDENTITY_PROVIDER }}
@@ -39,7 +50,7 @@ jobs:
 
       - name: Run Claude Code
         id: claude
-        uses: anthropics/claude-code-action@v1
+        uses: anthropics/claude-code-action@44423bdec74b97d67543eb16c110546762c110b2 # v1.0.181
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           ANTHROPIC_VERTEX_PROJECT_ID: ${{ steps.auth.outputs.project_id }}
