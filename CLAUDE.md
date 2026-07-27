@@ -84,7 +84,7 @@ poetry install
 poetry run pre-commit install
 
 # Create local wheel for testing
-make release
+make dist
 ```
 
 ## Environment Variables

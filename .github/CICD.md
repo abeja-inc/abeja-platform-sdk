@@ -3,10 +3,11 @@
 This repository uses separate workflows for unit tests, live integration tests,
 and package releases.
 
-The first migration pull request deliberately keeps `.circleci/config.yml` and
-`tools/trigger_build_system_test.py` so the old and new test paths can be
-observed on the same commit. Do not promote that parallel configuration to
-`staging`: the two providers would both try to publish a release.
+The first migration pull request deliberately kept `.circleci/config.yml` and
+`tools/trigger_build_system_test.py` so the old and new test paths could be
+observed on the same commit. The cutover commit removes both legacy paths and
+the local credential-based publishing target before promotion to `staging`;
+never restore both publishers on a release branch.
 
 ## Workflows
 
@@ -215,9 +216,10 @@ or tagging an unverified artifact.
    required yet.
 5. Merge the parallel migration to `develop`, verify both push paths, and
    observe the agreed stability period.
-6. When all release Environments, Trusted Publishers, App permissions, target
-   receiver, and recovery steps are verified, remove the CircleCI config and
-   helper in a cutover commit on `develop`. Do not promote a commit containing
+6. In the cutover commit on `develop`, remove the CircleCI config, the
+   system-test trigger helper, and the `TWINE_USERNAME`/`TWINE_PASSWORD`
+   publishing target. Confirm those legacy paths remain absent before opening
+   the `develop` to `staging` pull request. Do not promote a commit containing
    both publishers to `staging`.
 7. Immediately before the first `staging` promotion, use CircleCI's reversible
    block on new work if the project can still start pipelines, then drain

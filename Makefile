@@ -39,7 +39,3 @@ format:
 .PHONY: docs
 docs:
 	PYTHONWARNINGS=ignore poetry run sphinx-build -M html doc/source doc/build -v
-
-.PHONY: release
-release: dist
-	poetry publish -u ${TWINE_USERNAME} -p ${TWINE_PASSWORD}
