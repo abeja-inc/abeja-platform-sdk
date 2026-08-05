@@ -18,6 +18,7 @@ jobs:
     name: Deploy Firebase Hosting dev site
     if: github.ref == 'refs/heads/develop'
     runs-on: ubuntu-latest
+    environment: firebase-hosting-dev
     permissions:
       contents: read
       id-token: write   # WIF の OIDC トークン発行に必須

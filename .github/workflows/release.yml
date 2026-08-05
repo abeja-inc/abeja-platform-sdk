@@ -31,7 +31,7 @@ jobs:
     needs:
       - unit-tests
       - integration-tests
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     timeout-minutes: 15
     permissions:
       contents: read
@@ -141,7 +141,7 @@ jobs:
   system-test-readiness:
     name: Verify platform system-test workflow
     needs: build
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     timeout-minutes: 10
     permissions: {}
     environment: system-test-dispatch
@@ -251,7 +251,7 @@ jobs:
     needs:
       - build
       - system-test-readiness
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     timeout-minutes: 15
     outputs:
       run-attempt: ${{ steps.publish-attempt.outputs.run-attempt }}
@@ -277,7 +277,8 @@ jobs:
           enable-cache: "false"
 
       # Keep this inline so the credentialed job never executes checked-out
-      # repository code. The same rules are unit-tested in tools/.
+      # repository code. A test requires this block to match the unit-tested
+      # tools/check_pypi_distribution.py source byte for byte.
       - name: Check existing PyPI distribution
         id: pypi-state
         shell: python
@@ -292,63 +293,100 @@ jobs:
           from urllib.error import HTTPError
           from urllib.parse import quote
 
-          wheels = list(Path("dist").glob("*.whl"))
-          if len(wheels) != 1:
-              raise RuntimeError(f"Expected one wheel, found {len(wheels)}")
-          wheel = wheels[0]
 
-          package_version = os.environ["PACKAGE_VERSION"]
-          release = quote(package_version, safe="")
-          url = f"https://pypi.org/pypi/abeja-sdk/{release}/json"
-          missing = False
-          try:
-              with urllib.request.urlopen(url, timeout=10) as response:
-                  data = json.loads(response.read())
-          except HTTPError as error:
-              if error.code != 404:
-                  raise
-              missing = True
+          def get_pypi_release_files(package_name, version, urlopen=None):
+              opener = urlopen or urllib.request.urlopen
+              package = quote(package_name, safe="")
+              release = quote(version, safe="")
+              url = f"https://pypi.org/pypi/{package}/{release}/json"
 
-          if missing:
-              state = "missing"
-          else:
+              try:
+                  with opener(url, timeout=10) as response:
+                      data = json.loads(response.read())
+              except HTTPError as error:
+                  if error.code == 404:
+                      return None
+                  raise RuntimeError(
+                      f"Could not fetch {package_name} {version} from PyPI: {error}"
+                  ) from error
+              except Exception as error:
+                  raise RuntimeError(
+                      f"Could not fetch {package_name} {version} from PyPI: {error}"
+                  ) from error
+
               if not isinstance(data, dict):
                   raise RuntimeError("PyPI returned an invalid JSON object")
               urls = data.get("urls")
               if not isinstance(urls, list):
                   raise RuntimeError("PyPI returned an invalid file list")
-              if (
-                  len(urls) != 1
-                  or not isinstance(urls[0], dict)
-                  or urls[0].get("filename") != wheel.name
-              ):
+              return urls
+
+
+          def sha256sum(path):
+              return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+          def get_distribution_state(
+              package_name,
+              version,
+              distribution_path,
+              urlopen=None,
+          ):
+              wheel = Path(distribution_path)
+              if not wheel.is_file():
+                  raise ValueError(f"Distribution does not exist: {wheel}")
+
+              remote_files = get_pypi_release_files(
+                  package_name,
+                  version,
+                  urlopen=urlopen,
+              )
+              if remote_files is None:
+                  return "missing"
+              remote = remote_files[0] if len(remote_files) == 1 else None
+              has_expected_file = isinstance(remote, dict)
+              if has_expected_file:
+                  has_expected_file = remote.get("filename") == wheel.name
+              if not has_expected_file:
                   filenames = [
                       item.get("filename") if isinstance(item, dict) else None
-                      for item in urls
+                      for item in remote_files
                   ]
-                  raise RuntimeError(
-                      f"PyPI has an unexpected file set: {filenames}"
-                  )
-              remote = urls[0]
+                  raise RuntimeError(f"PyPI has an unexpected file set: {filenames}")
+
               if remote.get("yanked") is True:
                   raise RuntimeError(f"PyPI wheel is yanked: {wheel.name}")
               digests = remote.get("digests")
               remote_digest = (
                   digests.get("sha256") if isinstance(digests, dict) else None
               )
-              local_digest = hashlib.sha256(wheel.read_bytes()).hexdigest()
-              if remote_digest != local_digest:
+              if remote_digest != sha256sum(wheel):
                   raise RuntimeError(f"PyPI wheel digest differs: {wheel.name}")
-              state = "identical"
+              return "identical"
 
-          with open(os.environ["GITHUB_OUTPUT"], "a") as output:
-              output.write(f"state={state}\n")
-          if state == "identical":
-              with open(os.environ["GITHUB_STEP_SUMMARY"], "a") as summary:
-                  summary.write(
-                      "The identical wheel is already available on PyPI; "
-                      "upload is not repeated.\n"
-                  )
+
+          def main():
+              wheels = list(Path("dist").glob("*.whl"))
+              if len(wheels) != 1:
+                  raise RuntimeError(f"Expected one wheel, found {len(wheels)}")
+              state = get_distribution_state(
+                  "abeja-sdk",
+                  os.environ["PACKAGE_VERSION"],
+                  wheels[0],
+              )
+
+              with open(os.environ["GITHUB_OUTPUT"], "a") as output:
+                  output.write(f"state={state}\n")
+              if state == "identical":
+                  with open(os.environ["GITHUB_STEP_SUMMARY"], "a") as summary:
+                      summary.write(
+                          "The identical wheel is already available on PyPI; "
+                          "upload is not repeated.\n"
+                      )
+
+
+          if __name__ == "__main__":
+              main()
 
       # Environment approval can take long enough for the release branch to
       # move after the build job's first check. Fence only a new upload here;
@@ -454,7 +492,7 @@ jobs:
     needs:
       - build
       - publish
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     timeout-minutes: 10
     permissions:
       checks: write # Create/reconcile the exact public provenance check only.
@@ -771,7 +809,7 @@ jobs:
       - publish
       - record-release-provenance
       - system-test-readiness
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     timeout-minutes: 10
     permissions: {}
     environment: system-test-dispatch
@@ -788,6 +826,7 @@ jobs:
 
       - name: Dispatch platform-system-test workflow
         env:
+          APP_SLUG: ${{ steps.app-token.outputs.app-slug }}
           GH_TOKEN: ${{ steps.app-token.outputs.token }}
           SDK_VERSION: ${{ needs.build.outputs.package-version }}
           RELEASE_STAGE: ${{ needs.build.outputs.release-stage }}
@@ -797,6 +836,11 @@ jobs:
           set -Eeuo pipefail
 
           expected_title="SDK $SDK_VERSION -> $RELEASE_STAGE (source $GITHUB_RUN_ID)"
+          if [[ ! "$APP_SLUG" =~ ^[a-z0-9][a-z0-9-]*$ ]]; then
+            echo "GitHub App slug is missing or invalid." >&2
+            exit 1
+          fi
+          expected_actor="${APP_SLUG}[bot]"
           find_existing_dispatch() {
             local matches
             local match_count
@@ -806,9 +850,10 @@ jobs:
                 -f "branch=$TARGET_REF" \
                 -f "event=workflow_dispatch" \
                 -f "per_page=100" \
-                --jq '.workflow_runs[] | [.display_title, .html_url] | @tsv' \
+                --jq '.workflow_runs[] | [.display_title, .actor.login, .html_url] | @tsv' \
                 | awk -F '\t' -v expected="$expected_title" \
-                    '$1 == expected { print $2 }'
+                    -v actor="$expected_actor" \
+                    '$1 == expected && $2 == actor { print $3 }'
             )"
             match_count="$(
               printf '%s\n' "$matches" |
@@ -872,7 +917,7 @@ jobs:
       - build
       - publish
       - trigger-system-tests
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     timeout-minutes: 10
     permissions:
       contents: write # Required only to create the production tag/release.

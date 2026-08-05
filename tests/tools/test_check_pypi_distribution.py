@@ -47,7 +47,7 @@ def test_distribution_state_is_missing_for_unknown_release(tmp_path):
     state = get_distribution_state(
         'abeja-sdk',
         '2.3.6',
-        [distribution],
+        distribution,
         urlopen=mock.Mock(side_effect=error),
     )
 
@@ -69,7 +69,7 @@ def test_distribution_state_fails_closed_for_pypi_error(tmp_path):
         get_distribution_state(
             'abeja-sdk',
             '2.3.6',
-            [distribution],
+            distribution,
             urlopen=mock.Mock(side_effect=error),
         )
 
@@ -84,7 +84,7 @@ def test_distribution_state_fails_closed_for_malformed_json(tmp_path):
         get_distribution_state(
             'abeja-sdk',
             '2.3.6',
-            [distribution],
+            distribution,
             urlopen=mock.Mock(return_value=response),
         )
 
@@ -99,7 +99,7 @@ def test_distribution_state_fails_closed_for_json_null(tmp_path):
         get_distribution_state(
             'abeja-sdk',
             '2.3.6',
-            [distribution],
+            distribution,
             urlopen=mock.Mock(return_value=response),
         )
 
@@ -113,7 +113,7 @@ def test_distribution_state_is_identical_for_matching_digest(tmp_path):
     state = get_distribution_state(
         'abeja-sdk',
         '2.3.6',
-        [distribution],
+        distribution,
         urlopen=mock.Mock(return_value=pypi_response(distribution.name, digest)),
     )
 
@@ -124,11 +124,11 @@ def test_distribution_state_rejects_different_digest(tmp_path):
     distribution = tmp_path / 'abeja_sdk-2.3.6-py3-none-any.whl'
     distribution.write_bytes(b'wheel')
 
-    with pytest.raises(RuntimeError, match='different or missing files'):
+    with pytest.raises(RuntimeError, match='wheel digest differs'):
         get_distribution_state(
             'abeja-sdk',
             '2.3.6',
-            [distribution],
+            distribution,
             urlopen=mock.Mock(
                 return_value=pypi_response(distribution.name, 'different')
             ),
@@ -145,7 +145,7 @@ def test_distribution_state_rejects_unexpected_extra_file(tmp_path):
         get_distribution_state(
             'abeja-sdk',
             '2.3.6',
-            [distribution],
+            distribution,
             urlopen=mock.Mock(
                 return_value=pypi_response_with_extra_file(
                     distribution.name,
@@ -161,11 +161,11 @@ def test_distribution_state_rejects_yanked_wheel(tmp_path):
     distribution.write_bytes(content)
     digest = hashlib.sha256(content).hexdigest()
 
-    with pytest.raises(RuntimeError, match='files are yanked'):
+    with pytest.raises(RuntimeError, match='wheel is yanked'):
         get_distribution_state(
             'abeja-sdk',
             '2.3.6',
-            [distribution],
+            distribution,
             urlopen=mock.Mock(
                 return_value=pypi_response(
                     distribution.name,
