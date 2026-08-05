@@ -30,106 +30,80 @@ jobs:
       - name: Fetch Dependabot metadata
         id: metadata
         uses: dependabot/fetch-metadata@21025c705c08248db411dc16f3619e6b5f9ea21a # v2.5.0
+        with:
+          alert-lookup: true
+          github-token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Check Dependabot alerts severity
+      - name: Check Dependabot metadata severity
         id: severity
         uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7.1.0
         env:
-          UPDATE_TYPE: ${{ steps.metadata.outputs.update-type }}
+          DEPENDENCY_GROUP: ${{ steps.metadata.outputs.dependency-group }}
+          UPDATED_DEPENDENCIES: ${{ steps.metadata.outputs.updated-dependencies-json }}
         with:
           script: |
-            const prNumber = context.issue.number;
-            const owner = context.repo.owner;
-            const repo = context.repo.repo;
-            const updateType = process.env.UPDATE_TYPE || '';
-
-            // Get PR details to check for security labels
-            const { data: pr } = await github.rest.pulls.get({
-              owner,
-              repo,
-              pull_number: prNumber
-            });
-
-            // Check if this is a security update by looking at labels, title, or metadata
-            const isSecurityUpdate = pr.labels.some(label => 
-              label.name.toLowerCase().includes('security')
-            ) || pr.title.toLowerCase().includes('security') ||
-              updateType.includes('security');
-
-            console.log(`Is security update: ${isSecurityUpdate}`);
-
-            if (!isSecurityUpdate) {
-              console.log('Not a security update - skipping severity check');
-              return { severity: 'none', isHighOrCritical: false };
-            }
-
-            // For security updates, check vulnerability alerts
+            const rawMetadata = process.env.UPDATED_DEPENDENCIES || '';
+            let dependencies;
             try {
-              const { data: alerts } = await github.rest.dependabot.listAlertsForRepo({
-                owner,
-                repo,
-                state: 'open'
-              });
-
-              console.log(`Found ${alerts.length} open vulnerability alerts`);
-
-              // Check if this is a grouped PR
-              const isGroupPR = pr.title.toLowerCase().includes('group');
-
-              if (isGroupPR) {
-                // For grouped PRs, use the highest severity across all alerts
-                console.log('Grouped PR detected - checking all open alerts');
-
-                if (alerts.length > 0) {
-                  const severities = alerts.map(a => a.security_advisory.severity);
-                  const highestSeverity = severities.includes('critical') ? 'critical' :
-                                         severities.includes('high') ? 'high' :
-                                         severities.includes('medium') ? 'medium' : 'low';
-
-                  const isHighOrCritical = ['high', 'critical'].includes(highestSeverity);
-
-                  console.log(`Highest severity in group: ${highestSeverity}`);
-                  console.log(`Is High or Critical: ${isHighOrCritical}`);
-
-                  return { severity: highestSeverity, isHighOrCritical, isGroup: true };
-                }
-              } else {
-                // For individual PRs, match by package name
-                const packageMatch = pr.title.match(/bump\s+(.+?)\s+from/i);
-                const packageName = packageMatch ? packageMatch[1] : null;
-
-                if (packageName) {
-                  console.log(`Package name: ${packageName}`);
-
-                  const relevantAlerts = alerts.filter(alert => 
-                    alert.security_advisory.package.name === packageName
-                  );
-
-                  if (relevantAlerts.length > 0) {
-                    const severities = relevantAlerts.map(a => a.security_advisory.severity);
-                    const highestSeverity = severities.includes('critical') ? 'critical' :
-                                           severities.includes('high') ? 'high' :
-                                           severities.includes('medium') ? 'medium' : 'low';
-
-                    const isHighOrCritical = ['high', 'critical'].includes(highestSeverity);
-
-                    console.log(`Package: ${packageName}`);
-                    console.log(`Severity: ${highestSeverity}`);
-                    console.log(`Is High or Critical: ${isHighOrCritical}`);
-
-                    return { severity: highestSeverity, isHighOrCritical, isGroup: false };
-                  }
-                }
-              }
+              dependencies = JSON.parse(rawMetadata);
             } catch (error) {
-              console.log(`Could not fetch vulnerability alerts: ${error.message}`);
-              // If we can't fetch alerts, require manual review for safety
-              return { severity: 'unknown', isHighOrCritical: false };
+              console.log(`Could not parse Dependabot metadata: ${error.message}`);
+              return {
+                severity: 'unknown',
+                isHighOrCritical: false,
+                isGroup: false
+              };
             }
 
-            // If no matching alerts found, require manual review
-            console.log('No matching vulnerability alerts found - requiring manual review');
-            return { severity: 'unknown', isHighOrCritical: false };
+            if (!Array.isArray(dependencies) || dependencies.length === 0) {
+              console.log('Dependabot returned no updated dependency metadata');
+              return {
+                severity: 'unknown',
+                isHighOrCritical: false,
+                isGroup: false
+              };
+            }
+
+            const isGroup = Boolean(process.env.DEPENDENCY_GROUP) ||
+              dependencies.length > 1;
+            const alerts = dependencies.map(dependency => ({
+              dependencyName: dependency.dependencyName,
+              alertState: dependency.alertState,
+              ghsaId: dependency.ghsaId,
+              cvss: Number(dependency.cvss)
+            }));
+            const allDependenciesHaveOpenAlerts = alerts.every(alert =>
+              typeof alert.dependencyName === 'string' &&
+              alert.dependencyName.length > 0 &&
+              alert.alertState === 'OPEN' &&
+              /^GHSA-[23456789cfghjmpqrvwx]{4}-[23456789cfghjmpqrvwx]{4}-[23456789cfghjmpqrvwx]{4}$/i.test(alert.ghsaId) &&
+              Number.isFinite(alert.cvss) &&
+              alert.cvss > 0 &&
+              alert.cvss <= 10
+            );
+
+            if (!allDependenciesHaveOpenAlerts) {
+              console.log(
+                'At least one updated dependency lacks a matching open alert; ' +
+                'requiring manual review'
+              );
+              return {
+                severity: 'unknown',
+                isHighOrCritical: false,
+                isGroup
+              };
+            }
+
+            const highestCvss = Math.max(...alerts.map(alert => alert.cvss));
+            const severity = highestCvss >= 9 ? 'critical' :
+              highestCvss >= 7 ? 'high' :
+              highestCvss >= 4 ? 'medium' : 'low';
+            const isHighOrCritical = highestCvss >= 7;
+
+            console.log(`Matched dependency alerts: ${alerts.length}`);
+            console.log(`Highest CVSS score: ${highestCvss}`);
+            console.log(`Severity: ${severity}`);
+            return { severity, isHighOrCritical, isGroup };
 
       - name: Check auto-merge configuration
         id: check

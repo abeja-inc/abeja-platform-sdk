@@ -17,6 +17,8 @@ permissions:
 
 env:
   POETRY_VERSION: "1.8.0"
+  # packaging 26.3 requires Python 3.9, while this SDK still tests Python 3.8.
+  POETRY_PACKAGING_VERSION: "26.2"
 
 jobs:
   integration-tests:
@@ -49,7 +51,7 @@ jobs:
           )
         )
       )
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     timeout-minutes: 30
     environment: sdk-integration-test
     concurrency:
@@ -85,7 +87,9 @@ jobs:
           persist-credentials: false
 
       - name: Install Poetry
-        run: pipx install "poetry==${POETRY_VERSION}"
+        run: |
+          pipx install "poetry==${POETRY_VERSION}"
+          pipx runpip poetry install "packaging==${POETRY_PACKAGING_VERSION}"
 
       - name: Set up Python
         uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6.3.0

@@ -6,6 +6,25 @@ ROOT = Path(__file__).resolve().parents[2]
 WORKFLOWS = ROOT / ".github" / "workflows"
 
 
+def get_step_run(workflow, step_name):
+    lines = workflow.splitlines()
+    step_index = lines.index(f"      - name: {step_name}")
+    run_index = next(
+        index
+        for index in range(step_index + 1, len(lines))
+        if lines[index].startswith("        run: |")
+    )
+    run_indent = len(lines[run_index]) - len(lines[run_index].lstrip())
+    block_indent = run_indent + 2
+    block = []
+    for line in lines[run_index + 1:]:
+        indentation = len(line) - len(line.lstrip()) if line else block_indent
+        if line and indentation <= run_indent:
+            break
+        block.append(line[block_indent:] if line else "")
+    return "\n".join(block).rstrip()
+
+
 def test_release_and_live_integration_runs_are_queued():
     release = (WORKFLOWS / "release.yml").read_text()
     integration = (WORKFLOWS / "integration-test.yml").read_text()
@@ -103,12 +122,27 @@ def test_unit_workflow_has_noncolliding_stale_cancellation_and_stable_gate():
         "group: abeja-platform-sdk-unit-tests-"
         "${{ github.event.pull_request.number || github.ref }}"
     ) in unit
-    assert "cancel-in-progress: true" in unit
+    assert (
+        "cancel-in-progress: "
+        "${{ github.event_name == 'pull_request' }}"
+    ) in unit
     assert "name: Unit tests" in required
     assert "if: ${{ always() }}" in required
     assert "needs: unit-tests" in required
     assert 'run: test "$UNIT_TESTS_RESULT" = "success"' in required
     assert "permissions: {}" in required
+
+
+def test_poetry_runtime_stays_compatible_with_python_38():
+    for name in ("integration-test.yml", "test.yml"):
+        workflow = (WORKFLOWS / name).read_text()
+        install_poetry = get_step_run(workflow, "Install Poetry")
+
+        assert 'POETRY_PACKAGING_VERSION: "26.2"' in workflow
+        assert (
+            'pipx runpip poetry install '
+            '"packaging==${POETRY_PACKAGING_VERSION}"'
+        ) in install_poetry
 
 
 def test_integration_secrets_fail_closed_for_manual_and_external_callers():
@@ -345,6 +379,10 @@ def test_system_test_dispatch_reconciles_retries_by_run_and_version():
         '(source $GITHUB_RUN_ID)"'
     ) in trigger
     assert "display_title" in trigger
+    assert "steps.app-token.outputs.app-slug" in trigger
+    assert 'expected_actor="${APP_SLUG}[bot]"' in trigger
+    assert ".actor.login" in trigger
+    assert '$1 == expected && $2 == actor { print $3 }' in trigger
     assert "Found multiple matching system-test runs" in trigger
     assert "Matching system-test dispatch already exists" in trigger
     assert "System-test dispatch accepted" in trigger
@@ -412,6 +450,16 @@ def test_pypi_uses_protected_environment_and_trusted_publishing():
     assert "PyPI publication was not verified" in publish
 
 
+def test_pypi_preflight_runs_the_exact_unit_tested_script():
+    release = (WORKFLOWS / "release.yml").read_text()
+    tested_script = (ROOT / "tools" / "check_pypi_distribution.py").read_text()
+
+    assert get_step_run(
+        release,
+        "Check existing PyPI distribution",
+    ) == tested_script.rstrip()
+
+
 def test_privileged_workflow_run_is_removed_and_release_is_reconciled_inline():
     release = (WORKFLOWS / "release.yml").read_text()
     finalize = release.split("  finalize-production-release:", 1)[1]
@@ -458,3 +506,51 @@ def test_dependabot_alert_lookup_uses_the_matching_token_permission():
 
     assert "vulnerability-alerts: read" in workflow
     assert "security-events: read" not in workflow
+    assert "alert-lookup: true" in workflow
+    assert "updated-dependencies-json" in workflow
+    assert "dependency.alertState" in workflow
+    assert "dependency.ghsaId" in workflow
+    assert "dependency.cvss" in workflow
+    assert "allDependenciesHaveOpenAlerts" in workflow
+    assert "listAlertsForRepo" not in workflow
+    assert "pr.title" not in workflow
+    assert "pr.labels" not in workflow
+
+
+def test_migrated_workflows_use_supported_runner_image():
+    workflows = "\n".join(
+        (WORKFLOWS / name).read_text()
+        for name in (
+            "integration-test.yml",
+            "release.yml",
+            "test.yml",
+        )
+    )
+
+    assert "ubuntu-22.04" not in workflows
+    assert workflows.count("runs-on: ubuntu-24.04") == 9
+
+
+def test_firebase_deployments_use_branch_scoped_environments():
+    dev = (WORKFLOWS / "firebase-deploy-dev.yml").read_text()
+    production = (WORKFLOWS / "firebase-deploy-prod.yml").read_text()
+
+    assert "if: github.ref == 'refs/heads/develop'" in dev
+    assert "environment: firebase-hosting-dev" in dev
+    assert "if: github.ref == 'refs/heads/master'" in production
+    assert "environment: firebase-hosting-production" in production
+    for workflow in (dev, production):
+        assert "permissions: {}" in workflow.split("jobs:", 1)[0]
+        assert "contents: read" in workflow
+        assert "id-token: write" in workflow
+        assert "service_account: github-deploy@apf-mlops-docs.iam.gserviceaccount.com" in workflow
+
+
+def test_firebase_shared_trust_boundary_is_documented():
+    operations = (ROOT / ".github" / "CICD.md").read_text()
+    normalized = " ".join(operations.split())
+
+    assert "one-project, multi-site design" in normalized
+    assert "deliberately does not distinguish Git refs" in normalized
+    assert "review and approval of the pull request into `master`" in normalized
+    assert "Do not add a required Environment reviewer" in normalized

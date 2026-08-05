@@ -1,7 +1,7 @@
 # GitHub Actions operations
 
 This repository uses separate workflows for unit tests, live integration tests,
-and package releases.
+package releases, and Firebase Hosting documentation deployments.
 
 The first migration pull request deliberately kept `.circleci/config.yml` and
 `tools/trigger_build_system_test.py` so the old and new test paths could be
@@ -14,9 +14,10 @@ never restore both publishers on a release branch.
 - `Unit tests` runs `make test` on Python 3.8. Its aggregate job always emits
   the stable `Unit tests` check and fails unless the implementation job
   succeeds. Make that exact check required in branch protection for `develop`,
-  `staging`, and `master`. Stale runs are cancelled per pull request or ref
-  using a static concurrency prefix that cannot collide with a reusable
-  workflow caller's own group.
+  `staging`, and `master`. Only stale pull-request runs are cancelled. Push and
+  reusable invocations never cancel an in-progress unit run. Release callers
+  are serialized by the outer release queue; a standalone unit workflow keeps
+  GitHub's default single pending slot.
 - `Integration tests` runs against a live, dedicated Datalake channel. It is
   serialized across the repository because every test deletes all files in the
   configured channel. Pending runs are queued instead of replacing one another.
@@ -31,8 +32,9 @@ never restore both publishers on a release branch.
   `platform-system-test`. Integration credentials are mandatory in this release
   path. A successful release means that the target registered the uniquely
   identified dispatch; it does not wait for the target run to finish. A retry
-  first reconciles both the provenance check and target runs, and fails on
-  duplicate or conflicting state. On `master`, a final checkout-free job then
+  first reconciles both the provenance check and target runs owned by the
+  configured dispatch GitHub App, and fails on duplicate or conflicting state.
+  On `master`, a final checkout-free job then
   reconciles the immutable tag and GitHub Release through the API. An identical
   existing tag/release is a safe no-op; a conflicting target or release
   metadata fails closed.
@@ -46,9 +48,9 @@ matrix. Upgrade the development dependencies before expanding the matrix.
 | Event | Eligible refs / callers | Trust and credentials | Jobs and side effects |
 | --- | --- | --- | --- |
 | `pull_request` | Targets `develop`, `staging`, or `master` | Unit tests are unprivileged. Integration receives local Environment secrets only for a same-repository, non-Dependabot head. | Stable `Unit tests` gate; optional serialized integration test; no writes. |
-| `push` | `develop` for tests; `staging` and `master` for release | Protected repository code. Integration uses its Environment; OIDC publishing, Checks write, and dispatch credentials remain in separate checkout-free jobs. | Tests on `develop`; serialized build/publish/provenance-check/dispatch on release branches; production tag/release reconciliation on `master`. |
-| `workflow_dispatch` | Unit: any ref, no secrets. Integration: only the three named branches. | Integration is skipped before Environment access for every other ref. | Manual validation only; no package publication. |
-| `workflow_call` | Unit: public reusable workflow. Integration: same repository only, with the original event/ref restrictions still enforced. | The release caller forwards no secrets. The integration job resolves this repository's protected Environment secrets only after its repository guard passes. | Test jobs only. The static unit concurrency prefix cannot cancel its caller. |
+| `push` | `develop` for tests and dev documentation; `staging` and `master` for release; `master` for production documentation | Repository branch code. Production assumes that the `master` ruleset admitted only reviewed changes. Integration uses its Environment; OIDC publishing, Checks write, dispatch credentials, and Firebase OIDC remain in separate jobs. | Tests and automatic dev documentation deployment on `develop`; serialized build/publish/provenance-check/dispatch on release branches; production tag/release reconciliation and automatic production documentation deployment on `master`. |
+| `workflow_dispatch` | Unit: any ref, no secrets. Integration: only the three named branches. Firebase: dev only on `develop`, production only on `master`. | Integration is skipped before Environment access for every other ref. Firebase deploy jobs receive OIDC only on their exact eligible branch. | Manual validation, or an explicit documentation redeployment on the matching Firebase branch; no package publication. |
+| `workflow_call` | Unit: public reusable workflow. Integration: same repository only, with the original event/ref restrictions still enforced. | The release caller forwards no secrets. The integration job resolves this repository's protected Environment secrets only after its repository guard passes. | Test jobs only. Unit runs queue without cancelling an active release caller. |
 
 Release runs share the `abeja-sdk-pypi-release` queue. The queue retains at
 most 100 pending runs and does not guarantee dispatch order, so every release
@@ -61,6 +63,42 @@ external queue.
 ## Environments and secrets
 
 Create these GitHub Environments before enabling the workflows.
+
+### `firebase-hosting-dev` and `firebase-hosting-production`
+
+The Firebase workflows build the Sphinx documentation under `doc/source` and
+deploy `doc/build/html` to two Hosting sites in the shared
+`apf-mlops-docs` Firebase project:
+
+| Environment | Eligible branch | Firebase target | Hosting site | Approval |
+| --- | --- | --- | --- | --- |
+| `firebase-hosting-dev` | `develop` | `sdk-spec-dev` | `apf-mlops-docs-sdk-dev` | Automatic after a push |
+| `firebase-hosting-production` | `master` | `sdk-spec-prod` | `apf-mlops-docs-sdk` | Automatic after a reviewed pull request is merged |
+
+Restrict each Environment to its exact branch. Do not add a required
+Environment reviewer: review and approval of the pull request into `master` is
+the production approval gate, and the documentation deploy starts
+automatically after merge. Protect `master` with a ruleset that requires a pull
+request, at least one approval, resolution of review conversations, and the
+stable `Unit tests` check; direct pushes must not bypass that gate.
+
+Both sites intentionally share the Workload Identity Provider and
+`github-deploy@apf-mlops-docs.iam.gserviceaccount.com`. The Google Cloud trust
+policy admits this repository as a whole and deliberately does not distinguish
+Git refs. Firebase Hosting IAM is also intentionally shared between the dev and
+production sites in this one-project, multi-site design. The workflow ref
+guards and Environment deployment rules protect the normal deployment paths,
+but they are not a separate Google Cloud IAM boundary. Repository write access
+is therefore part of the accepted Firebase trust boundary. Splitting service
+accounts, refs, sites, or Firebase projects is a separate architecture change,
+not a prerequisite for this CI migration.
+
+The jobs request only `contents: read` and `id-token: write`; no Google Cloud
+service-account key is stored in GitHub. GitHub's OIDC assertion is exchanged
+through Workload Identity Federation for short-lived Google Cloud credentials.
+Keep the provider, service account, Firebase project, and deploy targets fixed
+unless the repository owner and the Firebase infrastructure owner review the
+trust-boundary change together.
 
 ### `sdk-integration-test`
 

@@ -17,16 +17,20 @@ permissions:
 
 env:
   POETRY_VERSION: "1.8.0"
+  # packaging 26.3 requires Python 3.9, while this SDK still tests Python 3.8.
+  POETRY_PACKAGING_VERSION: "26.2"
 
 # Keep this static prefix distinct from any reusable-workflow caller's group.
 concurrency:
   group: abeja-platform-sdk-unit-tests-${{ github.event.pull_request.number || github.ref }}
-  cancel-in-progress: true
+  # A release calls this workflow with the same staging/master ref as its
+  # caller. Only pull-request validation is safe to cancel as stale.
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
   unit-tests:
     name: Lint, types, and tests
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     timeout-minutes: 30
     steps:
       - name: Check out repository
@@ -36,7 +40,9 @@ jobs:
 
       # Poetry must be available before setup-python initializes its Poetry cache.
       - name: Install Poetry
-        run: pipx install "poetry==${POETRY_VERSION}"
+        run: |
+          pipx install "poetry==${POETRY_VERSION}"
+          pipx runpip poetry install "packaging==${POETRY_PACKAGING_VERSION}"
 
       - name: Set up Python
         uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6.3.0
@@ -55,7 +61,7 @@ jobs:
     name: Unit tests
     if: ${{ always() }}
     needs: unit-tests
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     timeout-minutes: 5
     permissions: {}
     steps:
