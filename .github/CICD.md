@@ -147,12 +147,14 @@ non-yanked state against public PyPI. That job has only `checks: write`; the
 OIDC-enabled publish job does not receive Checks permission. It then creates a
 completed GitHub check run before dispatch. `platform-system-test` reads this
 check through the public Checks REST API and compares its wheel digest with
-PyPI before accepting the dispatch. The target authenticates that public read
-with its read-only CI GitHub App to avoid the low shared anonymous API rate
-limit; no SDK repository secret crosses the repository boundary.
-Before staging, install that separate read App on `abeja-platform-sdk` with
-Actions and Checks read access and verify the target can mint its downscoped
-token. This is distinct from the SDK-owned App that dispatches
+PyPI before accepting the dispatch. Because this SDK repository and its
+release evidence are public, the target performs that read without a GitHub
+credential. No CI read GitHub App, `CI_APP_CLIENT_ID`, or
+`CI_APP_PRIVATE_KEY` is required. The target fails closed if the anonymous API
+is unavailable, rate-limited, or returns incomplete evidence. The shared-IP
+anonymous rate limit is an accepted operational risk; retry the failed target
+run after the rate-limit reset rather than weakening provenance validation.
+This public evidence read is separate from the SDK-owned App that dispatches
 `platform-system-test`.
 
 The release-provenance contract is exact:
