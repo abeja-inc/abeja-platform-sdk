@@ -84,7 +84,7 @@ poetry install
 poetry run pre-commit install
 
 # Create local wheel for testing
-make release
+make dist
 ```
 
 ## Environment Variables
@@ -111,9 +111,13 @@ Use `parameterized` and `mock` for test variations and mocking external services
 
 ## Release Process
 
-The SDK follows git-flow branching:
-- `master` - Production releases
+The SDK uses a PR-based release flow:
 - `develop` - Development branch
-- `release/X.X.X` - Release preparation branches
+- `staging` - Release-candidate packages
+- `master` - Production packages
 
-Releases are managed through Poetry version management and published to PyPI via CircleCI automation when tags are pushed.
+Merge `develop` into `staging` to publish the next automatically numbered RC.
+Merge `staging` into `master` to publish the final version. GitHub Actions runs
+unit and integration tests before publishing to PyPI, then dispatches the exact
+published version to `platform-system-test`. See `.github/CICD.md` for required
+GitHub Environments, secrets, branch protection, and the decommission checklist.
