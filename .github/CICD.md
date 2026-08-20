@@ -166,8 +166,6 @@ The release-provenance contract is exact:
 - `head_sha`: the 40-character release source SHA
 - `external_id`:
   `abeja-sdk-release-provenance:v1:<run-id>:<run-attempt>:<package-version>:<wheel-sha256>`
-- `details_url`:
-  `https://github.com/abeja-inc/abeja-platform-sdk/actions/runs/<run-id>/attempts/<run-attempt>`
 - `status` / `conclusion`: `completed` / `success`
 - `output.title`: `ABEJA SDK release provenance v1`
 - `output.summary`: one compact JSON object with lexicographically sorted keys.
@@ -186,6 +184,11 @@ attempt. `source_run_attempt` is the successful publish job's attempt, preserved
 as a job output: rerunning only a failed provenance or dispatch job therefore
 reuses the same identical check. Rerunning the publish job records its new
 attempt and produces a distinct external ID.
+
+`details_url` is intentionally not an evidence field: GitHub Actions owns and
+normalizes it to the Check Run page. Consumers validate the immutable source
+run, Check Run identity, canonical summary, publish attempt, and PyPI digest
+instead.
 
 Restrict `pypi-staging` to `staging` and `pypi-production` to `master`. Add a
 required reviewer to `pypi-production` if the repository's release policy
@@ -286,6 +289,11 @@ Release. If the rerun window has closed, or if the PyPI version is missing,
 yanked, or has a different digest, stop and escalate to the release owners for
 a separately reviewed recovery; use a new package version rather than
 dispatching or tagging unverified evidence.
+
+If the failure is caused by the workflow definition itself, a GitHub rerun
+still uses that original definition. Merge and validate the repair through the
+normal release path; do not mutate historical provenance evidence to force a
+retry.
 
 ## Migration and decommission checklist
 
