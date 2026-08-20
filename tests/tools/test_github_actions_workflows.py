@@ -108,10 +108,12 @@ def test_migrated_external_actions_are_commit_pinned():
             "v8.1.0",
         ),
     }
-    assert workflows.count(expected_checkout) == len(migrated_workflows)
+    # Release runs Integration as an Environment-bound job, so it has its own
+    # checkout in addition to the reusable integration workflow's checkout.
+    assert workflows.count(expected_checkout) == len(migrated_workflows) + 1
     assert workflows.count("persist-credentials: false") == len(
         migrated_workflows
-    )
+    ) + 1
 
 
 def test_unit_workflow_has_noncolliding_stale_cancellation_and_stable_gate():
@@ -145,10 +147,13 @@ def test_poetry_runtime_stays_compatible_with_python_38():
         ) in install_poetry
 
 
-def test_integration_secrets_fail_closed_for_manual_and_external_callers():
+def test_integration_secrets_fail_closed_for_manual_external_and_release_callers():
     integration = (WORKFLOWS / "integration-test.yml").read_text()
     release = (WORKFLOWS / "release.yml").read_text()
     integration_job = integration.split("  integration-tests:", 1)[1]
+    release_integration_job = release.split("  integration-tests:", 1)[1].split(
+        "  build:", 1
+    )[0]
 
     assert "workflow_call:" in integration
     assert (
@@ -165,7 +170,23 @@ def test_integration_secrets_fail_closed_for_manual_and_external_callers():
     assert "github.actor != 'dependabot[bot]'" in integration_job
     assert "environment: sdk-integration-test" in integration_job
     assert "secrets: inherit" not in integration
-    assert "secrets: inherit" not in release
+    assert not any(
+        line.strip() == "secrets: inherit" for line in release.splitlines()
+    )
+    assert "uses: ./.github/workflows/integration-test.yml" not in release_integration_job
+    assert "github.event_name == 'push'" in release_integration_job
+    assert "github.ref == 'refs/heads/staging'" in release_integration_job
+    assert "github.ref == 'refs/heads/master'" in release_integration_job
+    assert "environment: sdk-integration-test" in release_integration_job
+    assert 'POETRY_VERSION: "1.8.0"' in release_integration_job
+    assert 'POETRY_PACKAGING_VERSION: "26.2"' in release_integration_job
+    for secret in (
+        "CHANNEL_ID",
+        "ORGANIZATION_ID",
+        "USER_ID",
+        "PERSONAL_ACCESS_TOKEN",
+    ):
+        assert f"{secret}: ${{{{ secrets.{secret} }}}}" in release_integration_job
 
 
 def test_release_validates_version_and_exact_target_contract_before_publish():
@@ -528,7 +549,7 @@ def test_migrated_workflows_use_supported_runner_image():
     )
 
     assert "ubuntu-22.04" not in workflows
-    assert workflows.count("runs-on: ubuntu-24.04") == 9
+    assert workflows.count("runs-on: ubuntu-24.04") == 10
 
 
 def test_firebase_deployments_use_branch_scoped_environments():

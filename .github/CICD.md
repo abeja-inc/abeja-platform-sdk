@@ -50,7 +50,7 @@ matrix. Upgrade the development dependencies before expanding the matrix.
 | `pull_request` | Targets `develop`, `staging`, or `master` | Unit tests are unprivileged. Integration receives local Environment secrets only for a same-repository, non-Dependabot head. | Stable `Unit tests` gate; optional serialized integration test; no writes. |
 | `push` | `develop` for tests and dev documentation; `staging` and `master` for release; `master` for production documentation | Repository branch code. Production assumes that the `master` ruleset admitted only reviewed changes. Integration uses its Environment; OIDC publishing, Checks write, dispatch credentials, and Firebase OIDC remain in separate jobs. | Tests and automatic dev documentation deployment on `develop`; serialized build/publish/provenance-check/dispatch on release branches; production tag/release reconciliation and automatic production documentation deployment on `master`. |
 | `workflow_dispatch` | Unit: any ref, no secrets. Integration: only the three named branches. Firebase: dev only on `develop`, production only on `master`. | Integration is skipped before Environment access for every other ref. Firebase deploy jobs receive OIDC only on their exact eligible branch. | Manual validation, or an explicit documentation redeployment on the matching Firebase branch; no package publication. |
-| `workflow_call` | Unit: public reusable workflow. Integration: same repository only, with the original event/ref restrictions still enforced. | The release caller forwards no secrets. The integration job resolves this repository's protected Environment secrets only after its repository guard passes. | Test jobs only. Unit runs queue without cancelling an active release caller. |
+| `workflow_call` | Unit: public reusable workflow. Integration: same repository only, with the original event/ref restrictions still enforced. | The Integration workflow's repository guard runs before its Environment is evaluated. Release does not call Integration as a reusable workflow: its direct job selects the protected Environment itself. | Reusable test jobs only. Release runs its credentialed Integration job directly; Unit runs queue without cancelling an active release caller. |
 
 Release runs share the `abeja-sdk-pypi-release` queue. The queue retains at
 most 100 pending runs and does not guarantee dispatch order, so every release
@@ -115,14 +115,16 @@ requests skip the integration job before the Environment is accessed.
 | `USER_ID` | ABEJA Platform user |
 | `PERSONAL_ACCESS_TOKEN` | ABEJA Platform personal access token |
 
-The reusable workflow declares no named caller-provided secrets, and the
-release caller does not use `secrets: inherit`. Its job-level repository
-identity guard must remain in place because this is a public repository: an
-external repository may call the workflow, but that job is skipped before
-`sdk-integration-test` is evaluated. Manual runs have the same fail-closed
-branch allowlist. Use required reviewers and compatible branch/tag deployment
-rules as a second Environment boundary; verify the pull-request merge-ref
-behavior before enabling the workflow.
+The reusable Integration workflow declares no named caller-provided secrets.
+Release does not invoke it as a reusable workflow: Release's direct,
+same-repository `push` job selects `sdk-integration-test` itself, so the
+Environment secrets remain scoped to that job and `secrets: inherit` is not
+used. The Integration job-level repository identity guard must remain in place
+because this is a public repository: an external repository may call the
+workflow, but that job is skipped before `sdk-integration-test` is evaluated.
+Manual runs have the same fail-closed branch allowlist. Use required reviewers
+and compatible branch/tag deployment rules as a second Environment boundary;
+verify the pull-request merge-ref behavior before enabling the workflow.
 
 ### `pypi-staging` and `pypi-production`
 
