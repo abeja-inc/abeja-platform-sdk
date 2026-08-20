@@ -252,6 +252,14 @@ Serverless deployment currently covered by the CircleCI pipeline. PyPI
 propagation may take a short time, so installation should use a bounded retry
 rather than silently falling back to another SDK version.
 
+For an SDK-triggered staging system test, the final Serverless deployment must
+be an ordinary job bound directly to the target repository's `stg` Environment.
+Do not put that Environment behind a reusable-workflow call or use
+`secrets: inherit`: Environment-scoped credentials must remain available only
+to the final, protected deployment job. That job must still keep the validated
+bot/ref/provenance inputs, OIDC account binding, freshness verification, and
+the same deployment-concurrency group as the ordinary staging deployment.
+
 The SDK build also validates this version shape before publication: a
 `staging` release must be canonical `X.Y.ZrcN`, while a `master` release must
 be canonical `X.Y.Z`. The target readiness check verifies the exact six-input
