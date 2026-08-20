@@ -337,10 +337,9 @@ def test_verified_release_provenance_check_binds_the_published_wheel():
         'external_id="$external_id_prefix:$GITHUB_RUN_ID:$SOURCE_RUN_ATTEMPT:'
         '$PACKAGE_VERSION:$WHEEL_SHA256"'
     ) in provenance
-    assert (
-        'details_url="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/'
-        '$GITHUB_RUN_ID/attempts/$SOURCE_RUN_ATTEMPT"'
-    ) in provenance
+    assert '--arg details_url' not in provenance
+    assert 'details_url: $details_url' not in provenance
+    assert "presentation-only value" in provenance
     assert '--arg source_run_id "$GITHUB_RUN_ID"' in provenance
     assert (
         '--arg source_run_attempt "$SOURCE_RUN_ATTEMPT"'

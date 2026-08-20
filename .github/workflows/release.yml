@@ -726,7 +726,6 @@ jobs:
 
           external_id="$external_id_prefix:$GITHUB_RUN_ID:$SOURCE_RUN_ATTEMPT:$PACKAGE_VERSION:$WHEEL_SHA256"
           logical_external_id_prefix="$external_id_prefix:$GITHUB_RUN_ID:$SOURCE_RUN_ATTEMPT:$PACKAGE_VERSION:"
-          details_url="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID/attempts/$SOURCE_RUN_ATTEMPT"
           if [ "${#external_id}" -gt 255 ]; then
             echo "Release provenance external_id exceeds 255 characters." >&2
             exit 1
@@ -765,7 +764,6 @@ jobs:
               --arg name "$check_name" \
               --arg head_sha "$GITHUB_SHA" \
               --arg external_id "$external_id" \
-              --arg details_url "$details_url" \
               --arg title "$output_title" \
               --arg summary "$summary" \
               '{
@@ -773,7 +771,6 @@ jobs:
                 name: $name,
                 head_sha: $head_sha,
                 external_id: $external_id,
-                details_url: $details_url,
                 status: "completed",
                 conclusion: "success",
                 output: {
@@ -815,19 +812,20 @@ jobs:
             response="$matches"
             operation="Reusing"
           else
+            # GitHub Actions owns a Check Run's details URL and normalizes it
+            # to the Check Run page. The immutable provenance contract below
+            # deliberately excludes that presentation-only value.
             payload="$(
               jq -n \
                 --arg name "$check_name" \
                 --arg head_sha "$GITHUB_SHA" \
                 --arg external_id "$external_id" \
-                --arg details_url "$details_url" \
                 --arg title "$output_title" \
                 --arg summary "$summary" \
                 '{
                   name: $name,
                   head_sha: $head_sha,
                   external_id: $external_id,
-                  details_url: $details_url,
                   status: "completed",
                   conclusion: "success",
                   output: {
@@ -854,7 +852,6 @@ jobs:
                 name: .name,
                 head_sha: .head_sha,
                 external_id: .external_id,
-                details_url: .details_url,
                 status: .status,
                 conclusion: .conclusion,
                 output: {
