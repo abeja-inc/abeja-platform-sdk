@@ -271,3 +271,6 @@ logs
 .debug
 Dockerfile.local
 docker-compose.yml
+
+# Firebase Hosting deploy cache
+.firebase/

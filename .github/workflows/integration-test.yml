@@ -1,0 +1,110 @@
+name: Integration tests
+
+on:
+  pull_request:
+    branches:
+      - develop
+      - staging
+      - master
+  push:
+    branches:
+      - develop
+  workflow_dispatch:
+  workflow_call:
+
+permissions:
+  contents: read
+
+env:
+  POETRY_VERSION: "1.8.0"
+  # packaging 26.3 requires Python 3.9, while this SDK still tests Python 3.8.
+  POETRY_PACKAGING_VERSION: "26.2"
+
+jobs:
+  integration-tests:
+    name: Integration tests
+    # Fail closed before the Environment is accessed. In particular, a public
+    # reusable-workflow caller from another repository must never reach this
+    # repository's Environment secrets.
+    if: >-
+      github.repository == 'abeja-inc/abeja-platform-sdk' &&
+      (
+        (
+          github.event_name == 'pull_request' &&
+          github.event.pull_request.head.repo.full_name == github.repository &&
+          github.actor != 'dependabot[bot]'
+        ) ||
+        (
+          github.event_name == 'push' &&
+          (
+            github.ref == 'refs/heads/develop' ||
+            github.ref == 'refs/heads/staging' ||
+            github.ref == 'refs/heads/master'
+          )
+        ) ||
+        (
+          github.event_name == 'workflow_dispatch' &&
+          (
+            github.ref == 'refs/heads/develop' ||
+            github.ref == 'refs/heads/staging' ||
+            github.ref == 'refs/heads/master'
+          )
+        )
+      )
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    environment: sdk-integration-test
+    concurrency:
+      group: abeja-platform-sdk-datalake-integration
+      queue: max
+    steps:
+      - name: Check integration-test credentials
+        env:
+          CHANNEL_ID: ${{ secrets.CHANNEL_ID }}
+          ORGANIZATION_ID: ${{ secrets.ORGANIZATION_ID }}
+          USER_ID: ${{ secrets.USER_ID }}
+          PERSONAL_ACCESS_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+        run: |
+          missing=()
+          for name in CHANNEL_ID ORGANIZATION_ID USER_ID PERSONAL_ACCESS_TOKEN; do
+            if [ -z "${!name:-}" ]; then
+              missing+=("$name")
+            fi
+          done
+
+          if [ "${#missing[@]}" -eq 0 ]; then
+            exit 0
+          fi
+
+          echo "Integration tests could not start because these credentials are unavailable: ${missing[*]}" \
+            >> "$GITHUB_STEP_SUMMARY"
+          echo "Integration-test credentials are required for this trusted run." >&2
+          exit 1
+
+      - name: Check out repository
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+        with:
+          persist-credentials: false
+
+      - name: Install Poetry
+        run: |
+          pipx install "poetry==${POETRY_VERSION}"
+          pipx runpip poetry install "packaging==${POETRY_PACKAGING_VERSION}"
+
+      - name: Set up Python
+        uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6.3.0
+        with:
+          python-version: "3.8"
+          cache: poetry
+          cache-dependency-path: poetry.lock
+
+      - name: Install dependencies
+        run: poetry install --no-interaction --no-ansi
+
+      - name: Run integration tests
+        env:
+          CHANNEL_ID: ${{ secrets.CHANNEL_ID }}
+          ORGANIZATION_ID: ${{ secrets.ORGANIZATION_ID }}
+          USER_ID: ${{ secrets.USER_ID }}
+          PERSONAL_ACCESS_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+        run: make integration_test
