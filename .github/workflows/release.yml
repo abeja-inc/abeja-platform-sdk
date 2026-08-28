@@ -217,6 +217,7 @@ jobs:
     environment: system-test-dispatch
     outputs:
       workflow: ${{ steps.target-workflow.outputs.workflow }}
+      target-ref-sha: ${{ steps.target-workflow.outputs.target-ref-sha }}
     steps:
       - name: Create read-only cross-repository GitHub App token
         id: read-token
@@ -233,10 +234,13 @@ jobs:
         id: target-workflow
         env:
           GH_TOKEN: ${{ steps.read-token.outputs.token }}
+          RELEASE_STAGE: ${{ needs.build.outputs.release-stage }}
           TARGET_REF: ${{ needs.build.outputs.target-ref }}
           TARGET_REPOSITORY: ${{ github.repository_owner }}/platform-system-test
           SYSTEM_TEST_WORKFLOW: ${{ vars.SYSTEM_TEST_WORKFLOW || 'system-test.yml' }}
         run: |
+          set -Eeuo pipefail
+
           if [ "${#SYSTEM_TEST_WORKFLOW}" -gt 100 ] ||
             [[ ! "$SYSTEM_TEST_WORKFLOW" =~ ^[A-Za-z0-9][A-Za-z0-9._-]*\.ya?ml$ ]]; then
             echo "SYSTEM_TEST_WORKFLOW must be a safe .yml or .yaml filename." >&2
@@ -255,15 +259,32 @@ jobs:
             exit 1
           fi
 
+          target_ref_sha=""
           for ref in "$default_branch" "$TARGET_REF"; do
-            echo "Validating $SYSTEM_TEST_WORKFLOW on $TARGET_REPOSITORY@$ref"
+            ref_sha="$(gh api --method GET \
+              "repos/$TARGET_REPOSITORY/commits/$ref" \
+              --jq '.sha')"
+            if [[ ! "$ref_sha" =~ ^[0-9a-f]{40}$ ]]; then
+              echo "Could not resolve $TARGET_REPOSITORY@$ref to a commit." >&2
+              exit 1
+            fi
+            if [ "$ref" = "$TARGET_REF" ]; then
+              target_ref_sha="$ref_sha"
+            fi
+            echo "Validating $SYSTEM_TEST_WORKFLOW on $TARGET_REPOSITORY@$ref_sha ($ref)"
+            contract_stage="registration"
+            if [ "$ref" = "$TARGET_REF" ]; then
+              contract_stage="$RELEASE_STAGE"
+            fi
             gh api --method GET \
               "repos/$TARGET_REPOSITORY/contents/.github/workflows/$SYSTEM_TEST_WORKFLOW" \
-              -f "ref=$ref" \
+              -f "ref=$ref_sha" \
               --jq '.content' \
               | tr -d '\n' \
               | base64 --decode \
-              | TARGET_WORKFLOW_REF="$ref" ruby -ryaml -e '
+              | TARGET_WORKFLOW_REF="$ref" \
+                TARGET_WORKFLOW_STAGE="$contract_stage" \
+                ruby -ryaml -e '
                   document = YAML.safe_load(STDIN.read, aliases: false)
                   events = document["on"] || document[true]
                   dispatch = events["workflow_dispatch"] if events.is_a?(Hash)
@@ -299,10 +320,102 @@ jobs:
                       "unexpected=#{unexpected.join(",")}"
                     )
                   end
+
+                  stage = ENV.fetch("TARGET_WORKFLOW_STAGE")
+                  unless stage == "registration"
+                    contract = {
+                      "staging" => {
+                        "prepare" => "prepare-stg-sdk-deploy",
+                        "codetest" => "codetest-stg",
+                        "terminal" => "deploy-stg-sdk-release",
+                        "name" => "deploy staging SDK release",
+                        "environment" => "stg",
+                        "owner_variable" => "DEPLOYMENT_OWNER_STG"
+                      },
+                      "production" => {
+                        "prepare" => "prepare-prod-sdk-deploy",
+                        "codetest" => "codetest-prod",
+                        "terminal" => "deploy-prod-sdk-release",
+                        "name" => "deploy production SDK release",
+                        "environment" => "prod",
+                        "owner_variable" => "DEPLOYMENT_OWNER_PROD"
+                      }
+                    }.fetch(stage)
+                    jobs = document["jobs"]
+                    jobs = {} unless jobs.is_a?(Hash)
+                    prepare = jobs[contract.fetch("prepare")]
+                    codetest = jobs[contract.fetch("codetest")]
+                    terminal = jobs[contract.fetch("terminal")]
+                    abort("#{ENV.fetch("TARGET_WORKFLOW_REF")}: " \
+                      "stage-specific SDK jobs are missing") unless
+                      prepare.is_a?(Hash) &&
+                      codetest.is_a?(Hash) &&
+                      terminal.is_a?(Hash)
+
+                    needs = Array(terminal["needs"]).map(&:to_s).sort
+                    expected_needs = [
+                      contract.fetch("prepare"),
+                      contract.fetch("codetest")
+                    ].sort
+                    environment = terminal["environment"]
+                    environment_name = if environment.is_a?(Hash)
+                      environment["name"]
+                    else
+                      environment
+                    end
+                    permissions = terminal["permissions"]
+                    concurrency = terminal["concurrency"]
+                    terminal_env = terminal["env"]
+                    steps = terminal["steps"]
+                    steps = [] unless steps.is_a?(Array)
+                    checkout_index = steps.index do |step|
+                      step.is_a?(Hash) &&
+                        step["uses"].to_s.match?(%r{\Aactions/checkout@[0-9a-f]{40}\z}) &&
+                        step.dig("with", "persist-credentials") == false
+                    end
+                    deploy_index = steps.index do |step|
+                      step.is_a?(Hash) &&
+                        step["uses"] == "./.github/actions/deploy-serverless"
+                    end
+                    ownership_guard = Array(prepare["steps"]).any? do |step|
+                      run = step["run"] if step.is_a?(Hash)
+                      run.is_a?(String) &&
+                        run.include?(contract.fetch("owner_variable")) &&
+                        run.include?("github-actions")
+                    end
+                    expected_concurrency = [
+                      "platform-system-test-deploy-$",
+                      "{{ github.ref }}"
+                    ].join
+                    valid_terminal =
+                      terminal["name"] == contract.fetch("name") &&
+                      needs == expected_needs &&
+                      environment_name == contract.fetch("environment") &&
+                      permissions.is_a?(Hash) &&
+                      permissions["contents"] == "read" &&
+                      permissions["id-token"] == "write" &&
+                      concurrency.is_a?(Hash) &&
+                      concurrency["group"] == expected_concurrency &&
+                      concurrency["queue"] == "max" &&
+                      terminal_env.is_a?(Hash) &&
+                      terminal_env["DEPLOYMENT_OWNER"] == "github-actions" &&
+                      ownership_guard &&
+                      !checkout_index.nil? &&
+                      !deploy_index.nil? &&
+                      checkout_index < deploy_index
+                    unless valid_terminal
+                      abort(
+                        "#{ENV.fetch("TARGET_WORKFLOW_REF")}: " \
+                        "#{contract.fetch("terminal")} must be the protected " \
+                        "stage-specific terminal deployment job"
+                      )
+                    end
+                  end
                 '
           done
 
           printf 'workflow=%s\n' "$SYSTEM_TEST_WORKFLOW" >> "$GITHUB_OUTPUT"
+          printf 'target-ref-sha=%s\n' "$target_ref_sha" >> "$GITHUB_OUTPUT"
 
       # Creating a token with this downscoped permission fails if the App was
       # installed without Actions: Write. Do not expose this probe token to a
@@ -880,6 +993,10 @@ jobs:
     timeout-minutes: 10
     permissions: {}
     environment: system-test-dispatch
+    outputs:
+      run-id: ${{ steps.dispatch.outputs.run-id }}
+      run-url: ${{ steps.dispatch.outputs.run-url }}
+      target-sha: ${{ steps.dispatch.outputs.target-sha }}
     steps:
       - name: Create cross-repository GitHub App token
         id: app-token
@@ -890,14 +1007,17 @@ jobs:
           owner: ${{ github.repository_owner }}
           repositories: platform-system-test
           permission-actions: write
+          permission-contents: read
 
       - name: Dispatch platform-system-test workflow
+        id: dispatch
         env:
           APP_SLUG: ${{ steps.app-token.outputs.app-slug }}
           GH_TOKEN: ${{ steps.app-token.outputs.token }}
           SDK_VERSION: ${{ needs.build.outputs.package-version }}
           RELEASE_STAGE: ${{ needs.build.outputs.release-stage }}
           TARGET_REF: ${{ needs.build.outputs.target-ref }}
+          EXPECTED_TARGET_SHA: ${{ needs.system-test-readiness.outputs.target-ref-sha }}
           SYSTEM_TEST_WORKFLOW: ${{ needs.system-test-readiness.outputs.workflow }}
         run: |
           set -Eeuo pipefail
@@ -908,6 +1028,12 @@ jobs:
             exit 1
           fi
           expected_actor="${APP_SLUG}[bot]"
+          expected_path=".github/workflows/$SYSTEM_TEST_WORKFLOW"
+          if [[ ! "$EXPECTED_TARGET_SHA" =~ ^[0-9a-f]{40}$ ]]; then
+            echo "The inspected system-test target SHA is invalid." >&2
+            exit 1
+          fi
+
           find_existing_dispatch() {
             local matches
             local match_count
@@ -917,10 +1043,10 @@ jobs:
                 -f "branch=$TARGET_REF" \
                 -f "event=workflow_dispatch" \
                 -f "per_page=100" \
-                --jq '.workflow_runs[] | [.display_title, .actor.login, .html_url] | @tsv' \
+                --jq '.workflow_runs[] | [.id, .display_title, .actor.login] | @tsv' \
                 | awk -F '\t' -v expected="$expected_title" \
                     -v actor="$expected_actor" \
-                    '$1 == expected && $2 == actor { print $3 }'
+                    '$2 == expected && $3 == actor { print $1 }'
             )"
             match_count="$(
               printf '%s\n' "$matches" |
@@ -937,10 +1063,83 @@ jobs:
             return 1
           }
 
+          cancel_unverified_run() {
+            local run_id="$1"
+            if gh api --method POST \
+              "repos/${GITHUB_REPOSITORY_OWNER}/platform-system-test/actions/runs/$run_id/cancel" \
+              --silent; then
+              echo "Cancellation requested for unverified system-test run $run_id." >&2
+            else
+              echo "Could not cancel unverified system-test run $run_id; investigate it in the target repository." >&2
+            fi
+          }
+
+          record_dispatch_response() {
+            local response="$1"
+            local run_id
+            local run_url
+            local target_sha
+            local actual_contract
+            local expected_contract
+            run_id="$(printf '%s' "$response" | jq -er '.id')"
+            run_url="$(printf '%s' "$response" | jq -er '.html_url')"
+            target_sha="$(printf '%s' "$response" | jq -er '.head_sha')"
+            if [[ ! "$run_id" =~ ^[1-9][0-9]*$ ]] ||
+              [[ ! "$run_url" =~ ^https://github\.com/abeja-inc/platform-system-test/actions/runs/[1-9][0-9]*$ ]] ||
+              [[ ! "$target_sha" =~ ^[0-9a-f]{40}$ ]]; then
+              echo "Matching system-test run has an invalid identity." >&2
+              exit 1
+            fi
+            if [ "$target_sha" != "$EXPECTED_TARGET_SHA" ]; then
+              cancel_unverified_run "$run_id"
+              echo "System-test run did not use the inspected target SHA." >&2
+              exit 1
+            fi
+
+            actual_contract="$(printf '%s' "$response" | jq -Sc '{
+              display_title: .display_title,
+              event: .event,
+              head_branch: .head_branch,
+              path: .path,
+              actor_login: .actor.login,
+              actor_type: .actor.type
+            }')"
+            expected_contract="$(jq -Scn \
+              --arg display_title "$expected_title" \
+              --arg event "workflow_dispatch" \
+              --arg head_branch "$TARGET_REF" \
+              --arg path "$expected_path" \
+              --arg actor_login "$expected_actor" \
+              --arg actor_type "Bot" \
+              '{
+                display_title: $display_title,
+                event: $event,
+                head_branch: $head_branch,
+                path: $path,
+                actor_login: $actor_login,
+                actor_type: $actor_type
+              }')"
+            if [ "$actual_contract" != "$expected_contract" ]; then
+              cancel_unverified_run "$run_id"
+              echo "System-test run differs from the dispatched contract." >&2
+              exit 1
+            fi
+
+            {
+              printf 'run-id=%s\n' "$run_id"
+              printf 'run-url=%s\n' "$run_url"
+              printf 'target-sha=%s\n' "$target_sha"
+            } >> "$GITHUB_OUTPUT"
+            recorded_url="$run_url"
+          }
+
           existing_status=0
-          existing_url="$(find_existing_dispatch)" || existing_status=$?
+          existing_run_id="$(find_existing_dispatch)" || existing_status=$?
           if [ "$existing_status" -eq 0 ]; then
-            echo "Matching system-test dispatch already exists: $existing_url" \
+            existing_response="$(gh api --method GET \
+              "repos/${GITHUB_REPOSITORY_OWNER}/platform-system-test/actions/runs/$existing_run_id")"
+            record_dispatch_response "$existing_response"
+            echo "Matching system-test dispatch already exists: $recorded_url" \
               >> "$GITHUB_STEP_SUMMARY"
             exit 0
           fi
@@ -948,34 +1147,245 @@ jobs:
             exit "$existing_status"
           fi
 
-          dispatch_status=0
-          gh workflow run "$SYSTEM_TEST_WORKFLOW" \
-            --repo "${GITHUB_REPOSITORY_OWNER}/platform-system-test" \
-            --ref "$TARGET_REF" \
-            --field "sdk_version=$SDK_VERSION" \
-            --field "release_stage=$RELEASE_STAGE" \
-            --field "sdk_sha=$GITHUB_SHA" \
-            --field "source_repository=$GITHUB_REPOSITORY" \
-            --field "source_run_id=$GITHUB_RUN_ID" \
-            --field "source_run_url=$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID" \
-            || dispatch_status=$?
+          current_target_sha="$(gh api --method GET \
+            "repos/${GITHUB_REPOSITORY_OWNER}/platform-system-test/commits/$TARGET_REF" \
+            --jq '.sha')"
+          if [ "$current_target_sha" != "$EXPECTED_TARGET_SHA" ]; then
+            echo "System-test target ref advanced after readiness validation." >&2
+            exit 1
+          fi
+
+          dispatch_payload="$(jq -cn \
+            --arg ref "$TARGET_REF" \
+            --arg sdk_version "$SDK_VERSION" \
+            --arg release_stage "$RELEASE_STAGE" \
+            --arg sdk_sha "$GITHUB_SHA" \
+            --arg source_repository "$GITHUB_REPOSITORY" \
+            --arg source_run_id "$GITHUB_RUN_ID" \
+            --arg source_run_url "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID" \
+            '{
+              ref: $ref,
+              inputs: {
+                sdk_version: $sdk_version,
+                release_stage: $release_stage,
+                sdk_sha: $sdk_sha,
+                source_repository: $source_repository,
+                source_run_id: $source_run_id,
+                source_run_url: $source_run_url
+              }
+            }')"
+          dispatch_response="$(printf '%s' "$dispatch_payload" | gh api \
+            --method POST \
+            -H "Accept: application/vnd.github+json" \
+            -H "X-GitHub-Api-Version: 2026-03-10" \
+            "repos/${GITHUB_REPOSITORY_OWNER}/platform-system-test/actions/workflows/$SYSTEM_TEST_WORKFLOW/dispatches" \
+            --input -)"
+          dispatched_run_id="$(printf '%s' "$dispatch_response" | jq -er '.workflow_run_id')"
+          dispatched_run_url="$(printf '%s' "$dispatch_response" | jq -er '.html_url')"
+          dispatched_api_url="$(printf '%s' "$dispatch_response" | jq -er '.run_url')"
+          if [[ ! "$dispatched_run_id" =~ ^[1-9][0-9]*$ ]] ||
+            [ "$dispatched_run_url" != "https://github.com/abeja-inc/platform-system-test/actions/runs/$dispatched_run_id" ] ||
+            [ "$dispatched_api_url" != "https://api.github.com/repos/abeja-inc/platform-system-test/actions/runs/$dispatched_run_id" ]; then
+            echo "GitHub returned an invalid workflow dispatch identity." >&2
+            exit 1
+          fi
 
           for _ in $(seq 1 12); do
-            existing_status=0
-            existing_url="$(find_existing_dispatch)" || existing_status=$?
-            if [ "$existing_status" -eq 0 ]; then
-              echo "System-test dispatch accepted: $existing_url" \
+            dispatched_response=""
+            if dispatched_response="$(gh api --method GET \
+              "repos/${GITHUB_REPOSITORY_OWNER}/platform-system-test/actions/runs/$dispatched_run_id" \
+              2>/dev/null)"; then
+              record_dispatch_response "$dispatched_response"
+              echo "System-test dispatch accepted: $recorded_url" \
                 >> "$GITHUB_STEP_SUMMARY"
               exit 0
-            fi
-            if [ "$existing_status" -ne 1 ]; then
-              exit "$existing_status"
             fi
             sleep 5
           done
 
-          echo "No matching system-test run appeared; dispatch exit status was $dispatch_status." >&2
+          echo "The dispatched system-test run could not be read by its returned ID." >&2
           exit 1
+
+  verify-system-tests:
+    name: Verify platform system tests
+    needs:
+      - build
+      - system-test-readiness
+      - trigger-system-tests
+    runs-on: ubuntu-24.04
+    # Installation tokens expire after one hour. Leave time for job cleanup and
+    # acquire a fresh read-only token when failed jobs are rerun.
+    timeout-minutes: 55
+    permissions: {}
+    environment: system-test-dispatch
+    steps:
+      - name: Create read-only cross-repository GitHub App token
+        id: read-token
+        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
+        with:
+          client-id: ${{ vars.SYSTEM_TEST_DISPATCH_APP_CLIENT_ID }}
+          private-key: ${{ secrets.SYSTEM_TEST_DISPATCH_APP_PRIVATE_KEY }}
+          owner: ${{ github.repository_owner }}
+          repositories: platform-system-test
+          permission-actions: read
+
+      - name: Wait for the exact platform-system-test run
+        env:
+          APP_SLUG: ${{ steps.read-token.outputs.app-slug }}
+          GH_TOKEN: ${{ steps.read-token.outputs.token }}
+          RELEASE_STAGE: ${{ needs.build.outputs.release-stage }}
+          RUN_ID: ${{ needs.trigger-system-tests.outputs.run-id }}
+          RUN_URL: ${{ needs.trigger-system-tests.outputs.run-url }}
+          SDK_VERSION: ${{ needs.build.outputs.package-version }}
+          SYSTEM_TEST_WORKFLOW: ${{ needs.system-test-readiness.outputs.workflow }}
+          TARGET_REF: ${{ needs.build.outputs.target-ref }}
+          TARGET_SHA: ${{ needs.trigger-system-tests.outputs.target-sha }}
+        run: |
+          set -Eeuo pipefail
+
+          if [[ ! "$APP_SLUG" =~ ^[a-z0-9][a-z0-9-]*$ ]] ||
+            [[ ! "$RUN_ID" =~ ^[1-9][0-9]*$ ]] ||
+            [[ ! "$RUN_URL" =~ ^https://github\.com/abeja-inc/platform-system-test/actions/runs/$RUN_ID$ ]] ||
+            [[ ! "$TARGET_SHA" =~ ^[0-9a-f]{40}$ ]]; then
+            echo "System-test run identity is invalid." >&2
+            exit 1
+          fi
+
+          expected_actor="${APP_SLUG}[bot]"
+          expected_path=".github/workflows/$SYSTEM_TEST_WORKFLOW"
+          expected_title="SDK $SDK_VERSION -> $RELEASE_STAGE (source $GITHUB_RUN_ID)"
+          case "$RELEASE_STAGE" in
+            staging)
+              expected_terminal_job="deploy staging SDK release"
+              ;;
+            production)
+              expected_terminal_job="deploy production SDK release"
+              ;;
+            *)
+              echo "Unsupported system-test release stage: $RELEASE_STAGE" >&2
+              exit 1
+              ;;
+          esac
+          expected_identity="$(
+            jq -Scn \
+              --argjson id "$RUN_ID" \
+              --arg display_title "$expected_title" \
+              --arg event "workflow_dispatch" \
+              --arg head_branch "$TARGET_REF" \
+              --arg head_sha "$TARGET_SHA" \
+              --arg path "$expected_path" \
+              --arg actor_login "$expected_actor" \
+              --arg actor_type "Bot" \
+              --arg html_url "$RUN_URL" \
+              '{
+                id: $id,
+                display_title: $display_title,
+                event: $event,
+                head_branch: $head_branch,
+                head_sha: $head_sha,
+                path: $path,
+                actor_login: $actor_login,
+                actor_type: $actor_type,
+                html_url: $html_url
+              }'
+          )"
+
+          for _ in $(seq 1 200); do
+            response="$(gh api --method GET \
+              "repos/${GITHUB_REPOSITORY_OWNER}/platform-system-test/actions/runs/$RUN_ID")"
+            actual_identity="$(
+              printf '%s' "$response" |
+                jq -Sc '{
+                  id: .id,
+                  display_title: .display_title,
+                  event: .event,
+                  head_branch: .head_branch,
+                  head_sha: .head_sha,
+                  path: .path,
+                  actor_login: .actor.login,
+                  actor_type: .actor.type,
+                  html_url: .html_url
+                }'
+            )"
+            if [ "$actual_identity" != "$expected_identity" ]; then
+              echo "System-test run identity differs from the dispatched run." >&2
+              exit 1
+            fi
+
+            status="$(printf '%s' "$response" | jq -er '.status')"
+            conclusion="$(printf '%s' "$response" | jq -r '.conclusion // ""')"
+            if [ "$status" = "completed" ]; then
+              if [ "$conclusion" != "success" ]; then
+                echo "System-test run completed with conclusion: $conclusion" >&2
+                exit 1
+              fi
+
+              terminal_records="$(gh api --paginate --method GET \
+                "repos/${GITHUB_REPOSITORY_OWNER}/platform-system-test/actions/runs/$RUN_ID/jobs" \
+                -f "filter=latest" \
+                -f "per_page=100" \
+                --jq '.jobs[] | [
+                  .id,
+                  .run_id,
+                  .name,
+                  .status,
+                  (.conclusion // ""),
+                  .html_url,
+                  .head_sha
+                ] | @tsv' \
+                | awk -F '\t' -v expected="$expected_terminal_job" \
+                    '$3 == expected { print }')"
+              terminal_count="$(printf '%s\n' "$terminal_records" |
+                awk 'NF { count++ } END { print count + 0 }')"
+              if [ "$terminal_count" -ne 1 ]; then
+                echo "Expected exactly one successful terminal deployment job named $expected_terminal_job; found $terminal_count." >&2
+                exit 1
+              fi
+              IFS=$'\t' read -r terminal_id terminal_run_id terminal_name \
+                terminal_status terminal_conclusion terminal_url terminal_sha \
+                terminal_unexpected <<< "$terminal_records"
+              if [[ ! "$terminal_id" =~ ^[1-9][0-9]*$ ]] ||
+                [ "$terminal_run_id" != "$RUN_ID" ] ||
+                [ "$terminal_name" != "$expected_terminal_job" ] ||
+                [ "$terminal_status" != "completed" ] ||
+                [ "$terminal_conclusion" != "success" ] ||
+                [[ ! "$terminal_url" =~ ^https://github\.com/abeja-inc/platform-system-test/actions/runs/$RUN_ID/job/[1-9][0-9]*$ ]] ||
+                [ "$terminal_sha" != "$TARGET_SHA" ] ||
+                [ -n "$terminal_unexpected" ]; then
+                echo "The terminal platform deployment job did not satisfy the verified contract." >&2
+                exit 1
+              fi
+              {
+                echo "Platform system tests succeeded: $RUN_URL"
+                echo "Verified terminal deployment job: $terminal_url"
+              } >> "$GITHUB_STEP_SUMMARY"
+              exit 0
+            fi
+
+            case "$status" in
+              queued|in_progress|pending|requested|waiting)
+                ;;
+              *)
+                echo "System-test run has an unexpected status: $status" >&2
+                exit 1
+                ;;
+            esac
+            sleep 15
+          done
+
+          echo "System-test run did not complete within 50 minutes: $RUN_URL" >&2
+          exit 1
+
+  deploy-production-firebase:
+    name: Deploy Firebase Hosting production site
+    if: ${{ needs.build.outputs.release-stage == 'production' }}
+    needs:
+      - build
+      - verify-system-tests
+    permissions:
+      contents: read # Let the called workflow recheck the protected master ref.
+      id-token: write # Forward OIDC only to the called Firebase deploy job.
+    uses: ./.github/workflows/firebase-deploy-prod.yml
 
   finalize-production-release:
     name: Finalize production release
@@ -983,7 +1393,8 @@ jobs:
     needs:
       - build
       - publish
-      - trigger-system-tests
+      - verify-system-tests
+      - deploy-production-firebase
     runs-on: ubuntu-24.04
     timeout-minutes: 10
     permissions:
@@ -1019,7 +1430,6 @@ jobs:
             echo "Production source SHA is invalid." >&2
             exit 1
           fi
-
           tag_state="$(
             gh api --method GET \
               "repos/$REPOSITORY/git/ref/tags/$PACKAGE_VERSION" \
@@ -1027,6 +1437,16 @@ jobs:
               2>/dev/null || true
           )"
           if [ -z "$tag_state" ]; then
+            # Fence only the first immutable mutation. If this exact tag was
+            # already created by a partial attempt, a later failed-job rerun
+            # may finish reconciling its GitHub Release even after master moves.
+            current_master_sha="$(gh api --method GET \
+              "repos/$REPOSITORY/git/ref/heads/master" \
+              --jq '.object.sha')"
+            if [ "$current_master_sha" != "$SOURCE_SHA" ]; then
+              echo "Refusing stale production finalization: master is now $current_master_sha." >&2
+              exit 1
+            fi
             if ! gh api --method POST "repos/$REPOSITORY/git/refs" \
               -f "ref=refs/tags/$PACKAGE_VERSION" \
               -f "sha=$SOURCE_SHA" \

@@ -28,16 +28,20 @@ never restore both publishers on a release branch.
   before the Environment is accessed.
 - `Release` calls both test workflows, builds one wheel, verifies that the
   target system-test workflow is dispatchable, publishes the wheel, and then
-  records the verified PyPI file as a public GitHub check run, and then triggers
+  records the verified PyPI file as a public GitHub check run before triggering
   `platform-system-test`. Integration credentials are mandatory in this release
-  path. A successful release means that the target registered the uniquely
-  identified dispatch; it does not wait for the target run to finish. A retry
-  first reconciles both the provenance check and target runs owned by the
+  path. The SDK release identifies the exact target run and waits for a
+  successful conclusion; dispatch acceptance alone is not success. A retry
+  reconciles both the provenance check and the target run owned by the
   configured dispatch GitHub App, and fails on duplicate or conflicting state.
-  On `master`, a final checkout-free job then
+  On `master`, the successful System Test is followed by the protected Firebase
+  production workflow. That workflow verifies that the source is still the
+  current `master` head and reconciles the live Hosting release by source SHA,
+  documentation digest, and public marker. A final checkout-free job then
   reconciles the immutable tag and GitHub Release through the API. An identical
-  existing tag/release is a safe no-op; a conflicting target or release
-  metadata fails closed.
+  existing immutable state is a safe no-op, while a conflicting tag, release,
+  dispatch, or provenance identity fails closed. Firebase is intentionally a
+  mutable last-write reconciliation boundary, as described below.
 
 Python 3.8 and Poetry 1.8.0 are intentionally fixed for the initial migration.
 The current pytest and mypy versions do not support a Python 3.10/3.11 test
@@ -48,9 +52,9 @@ matrix. Upgrade the development dependencies before expanding the matrix.
 | Event | Eligible refs / callers | Trust and credentials | Jobs and side effects |
 | --- | --- | --- | --- |
 | `pull_request` | Targets `develop`, `staging`, or `master` | Unit tests are unprivileged. Integration receives local Environment secrets only for a same-repository, non-Dependabot head. | Stable `Unit tests` gate; optional serialized integration test; no writes. |
-| `push` | `develop` for tests and dev documentation; `staging` and `master` for release; `master` for production documentation | Repository branch code. Production assumes that the `master` ruleset admitted only reviewed changes. Integration uses its Environment; OIDC publishing, Checks write, dispatch credentials, and Firebase OIDC remain in separate jobs. | Tests and automatic dev documentation deployment on `develop`; serialized build/publish/provenance-check/dispatch on release branches; production tag/release reconciliation and automatic production documentation deployment on `master`. |
-| `workflow_dispatch` | Unit: any ref, no secrets. Integration: only the three named branches. Firebase: dev only on `develop`, production only on `master`. | Integration is skipped before Environment access for every other ref. Firebase deploy jobs receive OIDC only on their exact eligible branch. | Manual validation, or an explicit documentation redeployment on the matching Firebase branch; no package publication. |
-| `workflow_call` | Unit: public reusable workflow. Integration: same repository only, with the original event/ref restrictions still enforced. | The Integration workflow's repository guard runs before its Environment is evaluated. Release does not call Integration as a reusable workflow: its direct job selects the protected Environment itself. | Reusable test jobs only. Release runs its credentialed Integration job directly; Unit runs queue without cancelling an active release caller. |
+| `push` | `develop` for tests and dev documentation; `staging` and `master` for release | Repository branch code. Production assumes that the `master` ruleset admitted only reviewed changes. Integration uses its Environment; OIDC publishing, Checks write, dispatch credentials, and Firebase OIDC remain in separate jobs. | Tests and automatic dev documentation deployment on `develop`; serialized build/publish/provenance/System-Test completion on release branches; on `master` only, Firebase reconciliation followed by tag/release finalization. |
+| `workflow_dispatch` | Unit: any ref, no secrets. Integration: only the three named branches. Firebase: dev only on `develop`. | Integration is skipped before Environment access for every other ref. The dev Firebase job receives OIDC only on `develop`; production Firebase has no direct manual entry point. | Manual validation or an explicit dev documentation redeployment; no package publication or production documentation deployment. |
+| `workflow_call` | Unit: public reusable workflow. Integration: same repository only, with the original event/ref restrictions still enforced. Production Firebase: only the trusted `Release` caller on `master`. | Integration's repository guard runs before its Environment is evaluated. Release runs Integration directly so that job can select its protected Environment. Firebase's called job rechecks repository, event, ref, and current `master` SHA before using OIDC. | Reusable test jobs, plus production Firebase only after the exact System Test succeeds. |
 
 Release runs share the `abeja-sdk-pypi-release` queue. The queue retains at
 most 100 pending runs and does not guarantee dispatch order, so every release
@@ -78,9 +82,12 @@ deploy `doc/build/html` to two Hosting sites in the shared
 Restrict each Environment to its exact branch. Do not add a required
 Environment reviewer: review and approval of the pull request into `master` is
 the production approval gate, and the documentation deploy starts
-automatically after merge. Protect `master` with a ruleset that requires a pull
-request, at least one approval, resolution of review conversations, and the
-stable `Unit tests` check; direct pushes must not bypass that gate.
+automatically from `Release` after merge and after the exact production System
+Test succeeds. The production workflow is callable only; it has no independent
+`push` or `workflow_dispatch` entry point. Protect `master` with a ruleset that
+requires a pull request, at least one approval, resolution of review
+conversations, and the stable `Unit tests` check; direct pushes must not bypass
+that gate.
 
 Both sites intentionally share the Workload Identity Provider and
 `github-deploy@apf-mlops-docs.iam.gserviceaccount.com`. The Google Cloud trust
@@ -99,6 +106,26 @@ through Workload Identity Federation for short-lived Google Cloud credentials.
 Keep the provider, service account, Firebase project, and deploy targets fixed
 unless the repository owner and the Firebase infrastructure owner review the
 trust-boundary change together.
+
+The production workflow checks the current `master` head before the protected
+job and again immediately before mutation. Together with the documented
+production-release `master` freeze, these fences prevent an old Actions run
+from moving the mutable site backward. Its Sphinx build uses the commit time as
+`SOURCE_DATE_EPOCH`,
+hashes the generated file tree, and publishes
+`abeja-platform-sdk-release.json` with the source SHA and digest. The same
+identity is stored as the Firebase release message. Before and after deployment,
+the workflow reads the live channel. A different current release identity is
+the normal predecessor and is replaced by the reviewed current-`master`
+artifact; it is not treated as an immutable-state conflict. If the release
+identity is already the expected one, the workflow skips only when the public
+marker also matches and otherwise fails closed. After a deployment it requires
+both the live release identity and public marker to match, and it accepts an
+ambiguous nonzero CLI exit only when those two external records prove that the
+intended release became current. The pre-deployment Firebase Version name is
+written to the run summary as the emergency rollback reference. An out-of-band
+console or CLI deployment can therefore be overwritten by the next reviewed
+SDK production release and must be coordinated with the Hosting owner.
 
 ### `sdk-integration-test`
 
@@ -208,7 +235,9 @@ Restrict this Environment's deployment branches to selected branches
 branch may obtain the App private key. The readiness token is downscoped to
 `Actions: Read` and `Contents: Read`. A second token creation checks
 `Actions: Write` before publication without passing that token to a shell step.
-The post-publication trigger token also requests `Actions: Write`.
+The post-publication trigger token requests `Actions: Write`. A separate wait
+job creates a fresh token downscoped to `Actions: Read` and does not check out
+repository code.
 
 | Type | Name | Purpose |
 | --- | --- | --- |
@@ -268,7 +297,13 @@ The SDK build also validates this version shape before publication: a
 `staging` release must be canonical `X.Y.ZrcN`, while a `master` release must
 be canonical `X.Y.Z`. The target readiness check verifies the exact six-input
 contract on both the default branch and selected deployment ref before the
-PyPI job can start.
+PyPI job can start. On the selected ref it also verifies the stage-specific
+prepare, codetest, and terminal deployment jobs, including their Environment,
+dependencies, permissions, ownership guard, concurrency, and checkout boundary.
+The selected ref is resolved to a commit SHA. The dispatch is rejected if the
+ref advances before the API call. If it moves in the remaining API race and the
+created run does not use the exact inspected SHA, the SDK release fails closed,
+requests cancellation of that run, and requires target-repository investigation.
 
 Use stage-specific GitHub Environments, OIDC permissions (`contents: read` and
 `id-token: write`), AWS role trust and variables/secrets, and stage-specific
@@ -283,6 +318,16 @@ job automatically searches the target by `source_run_id`, `sdk_version`, and
 `release_stage`, skips one exact prior dispatch, and fails if duplicate matches
 already exist.
 
+After registration, the dispatch API returns the exact target run ID and URLs;
+the SDK does not guess which run was created from list timing. The SDK wait job
+repeatedly reads that exact run ID. It verifies the workflow path, deployment ref
+and inspected SHA, App bot identity, display title, event type, and URL on every
+read. A successful overall run is still insufficient by itself: the waiter also
+requires the exact stage-specific terminal deployment job to be
+`completed` / `success`. A failed, cancelled, timed-out, stale, skipped-terminal,
+or conflicting run fails the SDK workflow; queued or in-progress runs are
+bounded to 50 minutes so the short-lived App token cannot expire silently.
+
 For any failure after a package may have reached PyPI, use **Re-run failed
 jobs**, not **Re-run all jobs**. A full staging rerun recalculates the next RC
 from PyPI and can intentionally produce a new version. On a failed publish-job
@@ -294,18 +339,69 @@ covering GitHub's 30-day workflow rerun window.
 The target rejects new human dispatches and accepts only the configured SDK
 GitHub App bot. If the target dispatch was never accepted, rerun the failed SDK
 workflow jobs so that the App-authenticated dispatch and provenance checks are
-reused. If the linked target run exists but fails, rerun its failed jobs;
-rerunning the SDK dispatch only reconciles and exits after finding that run.
-Do not manually create a new target dispatch, production tag, or GitHub
-Release. If the rerun window has closed, or if the PyPI version is missing,
-yanked, or has a different digest, stop and escalate to the release owners for
-a separately reviewed recovery; use a new package version rather than
-dispatching or tagging unverified evidence.
+reused. If the linked target run exists but fails, first rerun that target run's
+failed jobs and then rerun the SDK workflow's failed jobs. The SDK trigger and
+waiter both reuse the same run ID. Do not manually create a new target dispatch,
+production tag, or GitHub Release. If the rerun window has closed, or if the
+PyPI version is missing, yanked, or has a different digest, stop and escalate
+to the release owners for a separately reviewed recovery; use a new package
+version rather than dispatching or tagging unverified evidence.
 
 If the failure is caused by the workflow definition itself, a GitHub rerun
 still uses that original definition. Merge and validate the repair through the
 normal release path; do not mutate historical provenance evidence to force a
 retry.
+
+## Production failure and rollback boundary
+
+PyPI files, release evidence, tags, and published GitHub Releases are immutable
+history in this process. "Rollback" therefore means preserving that history,
+restoring mutable service state when necessary, and shipping a corrected new
+version. It never means deleting and reusing a package version.
+
+| Failure point | State and permitted recovery |
+| --- | --- |
+| Before PyPI publication | No public package exists. Repair the cause and rerun through the normal reviewed branch path. |
+| PyPI published; System Test not successful | Do not create a tag or GitHub Release. First determine whether the stage-specific terminal deployment job started. If it never started and the failure is transient, rerun the exact target run's failed jobs and then the SDK failed jobs. If deployment started or its state is uncertain, freeze promotion and, in a `platform-system-test` change window, inspect and stabilize CloudFormation before deciding whether a rerun is safe: `serverless deploy` can partially mutate service state before a later ledger check fails. For an artifact defect, record the reason, request a PyPI yank, and use a new staging RC or a new production patch version. |
+| System Test successful; Firebase not reconciled | The package and platform test evidence remain valid, **and the production platform stack has already been deployed** by the terminal System Test job, but production finalization is blocked. Rerun only the failed Firebase/caller job while `master` still identifies the same SHA. If service state needs recovery, freeze promotion and use the owning service's reviewed incident/change procedure to inspect and stabilize it; never dispatch an older SDK as rollback. Use the Version name recorded in the job summary only for an explicitly approved emergency Hosting rollback. |
+| Tag and GitHub Release created | Do not move/delete the tag or rewrite release metadata to hide a defect. Request a reasoned PyPI yank if appropriate, restore mutable service state under the owning system's incident runbook, and release a new patch version. |
+
+A PyPI yank is non-destructive and exact `==` pins can still select a yanked
+file, so it is a warning and resolver control rather than erasure. Package files
+and filenames cannot be reused after deletion. Never delete a release in order
+to republish the same version, never dispatch an older SDK as an automatic
+rollback, and never bypass the target freshness guard. Infrastructure rollback
+and stabilization belong to the owning service's reviewed incident procedure;
+Firebase rollback belongs to the Hosting owner and must use the recorded prior
+Version. The rollback section of the `platform-system-test` migration runbook
+only transfers **CI deployment ownership** back to CircleCI in the order
+"disable GitHub Actions ownership, drain its runs, stabilize CloudFormation,
+then restore CircleCI." It is not an application rollback or an older-SDK
+rollback procedure.
+See PyPI's [yanking guidance](https://docs.pypi.org/project-management/yanking/)
+and [file-name reuse policy](https://pypi.org/help/#file-name-reuse) before an
+incident operator changes public package state.
+
+Production System Test ownership is an external precondition, not something the
+SDK workflow can switch safely. Before merging a `staging` to `master` release,
+follow the target runbook's exact order: prepare and review the CircleCI change;
+remove only the production deployment filter; freeze the deployment ref and
+legacy SDK trigger; block new CircleCI production work; drain every active
+production deployment; read the CircleCI config from the actual triggering ref
+and prove that no new production `build` can start; only then set
+`DEPLOYMENT_OWNER_PROD=github-actions`. If any check fails, keep the SDK
+production PR draft and use the target repository's rollback sequence to
+restore CircleCI ownership.
+
+After merging the production release PR, keep SDK `master` frozen until the
+same workflow has verified System Test and Firebase and has created the tag and
+GitHub Release. Firebase re-reads the current `master` head before mutation, and
+the finalizer does so before creating a previously absent tag. If the ref
+advances before either boundary, the stale release deliberately stops; do not
+force-rerun it, and stop for a separately reviewed recovery and version
+decision. If the exact tag was already created before a transient GitHub
+Release failure, **Re-run failed jobs** may finish reconciling that same tag;
+never delete or move the tag to manufacture a retry.
 
 ## Migration and decommission checklist
 
@@ -332,9 +428,17 @@ retry.
 7. Immediately before the first `staging` promotion, use CircleCI's reversible
    block on new work if the project can still start pipelines, then drain
    running jobs. Keep the ability to unblock for rollback.
-8. Merge the cutover to `staging`; verify the RC digest on PyPI and the uniquely
-   registered system-test run.
-9. Merge to `master`; verify the final PyPI digest, system-test run, and the
-   release workflow's reconciled tag and GitHub Release.
-10. Only after production succeeds, permanently stop the CircleCI project and
+8. Merge the cutover to `staging`; verify the RC digest on PyPI and successful
+   completion of the uniquely identified system-test run.
+9. Before the production merge, prepare and review the CircleCI change; remove
+   only its production deployment filter; freeze the deployment ref and legacy
+   SDK trigger; block new CircleCI production work; drain active deployments;
+   read the config from the actual triggering ref and prove no new production
+   `build` can start; then set `DEPLOYMENT_OWNER_PROD=github-actions` under the
+   reviewed change window.
+10. Merge to `master`; verify the final PyPI digest, exact successful System Test,
+   reconciled Firebase source/digest marker, and the release workflow's tag and
+   GitHub Release. Do not merge another SDK change to `master` until this
+   finalization completes.
+11. Only after production succeeds, permanently stop the CircleCI project and
     remove its old variables, contexts, and credentials.

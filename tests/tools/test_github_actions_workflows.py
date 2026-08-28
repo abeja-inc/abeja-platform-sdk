@@ -191,14 +191,39 @@ def test_integration_secrets_fail_closed_for_manual_external_and_release_callers
 
 def test_release_validates_version_and_exact_target_contract_before_publish():
     release = (WORKFLOWS / "release.yml").read_text()
+    readiness = release.split("  system-test-readiness:", 1)[1].split(
+        "  publish:", 1
+    )[0]
 
     assert "tools/validate_release_version.py" in release
-    assert "inputs.keys.map(&:to_s) - required_inputs" in release
-    assert 'document["run-name"] == expected_run_name' in release
+    assert "inputs.keys.map(&:to_s) - required_inputs" in readiness
+    assert "set -Eeuo pipefail" in readiness
+    assert 'document["run-name"] == expected_run_name' in readiness
     assert (
         r"^[A-Za-z0-9][A-Za-z0-9._-]*\.ya?ml$"
-        in release
+        in readiness
     )
+    for contract_value in (
+        "prepare-stg-sdk-deploy",
+        "codetest-stg",
+        "deploy-stg-sdk-release",
+        "deploy staging SDK release",
+        '"environment" => "stg"',
+        "DEPLOYMENT_OWNER_STG",
+        "prepare-prod-sdk-deploy",
+        "codetest-prod",
+        "deploy-prod-sdk-release",
+        "deploy production SDK release",
+        '"environment" => "prod"',
+        "DEPLOYMENT_OWNER_PROD",
+        'permissions["contents"] == "read"',
+        'permissions["id-token"] == "write"',
+        'concurrency["queue"] == "max"',
+        'step["uses"] == "./.github/actions/deploy-serverless"',
+        "checkout_index < deploy_index",
+        "stage-specific terminal deployment job",
+    ):
+        assert contract_value in readiness
     assert release.index("system-test-readiness:") < release.index("publish:")
 
 
@@ -234,10 +259,17 @@ def test_readiness_inspection_is_read_only_and_write_is_probed_before_publish():
     assert "permission-actions: write" in readiness
     assert "steps.read-token.outputs.token" in readiness
     assert "permission-actions: write" in trigger
+    assert "permission-contents: read" in trigger
     assert (
         "workflow: ${{ steps.target-workflow.outputs.workflow }}"
         in readiness
     )
+    assert (
+        "target-ref-sha: ${{ steps.target-workflow.outputs.target-ref-sha }}"
+        in readiness
+    )
+    assert '"repos/$TARGET_REPOSITORY/commits/$ref"' in readiness
+    assert '-f "ref=$ref_sha"' in readiness
     assert (
         "SYSTEM_TEST_WORKFLOW: "
         "${{ needs.system-test-readiness.outputs.workflow }}"
@@ -256,19 +288,26 @@ def test_system_test_dispatch_waits_for_publish_and_forwards_the_contract():
         "      - record-release-provenance\n"
         "      - system-test-readiness"
     ) in trigger
-    expected_fields = {
-        'sdk_version=$SDK_VERSION',
-        'release_stage=$RELEASE_STAGE',
-        'sdk_sha=$GITHUB_SHA',
-        'source_repository=$GITHUB_REPOSITORY',
-        'source_run_id=$GITHUB_RUN_ID',
-        (
-            'source_run_url=$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/'
-            'actions/runs/$GITHUB_RUN_ID'
-        ),
+    expected_arguments = {
+        '--arg sdk_version "$SDK_VERSION"',
+        '--arg release_stage "$RELEASE_STAGE"',
+        '--arg sdk_sha "$GITHUB_SHA"',
+        '--arg source_repository "$GITHUB_REPOSITORY"',
+        '--arg source_run_id "$GITHUB_RUN_ID"',
+        '--arg source_run_url "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"',
     }
-    for field in expected_fields:
-        assert f'--field "{field}"' in trigger
+    for argument in expected_arguments:
+        assert argument in trigger
+    for field in (
+        "sdk_version",
+        "release_stage",
+        "sdk_sha",
+        "source_repository",
+        "source_run_id",
+        "source_run_url",
+    ):
+        assert f"{field}: ${field}" in trigger
+    assert "return_run_details" not in trigger
 
 
 def test_verified_release_provenance_check_binds_the_published_wheel():
@@ -390,7 +429,7 @@ def test_release_provenance_check_is_retry_safe_and_fails_on_conflicts():
 def test_system_test_dispatch_reconciles_retries_by_run_and_version():
     release = (WORKFLOWS / "release.yml").read_text()
     trigger = release.split("  trigger-system-tests:", 1)[1].split(
-        "  finalize-production-release:", 1
+        "  verify-system-tests:", 1
     )[0]
 
     assert "find_existing_dispatch()" in trigger
@@ -402,10 +441,77 @@ def test_system_test_dispatch_reconciles_retries_by_run_and_version():
     assert "steps.app-token.outputs.app-slug" in trigger
     assert 'expected_actor="${APP_SLUG}[bot]"' in trigger
     assert ".actor.login" in trigger
-    assert '$1 == expected && $2 == actor { print $3 }' in trigger
+    assert '$2 == expected && $3 == actor { print $1 }' in trigger
     assert "Found multiple matching system-test runs" in trigger
     assert "Matching system-test dispatch already exists" in trigger
     assert "System-test dispatch accepted" in trigger
+    assert "record_dispatch_response()" in trigger
+    assert "X-GitHub-Api-Version: 2026-03-10" in trigger
+    assert ".workflow_run_id" in trigger
+    assert ".run_url" in trigger
+    assert ".html_url" in trigger
+    assert "gh workflow run" not in trigger
+    assert (
+        "EXPECTED_TARGET_SHA: "
+        "${{ needs.system-test-readiness.outputs.target-ref-sha }}"
+        in trigger
+    )
+    assert 'current_target_sha" != "$EXPECTED_TARGET_SHA' in trigger
+    assert 'target_sha" != "$EXPECTED_TARGET_SHA' in trigger
+    assert "cancel_unverified_run()" in trigger
+    assert "actions/runs/$run_id/cancel" in trigger
+    assert "System-test run did not use the inspected target SHA" in trigger
+    for output in ("run-id", "run-url", "target-sha"):
+        assert f"{output}: ${{{{ steps.dispatch.outputs.{output} }}}}" in trigger
+        assert f"printf '{output}=%s\\n'" in trigger
+
+
+def test_release_waits_for_the_exact_successful_system_test_run():
+    release = (WORKFLOWS / "release.yml").read_text()
+    verify = release.split("  verify-system-tests:", 1)[1].split(
+        "  deploy-production-firebase:", 1
+    )[0]
+    finalize = release.split("  finalize-production-release:", 1)[1]
+
+    assert release.index("  trigger-system-tests:") < release.index(
+        "  verify-system-tests:"
+    )
+    assert release.index("  verify-system-tests:") < release.index(
+        "  deploy-production-firebase:"
+    )
+    assert "      - trigger-system-tests" in verify
+    assert "    permissions: {}" in verify
+    assert "permission-actions: read" in verify
+    assert "permission-actions: write" not in verify
+    assert "actions/checkout@" not in verify
+    assert "actions/runs/$RUN_ID" in verify
+    for identity_field in (
+        "id: .id",
+        "display_title: .display_title",
+        "event: .event",
+        "head_branch: .head_branch",
+        "head_sha: .head_sha",
+        "path: .path",
+        "actor_login: .actor.login",
+        "actor_type: .actor.type",
+        "html_url: .html_url",
+    ):
+        assert identity_field in verify
+    assert 'if [ "$actual_identity" != "$expected_identity" ]' in verify
+    assert 'if [ "$status" = "completed" ]' in verify
+    assert 'if [ "$conclusion" != "success" ]' in verify
+    assert "actions/runs/$RUN_ID/jobs" in verify
+    assert 'expected_terminal_job="deploy staging SDK release"' in verify
+    assert 'expected_terminal_job="deploy production SDK release"' in verify
+    assert 'terminal_count" -ne 1' in verify
+    assert 'terminal_status" != "completed"' in verify
+    assert 'terminal_conclusion" != "success"' in verify
+    assert 'terminal_sha" != "$TARGET_SHA' in verify
+    assert "Verified terminal deployment job" in verify
+    assert "seq 1 200" in verify
+    assert "sleep 15" in verify
+    assert "timeout-minutes: 55" in verify
+    assert "      - verify-system-tests" in finalize
 
 
 def test_release_credentials_are_scoped_to_the_jobs_that_need_them():
@@ -420,6 +526,12 @@ def test_release_credentials_are_scoped_to_the_jobs_that_need_them():
         "  trigger-system-tests:", 1
     )[0]
     trigger = release.split("  trigger-system-tests:", 1)[1].split(
+        "  verify-system-tests:", 1
+    )[0]
+    verify = release.split("  verify-system-tests:", 1)[1].split(
+        "  deploy-production-firebase:", 1
+    )[0]
+    firebase = release.split("  deploy-production-firebase:", 1)[1].split(
         "  finalize-production-release:", 1
     )[0]
     finalize = release.split("  finalize-production-release:", 1)[1]
@@ -427,6 +539,9 @@ def test_release_credentials_are_scoped_to_the_jobs_that_need_them():
     assert "permissions: {}\n" in release.split("jobs:", 1)[0]
     assert "    permissions: {}" in readiness
     assert "    permissions: {}" in trigger
+    assert "    permissions: {}" in verify
+    assert "permission-actions: read" in verify
+    assert "permission-actions: write" not in verify
     assert (
         "    permissions:\n"
         "      contents: read"
@@ -440,6 +555,8 @@ def test_release_credentials_are_scoped_to_the_jobs_that_need_them():
     ) in provenance
     assert "contents:" not in provenance
     assert "id-token:" not in provenance
+    assert "      contents: read" in firebase
+    assert "      id-token: write" in firebase
     assert "    permissions:\n      contents: write" in finalize
 
 
@@ -486,11 +603,21 @@ def test_privileged_workflow_run_is_removed_and_release_is_reconciled_inline():
 
     assert not (WORKFLOWS / "auto-tag-on-release.yml").exists()
     assert "workflow_run:" not in release
+    assert "      - verify-system-tests" in finalize
+    assert "      - deploy-production-firebase" in finalize
     assert "needs.build.outputs.release-stage == 'production'" in finalize
     assert "contents: write" in finalize
     assert "actions/checkout@" not in finalize
     assert 'SOURCE_EVENT" != "push' in finalize
     assert "SOURCE_REF\" != \"refs/heads/master" in finalize
+    assert "Refusing stale production finalization" in finalize
+    assert 'current_master_sha" != "$SOURCE_SHA' in finalize
+    assert finalize.index('if [ -z "$tag_state" ]') < finalize.index(
+        'current_master_sha="$(gh api'
+    )
+    assert finalize.index('current_master_sha="$(gh api') < finalize.index(
+        'if ! gh api --method POST "repos/$REPOSITORY/git/refs"'
+    )
     assert "repos/$REPOSITORY/git/ref/tags/$PACKAGE_VERSION" in finalize
     assert "commit $SOURCE_SHA" in finalize
     assert "repos/$REPOSITORY/releases/tags/$PACKAGE_VERSION" in finalize
@@ -498,7 +625,12 @@ def test_privileged_workflow_run_is_removed_and_release_is_reconciled_inline():
 
 
 def test_shell_scripts_do_not_interpolate_actions_expressions_directly():
-    for name in ("integration-test.yml", "release.yml", "test.yml"):
+    for name in (
+        "firebase-deploy-prod.yml",
+        "integration-test.yml",
+        "release.yml",
+        "test.yml",
+    ):
         lines = (WORKFLOWS / name).read_text().splitlines()
         index = 0
         while index < len(lines):
@@ -548,7 +680,7 @@ def test_migrated_workflows_use_supported_runner_image():
     )
 
     assert "ubuntu-22.04" not in workflows
-    assert workflows.count("runs-on: ubuntu-24.04") == 10
+    assert workflows.count("runs-on: ubuntu-24.04") == 11
 
 
 def test_firebase_deployments_use_branch_scoped_environments():
@@ -557,13 +689,89 @@ def test_firebase_deployments_use_branch_scoped_environments():
 
     assert "if: github.ref == 'refs/heads/develop'" in dev
     assert "environment: firebase-hosting-dev" in dev
-    assert "if: github.ref == 'refs/heads/master'" in production
+    assert "SOURCE_REF: ${{ github.ref }}" in production
+    assert 'SOURCE_REF" != "refs/heads/master' in production
     assert "environment: firebase-hosting-production" in production
     for workflow in (dev, production):
         assert "permissions: {}" in workflow.split("jobs:", 1)[0]
         assert "contents: read" in workflow
         assert "id-token: write" in workflow
         assert "service_account: github-deploy@apf-mlops-docs.iam.gserviceaccount.com" in workflow
+
+
+def test_production_firebase_is_gated_and_retry_safe():
+    release = (WORKFLOWS / "release.yml").read_text()
+    production = (WORKFLOWS / "firebase-deploy-prod.yml").read_text()
+    build_docs = production.split("  build-docs:", 1)[1].split(
+        "  deploy-prod:", 1
+    )[0]
+    deploy = production.split("  deploy-prod:", 1)[1]
+    caller = release.split("  deploy-production-firebase:", 1)[1].split(
+        "  finalize-production-release:", 1
+    )[0]
+
+    assert "workflow_call:" in production
+    assert "  push:" not in production.split("permissions:", 1)[0]
+    assert "workflow_dispatch:" not in production
+    assert "      - verify-system-tests" in caller
+    assert "uses: ./.github/workflows/firebase-deploy-prod.yml" in caller
+    assert "  validate-call:" in production
+    assert "  build-docs:" in production
+    assert "      - validate-call" in deploy
+    assert "      - build-docs" in deploy
+    assert "SOURCE_WORKFLOW_REF: ${{ github.workflow_ref }}" in production
+    assert "Verify trusted Release caller and current master head" in production
+    assert "git/ref/heads/master" in production
+    assert "Refusing stale Firebase deployment" in production
+    assert "Recheck production source before Firebase mutation" in production
+    assert 'configured_site" != "apf-mlops-docs-sdk' in production
+    assert 'configured_public" != "doc/build/html' in production
+    assert "SOURCE_DATE_EPOCH" in production
+    assert "abeja-platform-sdk-release.json" in production
+    assert "docs_sha256" in production
+    assert "firebase hosting:channel:list" in production
+    assert "/channels/live" in production
+    assert ".release.message" in production
+    assert ".release.version.name" in production
+    assert "--message \"$RELEASE_IDENTITY\"" in production
+    assert "steps.live-state.outputs.identical != 'true'" in production
+    assert "deploy_status=0" in production
+    assert "|| deploy_status=$?" in production
+    assert 'last_message" = "$RELEASE_IDENTITY' in production
+    assert 'last_marker" = "$EXPECTED_MARKER' in production
+    assert "Firebase Hosting did not reconcile" in production
+    assert "firebase-tools@15.22.4" in deploy
+    assert "--ignore-scripts" in deploy
+
+    # Repository code is built without the Environment or OIDC permission.
+    # The credential-bearing job receives one exact same-run artifact and
+    # verifies its complete Firebase config, content digest, and marker.
+    assert "environment:" not in build_docs
+    assert "id-token:" not in build_docs
+    assert "actions/checkout@" in build_docs
+    assert "sphinx-build" in build_docs
+    assert "actions/upload-artifact@" in build_docs
+    assert "retention-days: 31" in build_docs
+    assert "overwrite: true" in build_docs
+    assert "environment: firebase-hosting-production" in deploy
+    assert "id-token: write" in deploy
+    assert "actions/checkout@" not in deploy
+    assert "actions/setup-python@" not in deploy
+    assert "poetry install" not in deploy
+    assert "sphinx-build" not in deploy
+    assert "actions/download-artifact@" in deploy
+    assert "artifact-ids: ${{ needs.build-docs.outputs.artifact-id }}" in deploy
+    assert "merge-multiple: true" in deploy
+    assert "complete reviewed contract" in deploy
+    assert "deploy hooks and unknown keys are forbidden" in deploy
+    assert "actual_firebaserc" in deploy
+    assert "actual_firebase_json" in deploy
+    assert "Firebase documentation marker differs from its artifact" in deploy
+    assert production.count("git/ref/heads/master") == 3
+    assert deploy.count("Refusing stale Firebase deployment") == 2
+    for match in re.finditer(r"^\s*uses:\s*([^\s]+)", production, re.MULTILINE):
+        reference = match.group(1)
+        assert re.search(r"@[0-9a-f]{40}$", reference), reference
 
 
 def test_firebase_shared_trust_boundary_is_documented():
@@ -574,3 +782,38 @@ def test_firebase_shared_trust_boundary_is_documented():
     assert "deliberately does not distinguish Git refs" in normalized
     assert "review and approval of the pull request into `master`" in normalized
     assert "Do not add a required Environment reviewer" in normalized
+    assert "different current release identity is the normal predecessor" in normalized
+    assert "out-of-band console or CLI deployment can therefore be overwritten" in normalized
+
+
+def test_production_rollback_boundary_and_ownership_cutover_are_documented():
+    operations = (ROOT / ".github" / "CICD.md").read_text()
+    normalized = " ".join(operations.split())
+
+    assert "## Production failure and rollback boundary" in operations
+    assert "It never means deleting and reusing a package version" in normalized
+    assert "A PyPI yank is non-destructive" in normalized
+    assert "exact `==` pins can still select a yanked" in normalized
+    assert "release a new patch version" in normalized
+    assert "production platform stack has already been deployed" in normalized
+    assert "never dispatch an older SDK" in normalized
+    assert "terminal deployment job started" in normalized
+    assert "inspect and stabilize CloudFormation" in normalized
+    assert "new staging RC or a new production patch version" in normalized
+    assert "CI deployment ownership" in normalized
+    assert "not an application rollback or an older-SDK rollback" in normalized
+    assert "DEPLOYMENT_OWNER_PROD" in normalized
+    assert "keep SDK `master` frozen" in normalized
+    assert "Do not merge another SDK change to `master`" in normalized
+    cutover_steps = (
+        "prepare and review the CircleCI change",
+        "remove only the production deployment filter",
+        "freeze the deployment ref and legacy SDK trigger",
+        "block new CircleCI production work",
+        "drain every active production deployment",
+        "prove that no new production `build` can start",
+        "DEPLOYMENT_OWNER_PROD=github-actions",
+    )
+    positions = [normalized.index(step) for step in cutover_steps]
+    assert positions == sorted(positions)
+    assert "keep the SDK production PR draft" in normalized
