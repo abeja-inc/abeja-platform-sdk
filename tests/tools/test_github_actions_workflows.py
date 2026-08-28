@@ -460,7 +460,15 @@ def test_system_test_dispatch_reconciles_retries_by_run_and_version():
     assert 'target_sha" != "$EXPECTED_TARGET_SHA' in trigger
     assert "cancel_unverified_run()" in trigger
     assert "actions/runs/$run_id/cancel" in trigger
+    assert 'run_status" = "completed"' in trigger
+    assert "completed before it could be cancelled" in trigger
     assert "System-test run did not use the inspected target SHA" in trigger
+    assert 'allow_contract_settle="${2:-false}"' in trigger
+    assert 'record_dispatch_response "$dispatched_response" true' in trigger
+    assert "return 3" in trigger
+    assert 'case "$record_status" in' in trigger
+    assert "run record is eventually consistent" in trigger
+    assert "identity did not settle by its returned ID" in trigger
     for output in ("run-id", "run-url", "target-sha"):
         assert f"{output}: ${{{{ steps.dispatch.outputs.{output} }}}}" in trigger
         assert f"printf '{output}=%s\\n'" in trigger

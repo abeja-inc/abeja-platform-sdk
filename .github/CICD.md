@@ -319,8 +319,11 @@ job automatically searches the target by `source_run_id`, `sdk_version`, and
 already exist.
 
 After registration, the dispatch API returns the exact target run ID and URLs;
-the SDK does not guess which run was created from list timing. The SDK wait job
-repeatedly reads that exact run ID. It verifies the workflow path, deployment ref
+the SDK does not guess which run was created from list timing. Because a newly
+created run record can be temporarily incomplete, the trigger re-reads that
+exact ID for a bounded period before accepting it or treating a persistent
+identity mismatch as a conflict. The SDK wait job then repeatedly reads that
+exact run ID. It verifies the workflow path, deployment ref
 and inspected SHA, App bot identity, display title, event type, and URL on every
 read. A successful overall run is still insufficient by itself: the waiter also
 requires the exact stage-specific terminal deployment job to be

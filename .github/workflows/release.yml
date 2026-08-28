@@ -1065,17 +1065,31 @@ jobs:
 
           cancel_unverified_run() {
             local run_id="$1"
-            if gh api --method POST \
-              "repos/${GITHUB_REPOSITORY_OWNER}/platform-system-test/actions/runs/$run_id/cancel" \
-              --silent; then
-              echo "Cancellation requested for unverified system-test run $run_id." >&2
-            else
-              echo "Could not cancel unverified system-test run $run_id; investigate it in the target repository." >&2
-            fi
+            local run_status
+            local attempt
+            for ((attempt = 1; attempt <= 12; attempt++)); do
+              run_status="$(gh api --method GET \
+                "repos/${GITHUB_REPOSITORY_OWNER}/platform-system-test/actions/runs/$run_id" \
+                --jq '.status' 2>/dev/null || true)"
+              if [ "$run_status" = "completed" ]; then
+                echo "Unverified system-test run $run_id completed before it could be cancelled; investigate it in the target repository." >&2
+                return 1
+              fi
+              if gh api --method POST \
+                "repos/${GITHUB_REPOSITORY_OWNER}/platform-system-test/actions/runs/$run_id/cancel" \
+                --silent 2>/dev/null; then
+                echo "Cancellation requested for unverified system-test run $run_id." >&2
+                return 0
+              fi
+              sleep 5
+            done
+            echo "Could not cancel unverified system-test run $run_id; investigate it in the target repository." >&2
+            return 1
           }
 
           record_dispatch_response() {
             local response="$1"
+            local allow_contract_settle="${2:-false}"
             local run_id
             local run_url
             local target_sha
@@ -1088,12 +1102,12 @@ jobs:
               [[ ! "$run_url" =~ ^https://github\.com/abeja-inc/platform-system-test/actions/runs/[1-9][0-9]*$ ]] ||
               [[ ! "$target_sha" =~ ^[0-9a-f]{40}$ ]]; then
               echo "Matching system-test run has an invalid identity." >&2
-              exit 1
+              return 2
             fi
             if [ "$target_sha" != "$EXPECTED_TARGET_SHA" ]; then
               cancel_unverified_run "$run_id"
               echo "System-test run did not use the inspected target SHA." >&2
-              exit 1
+              return 2
             fi
 
             actual_contract="$(printf '%s' "$response" | jq -Sc '{
@@ -1120,9 +1134,12 @@ jobs:
                 actor_type: $actor_type
               }')"
             if [ "$actual_contract" != "$expected_contract" ]; then
+              if [ "$allow_contract_settle" = "true" ]; then
+                return 3
+              fi
               cancel_unverified_run "$run_id"
               echo "System-test run differs from the dispatched contract." >&2
-              exit 1
+              return 2
             fi
 
             {
@@ -1138,7 +1155,9 @@ jobs:
           if [ "$existing_status" -eq 0 ]; then
             existing_response="$(gh api --method GET \
               "repos/${GITHUB_REPOSITORY_OWNER}/platform-system-test/actions/runs/$existing_run_id")"
-            record_dispatch_response "$existing_response"
+            if ! record_dispatch_response "$existing_response"; then
+              exit 1
+            fi
             echo "Matching system-test dispatch already exists: $recorded_url" \
               >> "$GITHUB_STEP_SUMMARY"
             exit 0
@@ -1195,15 +1214,30 @@ jobs:
             if dispatched_response="$(gh api --method GET \
               "repos/${GITHUB_REPOSITORY_OWNER}/platform-system-test/actions/runs/$dispatched_run_id" \
               2>/dev/null)"; then
-              record_dispatch_response "$dispatched_response"
-              echo "System-test dispatch accepted: $recorded_url" \
-                >> "$GITHUB_STEP_SUMMARY"
-              exit 0
+              record_status=0
+              record_dispatch_response "$dispatched_response" true ||
+                record_status=$?
+              case "$record_status" in
+                0)
+                  echo "System-test dispatch accepted: $recorded_url" \
+                    >> "$GITHUB_STEP_SUMMARY"
+                  exit 0
+                  ;;
+                3)
+                  # The run record is eventually consistent immediately after
+                  # dispatch. Retry a matching SHA before treating it as a
+                  # persistent contract conflict.
+                  ;;
+                *)
+                  exit 1
+                  ;;
+              esac
             fi
             sleep 5
           done
 
-          echo "The dispatched system-test run could not be read by its returned ID." >&2
+          cancel_unverified_run "$dispatched_run_id" || true
+          echo "The dispatched system-test run identity did not settle by its returned ID." >&2
           exit 1
 
   verify-system-tests:
