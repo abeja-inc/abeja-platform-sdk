@@ -1,3 +1,3 @@
-# The VERSION value is rewritten by CI to the correct value at the time of deployment.
-# see: ${REPOSITORY_ROOT}/.circleci/config.yml
+# The VERSION value is rewritten by the release workflow before the wheel is built.
+# See: ${REPOSITORY_ROOT}/.github/workflows/release.yml
 VERSION = "0.0.0"

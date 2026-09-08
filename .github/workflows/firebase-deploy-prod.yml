@@ -1,0 +1,469 @@
+name: Deploy sdk-spec (prod) to Firebase Hosting
+
+on:
+  workflow_call:
+
+permissions: {}
+
+# Firebase Hosting is mutable state. Never cancel an active deployment; retain
+# only the newest waiting run rather than queueing stale site versions.
+concurrency:
+  group: firebase-hosting-apf-mlops-docs-sdk-spec-prod
+  cancel-in-progress: false
+
+jobs:
+  validate-call:
+    name: Validate production Firebase caller
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions:
+      contents: read # Recheck master before the protected deploy job starts.
+    steps:
+      - name: Verify trusted Release caller and current master head
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SOURCE_EVENT: ${{ github.event_name }}
+          SOURCE_REF: ${{ github.ref }}
+          SOURCE_REPOSITORY: ${{ github.repository }}
+          SOURCE_SHA: ${{ github.sha }}
+          SOURCE_WORKFLOW_REF: ${{ github.workflow_ref }}
+        run: |
+          set -Eeuo pipefail
+
+          if [ "$SOURCE_REPOSITORY" != "abeja-inc/abeja-platform-sdk" ] ||
+            [ "$SOURCE_EVENT" != "push" ] ||
+            [ "$SOURCE_REF" != "refs/heads/master" ] ||
+            [ "$SOURCE_WORKFLOW_REF" != "abeja-inc/abeja-platform-sdk/.github/workflows/release.yml@refs/heads/master" ] ||
+            [[ ! "$SOURCE_SHA" =~ ^[0-9a-f]{40}$ ]]; then
+            echo "Firebase production caller identity is invalid." >&2
+            exit 1
+          fi
+          current_sha="$(gh api --method GET \
+            "repos/$SOURCE_REPOSITORY/git/ref/heads/master" \
+            --jq '.object.sha')"
+          if [ "$current_sha" != "$SOURCE_SHA" ]; then
+            echo "Refusing stale Firebase deployment: master is now $current_sha." >&2
+            exit 1
+          fi
+
+  build-docs:
+    name: Build production Firebase documentation
+    needs: validate-call
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    permissions:
+      contents: read
+    outputs:
+      artifact-id: ${{ steps.upload.outputs.artifact-id }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          persist-credentials: false
+
+      - name: Verify production Firebase target contract
+        run: |
+          set -Eeuo pipefail
+
+          configured_site="$(jq -er '
+            .targets["apf-mlops-docs"].hosting["sdk-spec-prod"]
+            | if length == 1 then .[0] else error("invalid target mapping") end
+          ' .firebaserc)"
+          configured_public="$(jq -er '[
+            .hosting[]
+            | select(.target == "sdk-spec-prod")
+            | .public
+          ] | if length == 1 then .[0] else error("invalid hosting config") end' \
+            firebase.json)"
+          if [ "$configured_site" != "apf-mlops-docs-sdk" ] ||
+            [ "$configured_public" != "doc/build/html" ]; then
+            echo "Firebase production target contract differs from the reviewed site." >&2
+            exit 1
+          fi
+
+      - name: Set up Python
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5.6.0
+        with:
+          python-version: '3.11'   # pyproject は python >=3.8,<3.12。3.12+ は範囲外
+
+      - name: Build reproducible Sphinx documentation
+        id: docs
+        run: |
+          set -Eeuo pipefail
+
+          source_date_epoch="$(git show -s --format=%ct "$GITHUB_SHA")"
+          if [[ ! "$source_date_epoch" =~ ^[1-9][0-9]*$ ]]; then
+            echo "Source commit timestamp is invalid." >&2
+            exit 1
+          fi
+          export SOURCE_DATE_EPOCH="$source_date_epoch"
+
+          pip install "poetry==1.8.5"
+          # dev 依存(mypy -> typed-ast 1.4.3)は 3.10+ でビルド不可。docs には不要なので --only main で除外
+          poetry install --only main --extras docs
+          poetry run sphinx-build -M html doc/source doc/build
+
+          docs_digest="$(python3 - <<'PY'
+          import hashlib
+          from pathlib import Path
+
+          root = Path("doc/build/html")
+          files = sorted(path for path in root.rglob("*") if path.is_file())
+          if not files:
+              raise RuntimeError("Sphinx produced no documentation files")
+
+          digest = hashlib.sha256()
+          for path in files:
+              relative = path.relative_to(root).as_posix().encode()
+              content = path.read_bytes()
+              digest.update(len(relative).to_bytes(8, "big"))
+              digest.update(relative)
+              digest.update(len(content).to_bytes(8, "big"))
+              digest.update(content)
+          print(digest.hexdigest())
+          PY
+          )"
+          if [[ ! "$docs_digest" =~ ^[0-9a-f]{64}$ ]]; then
+            echo "Documentation digest is invalid." >&2
+            exit 1
+          fi
+
+          marker="$(jq -Scn \
+            --arg schema "abeja-platform-sdk/firebase-hosting/v1" \
+            --arg repository "$GITHUB_REPOSITORY" \
+            --arg site "apf-mlops-docs-sdk" \
+            --arg source_sha "$GITHUB_SHA" \
+            --arg docs_sha256 "$docs_digest" \
+            '{
+              schema: $schema,
+              repository: $repository,
+              site: $site,
+              source_sha: $source_sha,
+              docs_sha256: $docs_sha256
+            }')"
+          printf '%s\n' "$marker" \
+            > doc/build/html/abeja-platform-sdk-release.json
+          {
+            printf 'sha256=%s\n' "$docs_digest"
+            printf 'marker=%s\n' "$marker"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Upload reviewed Firebase deployment artifact
+        id: upload
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: firebase-production-${{ github.sha }}
+          path: |
+            .firebaserc
+            firebase.json
+            doc/build/html
+          if-no-files-found: error
+          include-hidden-files: true
+          overwrite: true
+          # Failed-job reruns remain supported throughout GitHub's 30-day
+          # workflow rerun window without rebuilding source in the OIDC job.
+          retention-days: 31
+
+  deploy-prod:
+    name: Deploy Firebase Hosting production site
+    needs:
+      - validate-call
+      - build-docs
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    environment: firebase-hosting-production
+    permissions:
+      contents: read
+      id-token: write   # WIF の OIDC トークン発行に必須
+    steps:
+      - name: Download exact Firebase deployment artifact
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          artifact-ids: ${{ needs.build-docs.outputs.artifact-id }}
+          path: .
+          merge-multiple: true
+
+      - name: Verify downloaded Firebase deployment artifact
+        id: docs
+        run: |
+          set -Eeuo pipefail
+
+          if find . -type l -print -quit | grep -q .; then
+            echo "Firebase deployment artifact must not contain symbolic links." >&2
+            exit 1
+          fi
+          expected_firebaserc="$(jq -Scn '{
+            etags: {},
+            projects: {default: "apf-mlops-docs"},
+            targets: {
+              "apf-mlops-docs": {
+                hosting: {
+                  "sdk-spec-dev": ["apf-mlops-docs-sdk-dev"],
+                  "sdk-spec-prod": ["apf-mlops-docs-sdk"]
+                }
+              }
+            }
+          }')"
+          expected_firebase_json="$(jq -Scn '{
+            hosting: [
+              {
+                ignore: [
+                  "firebase.json",
+                  "**/.*",
+                  "**/node_modules/**"
+                ],
+                public: "doc/build/html",
+                target: "sdk-spec-dev",
+                trailingSlash: true
+              },
+              {
+                ignore: [
+                  "firebase.json",
+                  "**/.*",
+                  "**/node_modules/**"
+                ],
+                public: "doc/build/html",
+                target: "sdk-spec-prod",
+                trailingSlash: true
+              }
+            ]
+          }')"
+          actual_firebaserc="$(jq -Sc . .firebaserc)"
+          actual_firebase_json="$(jq -Sc . firebase.json)"
+          if [ "$actual_firebaserc" != "$expected_firebaserc" ] ||
+            [ "$actual_firebase_json" != "$expected_firebase_json" ]; then
+            echo "Firebase configuration differs from the complete reviewed contract; deploy hooks and unknown keys are forbidden." >&2
+            exit 1
+          fi
+          configured_site="$(jq -er '
+            .targets["apf-mlops-docs"].hosting["sdk-spec-prod"]
+            | if length == 1 then .[0] else error("invalid target mapping") end
+          ' .firebaserc)"
+          configured_public="$(jq -er '[
+            .hosting[]
+            | select(.target == "sdk-spec-prod")
+            | .public
+          ] | if length == 1 then .[0] else error("invalid hosting config") end' \
+            firebase.json)"
+          if [ "$configured_site" != "apf-mlops-docs-sdk" ] ||
+            [ "$configured_public" != "doc/build/html" ]; then
+            echo "Firebase artifact target differs from the reviewed site." >&2
+            exit 1
+          fi
+
+          docs_digest="$(python3 - <<'PY'
+          import hashlib
+          from pathlib import Path
+
+          root = Path("doc/build/html")
+          marker = root / "abeja-platform-sdk-release.json"
+          files = sorted(
+              path for path in root.rglob("*")
+              if path.is_file() and path != marker
+          )
+          if not files or not marker.is_file():
+              raise RuntimeError("Firebase documentation artifact is incomplete")
+
+          digest = hashlib.sha256()
+          for path in files:
+              relative = path.relative_to(root).as_posix().encode()
+              content = path.read_bytes()
+              digest.update(len(relative).to_bytes(8, "big"))
+              digest.update(relative)
+              digest.update(len(content).to_bytes(8, "big"))
+              digest.update(content)
+          print(digest.hexdigest())
+          PY
+          )"
+          if [[ ! "$docs_digest" =~ ^[0-9a-f]{64}$ ]]; then
+            echo "Documentation artifact digest is invalid." >&2
+            exit 1
+          fi
+          expected_marker="$(jq -Scn \
+            --arg schema "abeja-platform-sdk/firebase-hosting/v1" \
+            --arg repository "$GITHUB_REPOSITORY" \
+            --arg site "apf-mlops-docs-sdk" \
+            --arg source_sha "$GITHUB_SHA" \
+            --arg docs_sha256 "$docs_digest" \
+            '{
+              schema: $schema,
+              repository: $repository,
+              site: $site,
+              source_sha: $source_sha,
+              docs_sha256: $docs_sha256
+            }')"
+          actual_marker="$(jq -Sc . doc/build/html/abeja-platform-sdk-release.json)"
+          if [ "$actual_marker" != "$expected_marker" ]; then
+            echo "Firebase documentation marker differs from its artifact." >&2
+            exit 1
+          fi
+          {
+            printf 'sha256=%s\n' "$docs_digest"
+            printf 'marker=%s\n' "$expected_marker"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Set up Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: '22'   # firebase-tools の STS 交換を壊した Node 22.23.0 を避ける(22.23.1+)
+
+      - name: Install Firebase CLI
+        # This repository has no Node manifest; keep the one-off deploy CLI at
+        # an exact version until it can be installed from a reviewed lockfile.
+        run: npm install -g --ignore-scripts firebase-tools@15.22.4 # zizmor: ignore[adhoc-packages]
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@7c6bc770dae815cd3e89ee6cdf493a5fab2cc093 # v3.0.0
+        with:
+          project_id: apf-mlops-docs
+          workload_identity_provider: projects/529780319156/locations/global/workloadIdentityPools/github/providers/github-provider
+          service_account: github-deploy@apf-mlops-docs.iam.gserviceaccount.com
+
+      # The branch may advance while documentation is being built or while the
+      # Environment is waiting. Fence the mutable operation at the last safe
+      # point as well as in the unprivileged caller-validation job.
+      - name: Recheck production source before Firebase mutation
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SOURCE_REPOSITORY: ${{ github.repository }}
+          SOURCE_SHA: ${{ github.sha }}
+        run: |
+          current_sha="$(gh api --method GET \
+            "repos/$SOURCE_REPOSITORY/git/ref/heads/master" \
+            --jq '.object.sha')"
+          if [ "$current_sha" != "$SOURCE_SHA" ]; then
+            echo "Refusing stale Firebase deployment: master is now $current_sha." >&2
+            exit 1
+          fi
+
+      - name: Inspect the current Firebase Hosting release
+        id: live-state
+        env:
+          EXPECTED_MARKER: ${{ steps.docs.outputs.marker }}
+          RELEASE_IDENTITY: abeja-platform-sdk/firebase-hosting/v1:apf-mlops-docs-sdk:${{ github.sha }}:${{ steps.docs.outputs.sha256 }}
+        run: |
+          set -Eeuo pipefail
+
+          live_state="$(firebase hosting:channel:list \
+            --site apf-mlops-docs-sdk \
+            --project apf-mlops-docs \
+            --json)"
+          live_count="$(printf '%s' "$live_state" | jq '[
+            .result.channels[]
+            | select(.name | endswith("/channels/live"))
+          ] | length')"
+          if [ "$live_count" -ne 1 ]; then
+            echo "Expected exactly one Firebase live channel, found $live_count." >&2
+            exit 1
+          fi
+
+          current_message="$(printf '%s' "$live_state" | jq -r '
+            .result.channels[]
+            | select(.name | endswith("/channels/live"))
+            | .release.message // ""
+          ')"
+          current_version="$(printf '%s' "$live_state" | jq -r '
+            .result.channels[]
+            | select(.name | endswith("/channels/live"))
+            | .release.version.name // "none"
+          ')"
+          echo "Firebase live version before this job: $current_version" \
+            >> "$GITHUB_STEP_SUMMARY"
+
+          if [ "$current_message" != "$RELEASE_IDENTITY" ]; then
+            echo "identical=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          marker_url="https://apf-mlops-docs-sdk.web.app/abeja-platform-sdk-release.json"
+          actual_marker=""
+          for attempt in $(seq 1 20); do
+            actual_marker="$(curl --fail --silent --show-error --location \
+              --max-time 10 \
+              --header 'Cache-Control: no-cache' \
+              "$marker_url?run=$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT-$attempt" \
+              2>/dev/null || true)"
+            if [ "$actual_marker" = "$EXPECTED_MARKER" ]; then
+              echo "identical=true" >> "$GITHUB_OUTPUT"
+              echo "Firebase Hosting already serves the identical release." \
+                >> "$GITHUB_STEP_SUMMARY"
+              exit 0
+            fi
+            sleep 3
+          done
+
+          echo "Firebase release identity matches but its public marker differs." >&2
+          exit 1
+
+      - name: Deploy and reconcile Firebase Hosting production site
+        if: steps.live-state.outputs.identical != 'true'
+        env:
+          EXPECTED_MARKER: ${{ steps.docs.outputs.marker }}
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_IDENTITY: abeja-platform-sdk/firebase-hosting/v1:apf-mlops-docs-sdk:${{ github.sha }}:${{ steps.docs.outputs.sha256 }}
+          SOURCE_REPOSITORY: ${{ github.repository }}
+          SOURCE_SHA: ${{ github.sha }}
+        run: |
+          set -Eeuo pipefail
+
+          current_sha="$(gh api --method GET \
+            "repos/$SOURCE_REPOSITORY/git/ref/heads/master" \
+            --jq '.object.sha')"
+          if [ "$current_sha" != "$SOURCE_SHA" ]; then
+            echo "Refusing stale Firebase deployment: master is now $current_sha." >&2
+            exit 1
+          fi
+
+          deploy_status=0
+          firebase deploy \
+            --only hosting:sdk-spec-prod \
+            --project apf-mlops-docs \
+            --message "$RELEASE_IDENTITY" \
+            --non-interactive || deploy_status=$?
+
+          marker_url="https://apf-mlops-docs-sdk.web.app/abeja-platform-sdk-release.json"
+          last_message=""
+          last_marker=""
+          last_version=""
+          for attempt in $(seq 1 20); do
+            live_state="$(firebase hosting:channel:list \
+              --site apf-mlops-docs-sdk \
+              --project apf-mlops-docs \
+              --json)"
+            live_count="$(printf '%s' "$live_state" | jq '[
+              .result.channels[]
+              | select(.name | endswith("/channels/live"))
+            ] | length')"
+            if [ "$live_count" -ne 1 ]; then
+              echo "Expected exactly one Firebase live channel, found $live_count." >&2
+              exit 1
+            fi
+            last_message="$(printf '%s' "$live_state" | jq -r '
+              .result.channels[]
+              | select(.name | endswith("/channels/live"))
+              | .release.message // ""
+            ')"
+            last_version="$(printf '%s' "$live_state" | jq -r '
+              .result.channels[]
+              | select(.name | endswith("/channels/live"))
+              | .release.version.name // "none"
+            ')"
+            last_marker="$(curl --fail --silent --show-error --location \
+              --max-time 10 \
+              --header 'Cache-Control: no-cache' \
+              "$marker_url?run=$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT-$attempt" \
+              2>/dev/null || true)"
+            if [ "$last_message" = "$RELEASE_IDENTITY" ] &&
+              [ "$last_marker" = "$EXPECTED_MARKER" ]; then
+              {
+                echo "Firebase Hosting serves the verified release: $last_version"
+                echo "Firebase CLI exit status: $deploy_status"
+              } >> "$GITHUB_STEP_SUMMARY"
+              exit 0
+            fi
+            sleep 3
+          done
+
+          echo "Firebase Hosting did not reconcile to the expected release; CLI exit status was $deploy_status." >&2
+          echo "Last observed release identity: $last_message" >&2
+          exit 1

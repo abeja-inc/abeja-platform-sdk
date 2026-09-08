@@ -1,0 +1,211 @@
+name: Enable auto-merge for Dependabot PRs
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+
+env:
+  DEPENDABOT_AUTO_MERGE: ${{ vars.DEPENDABOT_AUTO_MERGE || 'false' }}
+
+permissions: {}
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  auto-merge:
+    name: Enable Dependabot auto-merge
+    if: >-
+      github.event.pull_request.user.login == 'dependabot[bot]' &&
+      github.event.pull_request.user.id == 49699333 &&
+      github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # Enable auto-merge through the GitHub CLI.
+      issues: write # Report the automation result on the PR.
+      pull-requests: write # Read PR metadata and update merge state.
+      vulnerability-alerts: read # Determine the matching Dependabot alert severity.
+    steps:
+      - name: Fetch Dependabot metadata
+        id: metadata
+        uses: dependabot/fetch-metadata@21025c705c08248db411dc16f3619e6b5f9ea21a # v2.5.0
+        with:
+          alert-lookup: true
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Check Dependabot metadata severity
+        id: severity
+        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7.1.0
+        env:
+          DEPENDENCY_GROUP: ${{ steps.metadata.outputs.dependency-group }}
+          UPDATED_DEPENDENCIES: ${{ steps.metadata.outputs.updated-dependencies-json }}
+        with:
+          script: |
+            const rawMetadata = process.env.UPDATED_DEPENDENCIES || '';
+            let dependencies;
+            try {
+              dependencies = JSON.parse(rawMetadata);
+            } catch (error) {
+              console.log(`Could not parse Dependabot metadata: ${error.message}`);
+              return {
+                severity: 'unknown',
+                isHighOrCritical: false,
+                isGroup: false
+              };
+            }
+
+            if (!Array.isArray(dependencies) || dependencies.length === 0) {
+              console.log('Dependabot returned no updated dependency metadata');
+              return {
+                severity: 'unknown',
+                isHighOrCritical: false,
+                isGroup: false
+              };
+            }
+
+            const isGroup = Boolean(process.env.DEPENDENCY_GROUP) ||
+              dependencies.length > 1;
+            const alerts = dependencies.map(dependency => ({
+              dependencyName: dependency.dependencyName,
+              alertState: dependency.alertState,
+              ghsaId: dependency.ghsaId,
+              cvss: Number(dependency.cvss)
+            }));
+            const allDependenciesHaveOpenAlerts = alerts.every(alert =>
+              typeof alert.dependencyName === 'string' &&
+              alert.dependencyName.length > 0 &&
+              alert.alertState === 'OPEN' &&
+              /^GHSA-[23456789cfghjmpqrvwx]{4}-[23456789cfghjmpqrvwx]{4}-[23456789cfghjmpqrvwx]{4}$/i.test(alert.ghsaId) &&
+              Number.isFinite(alert.cvss) &&
+              alert.cvss > 0 &&
+              alert.cvss <= 10
+            );
+
+            if (!allDependenciesHaveOpenAlerts) {
+              console.log(
+                'At least one updated dependency lacks a matching open alert; ' +
+                'requiring manual review'
+              );
+              return {
+                severity: 'unknown',
+                isHighOrCritical: false,
+                isGroup
+              };
+            }
+
+            const highestCvss = Math.max(...alerts.map(alert => alert.cvss));
+            const severity = highestCvss >= 9 ? 'critical' :
+              highestCvss >= 7 ? 'high' :
+              highestCvss >= 4 ? 'medium' : 'low';
+            const isHighOrCritical = highestCvss >= 7;
+
+            console.log(`Matched dependency alerts: ${alerts.length}`);
+            console.log(`Highest CVSS score: ${highestCvss}`);
+            console.log(`Severity: ${severity}`);
+            return { severity, isHighOrCritical, isGroup };
+
+      - name: Check auto-merge configuration
+        id: check
+        env:
+          AUTO_MERGE_ENABLED: ${{ env.DEPENDABOT_AUTO_MERGE }}
+          DEPENDENCY_TYPE: ${{ steps.metadata.outputs.dependency-type }}
+          UPDATE_TYPE: ${{ steps.metadata.outputs.update-type }}
+          SEVERITY: ${{ fromJSON(steps.severity.outputs.result).severity }}
+          IS_HIGH_OR_CRITICAL: ${{ fromJSON(steps.severity.outputs.result).isHighOrCritical }}
+        run: |
+          printf 'Auto-merge enabled: %s\n' "$AUTO_MERGE_ENABLED"
+          printf 'Dependency type: %s\n' "$DEPENDENCY_TYPE"
+          printf 'Update type: %s\n' "$UPDATE_TYPE"
+          printf 'Severity: %s\n' "$SEVERITY"
+          printf 'Is High/Critical: %s\n' "$IS_HIGH_OR_CRITICAL"
+
+          # Auto-merge conditions:
+          # 1. DEPENDABOT_AUTO_MERGE is enabled
+          # 2. Security update with High or Critical severity
+          if [[ "$AUTO_MERGE_ENABLED" == "true" ]] && \
+             [[ "$IS_HIGH_OR_CRITICAL" == "true" ]]; then
+            echo "should_merge=true" >> "$GITHUB_OUTPUT"
+            echo "✅ Auto-merge conditions met (High/Critical security update)"
+          else
+            echo "should_merge=false" >> "$GITHUB_OUTPUT"
+            echo "⏸️ Auto-merge disabled or conditions not met"
+          fi
+
+      - name: Enable auto-merge
+        if: steps.check.outputs.should_merge == 'true'
+        continue-on-error: true
+        id: merge
+        run: gh pr merge --auto --squash "$PR_URL"
+        env:
+          PR_URL: ${{ github.event.pull_request.html_url }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Comment on PR (success)
+        if: steps.check.outputs.should_merge == 'true' && steps.merge.outcome == 'success'
+        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7.1.0
+        env:
+          SEVERITY: ${{ fromJSON(steps.severity.outputs.result).severity }}
+          IS_GROUP: ${{ fromJSON(steps.severity.outputs.result).isGroup }}
+        with:
+          script: |
+            const severity = process.env.SEVERITY || 'unknown';
+            const isGroup = process.env.IS_GROUP === 'true';
+
+            const prType = isGroup ? 'Grouped Security Update' : 'Security Update';
+
+            const severityUpper = severity.toUpperCase();
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: '🤖 Auto-merge has been enabled for this PR.\n\n' +
+                    '**' + prType + ' Detected:**\n' +
+                    '- Severity: **' + severityUpper + '**\n' +
+                    '- Auto-merge policy: High/Critical severity only\n\n' +
+                    '**Merge Conditions:**\n' +
+                    '- All CI checks pass ✅\n' +
+                    '- No conflicts ✅\n' +
+                    '- Branch protection rules satisfied ✅\n\n' +
+                    '✅ Will be merged automatically once all checks complete.'
+            });
+
+      - name: Comment on PR (skipped - low severity)
+        if: steps.check.outputs.should_merge == 'false' && fromJSON(steps.severity.outputs.result).severity != 'none' && fromJSON(steps.severity.outputs.result).severity != 'unknown'
+        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7.1.0
+        env:
+          SEVERITY: ${{ fromJSON(steps.severity.outputs.result).severity }}
+          IS_GROUP: ${{ fromJSON(steps.severity.outputs.result).isGroup }}
+        with:
+          script: |
+            const severity = process.env.SEVERITY || 'unknown';
+            const isGroup = process.env.IS_GROUP === 'true';
+
+            const prType = isGroup ? 'Grouped Security Update' : 'Security Update';
+            const severityUpper = severity.toUpperCase();
+            const reason = severity === 'unknown' 
+              ? 'Could not determine vulnerability severity' 
+              : 'Severity: **' + severityUpper + '**';
+
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: '⏸️ Auto-merge skipped for this PR.\n\n' +
+                    '**' + prType + ':**\n' +
+                    '- ' + reason + '\n' +
+                    '- Auto-merge policy: High/Critical severity only\n\n' +
+                    'This update requires manual review and approval.'
+            });
+
+      - name: Comment on PR (failure)
+        if: steps.check.outputs.should_merge == 'true' && steps.merge.outcome == 'failure'
+        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7.1.0
+        with:
+          script: |
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: '⚠️ Failed to enable auto-merge.\n\n**Possible reasons:**\n- "Allow auto-merge" is not enabled in repository settings\n- Branch protection rules are not properly configured\n- Insufficient permissions\n\nPlease check Settings > General > Pull Requests > Allow auto-merge.'
+            });

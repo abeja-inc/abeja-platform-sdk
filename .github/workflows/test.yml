@@ -1,0 +1,71 @@
+name: Unit tests
+
+on:
+  pull_request:
+    branches:
+      - develop
+      - staging
+      - master
+  push:
+    branches:
+      - develop
+  workflow_dispatch:
+  workflow_call:
+
+permissions:
+  contents: read
+
+env:
+  POETRY_VERSION: "1.8.0"
+  # packaging 26.3 requires Python 3.9, while this SDK still tests Python 3.8.
+  POETRY_PACKAGING_VERSION: "26.2"
+
+# Keep this static prefix distinct from any reusable-workflow caller's group.
+concurrency:
+  group: abeja-platform-sdk-unit-tests-${{ github.event.pull_request.number || github.ref }}
+  # A release calls this workflow with the same staging/master ref as its
+  # caller. Only pull-request validation is safe to cancel as stale.
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  unit-tests:
+    name: Lint, types, and tests
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+        with:
+          persist-credentials: false
+
+      # Poetry must be available before setup-python initializes its Poetry cache.
+      - name: Install Poetry
+        run: |
+          pipx install "poetry==${POETRY_VERSION}"
+          pipx runpip poetry install "packaging==${POETRY_PACKAGING_VERSION}"
+
+      - name: Set up Python
+        uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6.3.0
+        with:
+          python-version: "3.8"
+          cache: poetry
+          cache-dependency-path: poetry.lock
+
+      - name: Install dependencies
+        run: poetry install --no-interaction --no-ansi
+
+      - name: Run lint, type checks, and unit tests
+        run: make test
+
+  required:
+    name: Unit tests
+    if: ${{ always() }}
+    needs: unit-tests
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions: {}
+    steps:
+      - name: Require the test suite to pass
+        env:
+          UNIT_TESTS_RESULT: ${{ needs.unit-tests.result }}
+        run: test "$UNIT_TESTS_RESULT" = "success"
