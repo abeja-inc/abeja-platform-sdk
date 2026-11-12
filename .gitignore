@@ -274,3 +274,6 @@ docker-compose.yml
 
 # Firebase Hosting deploy cache
 .firebase/
+
+# Claude Code local settings may contain sensitive command arguments.
+**/.claude/settings.local.json
